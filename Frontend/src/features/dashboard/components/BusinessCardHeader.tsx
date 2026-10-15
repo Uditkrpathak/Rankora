@@ -271,29 +271,6 @@ export const BusinessCardHeader: React.FC<BusinessCardHeaderProps> = ({
             <QrCode className="w-3.5 h-3.5 text-amber-600" />
             <span>Review Stand</span>
           </button>
-
-          {/* Optimization Toggle Switch */}
-          <button
-            type="button"
-            disabled={isTogglingOpt}
-            onClick={handleOptimizationToggle}
-            className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer select-none"
-          >
-            <span className="text-xs font-semibold text-slate-700">
-              Optimization
-            </span>
-            <div
-              className={`w-9 h-5 rounded-full relative transition-colors duration-200 ${
-                isOptEnabled ? 'bg-brand-600' : 'bg-slate-300'
-              }`}
-            >
-              <div
-                className={`w-4 h-4 rounded-full bg-white absolute top-0.5 shadow-sm transition-transform duration-200 ${
-                  isOptEnabled ? 'translate-x-4.5' : 'translate-x-0.5'
-                }`}
-              />
-            </div>
-          </button>
         </div>
       </div>
 

@@ -161,23 +161,6 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
             Tracked Keywords <span className="text-xs font-semibold text-slate-400">({totalCount})</span>
           </h3>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsSuggestionsOpen(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold transition border border-brand-200 shadow-2xs"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-brand-600" />
-            Suggest
-          </button>
-          <Link
-            to={`/business/${locationId}`}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            Manage
-          </Link>
-        </div>
       </div>
 
       <p className="text-[11px] text-slate-400 leading-snug">
