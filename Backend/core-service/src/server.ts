@@ -36,8 +36,31 @@ if (!rawTrustProxy || rawTrustProxy === '0' || rawTrustProxy === 'false') {
 // Security & Parsing
 app.use(helmet({
   crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
-app.use(cors({ origin: [ENV.FRONTEND_URL, 'http://localhost:5173'], credentials: true }));
+
+const allowedOrigins = [
+  ENV.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'http://localhost:5001',
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      /^https?:\/\/localhost(:\d+)?$/.test(origin)
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(verifyCsrf);
 app.use(apiGlobalLimiter);

@@ -26,15 +26,9 @@ import {
 
 function getCookieOptions() {
   const isProd = process.env.NODE_ENV === 'production';
-  const isCrossSite = Boolean(
-    isProd && (
-      process.env.CROSS_SITE_COOKIES === 'true' ||
-      (ENV.FRONTEND_URL && !ENV.FRONTEND_URL.includes('localhost') && (!ENV.APP_URL || !ENV.FRONTEND_URL.includes(new URL(ENV.APP_URL).hostname)))
-    )
-  );
   return {
-    secure: Boolean(isProd || isCrossSite),
-    sameSite: (isCrossSite ? 'none' : 'lax') as 'none' | 'lax',
+    secure: isProd,
+    sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
   };
 }
 
