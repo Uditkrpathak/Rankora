@@ -12,7 +12,10 @@
     "dev:core": "npm run dev -w @localo/core-service",
     "dev:frontend": "npm run dev -w @rankora/frontend",
     "dev:worker": "npm run dev:worker -w @localo/core-service",
-    "build": "npm run build --workspaces",
+    "build": "npm run build:backend",
+    "build:all": "npm run build:backend && npm run build:frontend",
+    "build:backend": "npm run build --workspace=@localo/types && npm run build --workspace=@localo/shared && npm run build --workspace=@localo/core-service",
+    "build:frontend": "npm run build --workspace=@rankora/frontend",
     "start": "npm run start -w @localo/core-service",
     "start:worker": "npm run start:worker -w @localo/core-service"
   },

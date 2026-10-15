@@ -20,7 +20,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState<boolean>(false);
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const clientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
 
   // Keep active callback pointers up-to-date without triggering re-initialization
   useEffect(() => {
