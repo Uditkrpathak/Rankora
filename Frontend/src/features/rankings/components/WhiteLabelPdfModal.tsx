@@ -51,8 +51,8 @@ export const WhiteLabelPdfModal: React.FC<WhiteLabelPdfModalProps> = ({
 
   // Extract top competitor summary
   const competitorMap = new Map<string, { name: string; count: number; bestRank: number; rating?: number }>();
-  scan.gridPoints?.forEach((point) => {
-    point.items?.forEach((item) => {
+  scan.gridPoints?.forEach((point: any) => {
+    point.items?.forEach((item: any) => {
       if (!item.isTarget) {
         const existing = competitorMap.get(item.name);
         if (existing) {
