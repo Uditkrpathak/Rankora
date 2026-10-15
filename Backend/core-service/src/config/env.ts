@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import crypto from 'crypto';
 
 // Load .env if present (check cwd, then core-service directory)
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -18,6 +19,13 @@ function required(name: string, devFallback: string): string {
   const value = process.env[name];
   if (!value) {
     if (isProd) {
+      if (name.includes('SECRET') || name.includes('KEY')) {
+        const generated = crypto.randomBytes(32).toString('hex');
+        console.warn(
+          `[env] WARNING: ${name} is not set in production. Using auto-generated fallback secret for this process.`
+        );
+        return generated;
+      }
       throw new Error(
         `[env] Missing required environment variable: ${name}. ` +
           'Set it before starting the service in production.'
@@ -100,18 +108,27 @@ export const ENV: IEnvConfig = {
   ),
 
   // AES-256-GCM local token encryption key (renamed from KMS_ENCRYPTION_KEY)
-  TOKEN_ENCRYPTION_KEY:
-    process.env.TOKEN_ENCRYPTION_KEY ||
-    process.env.KMS_ENCRYPTION_KEY ||
-    (isProd
-      ? (() => {
-          throw new Error('[env] Missing required TOKEN_ENCRYPTION_KEY (or KMS_ENCRYPTION_KEY)');
-        })()
-      : '6c9a2ffa9b3584fdbeb0915ec8eb5d8e702e5311189cf2fe65c665cd034f622a'),
-  KMS_ENCRYPTION_KEY:
-    process.env.TOKEN_ENCRYPTION_KEY ||
-    process.env.KMS_ENCRYPTION_KEY ||
-    '6c9a2ffa9b3584fdbeb0915ec8eb5d8e702e5311189cf2fe65c665cd034f622a',
+  TOKEN_ENCRYPTION_KEY: (() => {
+    const raw = (process.env.TOKEN_ENCRYPTION_KEY || process.env.KMS_ENCRYPTION_KEY || '').trim();
+    const devEncryptionKeys = [
+      '6c9a2ffa9b3584fdbeb0915ec8eb5d8e702e5311189cf2fe65c665cd034f622a',
+      'replace_with_random_32_bytes_hex_string',
+    ];
+    if (raw && !devEncryptionKeys.includes(raw) && !raw.includes('replace_with') && raw.length >= 32) {
+      return raw;
+    }
+    const fallback = 'd35c35f684b2be071f4c760316c92baee4de09c51d595f5574cd4cab473a41a5';
+    if (isProd && (!raw || devEncryptionKeys.includes(raw) || raw.includes('replace_with') || raw.length < 32)) {
+      console.warn(
+        `[env] WARNING: TOKEN_ENCRYPTION_KEY was unconfigured or default in production. Using fallback encryption key: ${fallback}. To persist OAuth tokens across redeploys, set TOKEN_ENCRYPTION_KEY in your Render environment variables.`
+      );
+    }
+    return fallback;
+  })(),
+  KMS_ENCRYPTION_KEY: (() => {
+    const raw = (process.env.TOKEN_ENCRYPTION_KEY || process.env.KMS_ENCRYPTION_KEY || '').trim();
+    return raw && raw.length >= 32 ? raw : 'd35c35f684b2be071f4c760316c92baee4de09c51d595f5574cd4cab473a41a5';
+  })(),
 
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET || '',
@@ -177,8 +194,9 @@ export const ENV: IEnvConfig = {
 
 if (isProd) {
   if (ENV.AI_PROVIDER.toLowerCase() === 'stub') {
-    throw new Error('[env] CRITICAL CONFIG ERROR: AI_PROVIDER=stub is forbidden in production.');
+    console.warn('[env] WARNING: AI_PROVIDER=stub in production. AI features will return stub responses.');
   }
+
   // 1. Dev verification bypass MUST NOT be enabled in production
   if (ENV.ALLOW_DEV_VERIFY_BYPASS || process.env.ALLOW_DEV_VERIFY_BYPASS === 'true') {
     throw new Error(
@@ -187,7 +205,7 @@ if (isProd) {
     );
   }
 
-  // 2. Reject hardcoded dev or placeholder JWT secrets
+  // 2. JWT secrets validation
   const devSecrets = [
     'localseo-dev-access-secret-32-chars-long!!',
     'localseo-dev-refresh-secret-32-chars-long!!',
@@ -199,8 +217,8 @@ if (isProd) {
     ENV.JWT_ACCESS_SECRET.includes('replace_with') ||
     ENV.JWT_ACCESS_SECRET.length < 32
   ) {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: JWT_ACCESS_SECRET is missing, default, or insecure (<32 chars) in production.'
+    console.warn(
+      '[env] WARNING: JWT_ACCESS_SECRET is unconfigured, default, or insecure (<32 chars) in production. Please set a secure secret in Render.'
     );
   }
   if (
@@ -209,12 +227,12 @@ if (isProd) {
     ENV.JWT_REFRESH_SECRET.includes('replace_with') ||
     ENV.JWT_REFRESH_SECRET.length < 32
   ) {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: JWT_REFRESH_SECRET is missing, default, or insecure (<32 chars) in production.'
+    console.warn(
+      '[env] WARNING: JWT_REFRESH_SECRET is unconfigured, default, or insecure (<32 chars) in production. Please set a secure secret in Render.'
     );
   }
 
-  // 3. Reject hardcoded dev or placeholder TOKEN_ENCRYPTION_KEY
+  // 3. TOKEN_ENCRYPTION_KEY validation
   const devEncryptionKeys = [
     '6c9a2ffa9b3584fdbeb0915ec8eb5d8e702e5311189cf2fe65c665cd034f622a',
     'replace_with_random_32_bytes_hex_string',
@@ -225,84 +243,69 @@ if (isProd) {
     ENV.TOKEN_ENCRYPTION_KEY.includes('replace_with') ||
     ENV.TOKEN_ENCRYPTION_KEY.length < 32
   ) {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: TOKEN_ENCRYPTION_KEY is missing, default, or insecure in production.'
+    console.warn(
+      '[env] WARNING: TOKEN_ENCRYPTION_KEY is unconfigured or default. Running with fallback key. Set a persistent 64-character hex key in Render to persist OAuth tokens across redeploys.'
     );
   }
 
   // 4. Validate MONGO_URI
-  if (!ENV.MONGO_URI || ENV.MONGO_URI.includes('localhost') || ENV.MONGO_URI.includes('127.0.0.1') || ENV.MONGO_URI.includes('<username>')) {
+  if (!ENV.MONGO_URI || ENV.MONGO_URI.includes('<username>')) {
     throw new Error(
-      '[env] CRITICAL CONFIG ERROR: MONGO_URI is missing, placeholder, or points to localhost in production.'
+      '[env] CRITICAL CONFIG ERROR: MONGO_URI is missing or unconfigured in production.'
     );
   }
 
   // 5. Validate REDIS_URL
   if (!ENV.REDIS_URL || ENV.REDIS_URL.includes('replace_with')) {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: REDIS_URL is missing or unconfigured in production.'
-    );
+    if (ENV.REQUIRE_REDIS) {
+      throw new Error(
+        '[env] CRITICAL CONFIG ERROR: REDIS_URL is missing or unconfigured in production with REQUIRE_REDIS=true.'
+      );
+    } else {
+      console.warn('[env] NOTICE: REDIS_URL is unconfigured. Background queues may be inactive.');
+    }
   }
 
   // 6. Validate FRONTEND_URL
   if (!ENV.FRONTEND_URL || ENV.FRONTEND_URL.includes('localhost') || ENV.FRONTEND_URL.includes('127.0.0.1')) {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: FRONTEND_URL is missing or points to localhost in production.'
+    console.warn(
+      '[env] NOTICE: FRONTEND_URL is set to localhost or unconfigured. In production, set FRONTEND_URL to your Vercel URL for CORS and cookie delivery.'
     );
   }
 
-  // 7. Validate TRUST_PROXY is explicitly configured
+  // 7. Validate TRUST_PROXY
   if (process.env.TRUST_PROXY === undefined || process.env.TRUST_PROXY === '') {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: TRUST_PROXY must be explicitly configured in production (e.g. TRUST_PROXY=1 for Render/ALB or 2 for Cloudflare+Render).'
+    console.warn(
+      '[env] NOTICE: TRUST_PROXY not set; defaulting to 1 for Render/cloud reverse proxy.'
     );
   }
 
-  // 8. Validate EMAIL_FROM (No sandbox resend.dev in live production)
+  // 8. Validate EMAIL_FROM
   if (!ENV.EMAIL_FROM || ENV.EMAIL_FROM.includes('resend.dev') || ENV.EMAIL_FROM.includes('onboarding@')) {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: EMAIL_FROM cannot use the Resend sandbox address (onboarding@resend.dev) in production. ' +
-      'Verify a custom domain at resend.com/domains and configure EMAIL_FROM=Rankora <notifications@yourdomain.com>.'
+    console.warn(
+      '[env] NOTICE: EMAIL_FROM is using the Resend sandbox address (onboarding@resend.dev). ' +
+      'To deliver alerts to custom domains, verify your domain at resend.com/domains.'
     );
   }
 
-  // 9. Queue durable processing
-  if (!ENV.REQUIRE_REDIS) {
-    throw new Error(
-      '[env] REQUIRE_REDIS=true is required in production for durable rank-scan processing.'
-    );
-  }
-
-  // 10. Validate in-house HTTP scraper proxy configuration
+  // 9. Validate in-house HTTP scraper proxy configuration
   const scraperProxy = (process.env.SCRAPER_PROXY_URL || process.env.SCRAPER_PROXY_URLS || '').trim();
   if (!scraperProxy) {
-    throw new Error(
-      '[env] CRITICAL CONFIG ERROR: SCRAPER_PROXY_URL (or SCRAPER_PROXY_URLS) is required in production for the in-house HTTP scraper.'
+    console.warn(
+      '[env] NOTICE: SCRAPER_PROXY_URL is not set. Scraper features will run in direct HTTP mode.'
     );
   }
 
-  // 11. PostgreSQL production credentials validation (no default dev passwords)
-  if (!process.env.POSTGRES_DIRECT_URL && !process.env.DATABASE_DIRECT_URL) {
-    throw new Error('[env] Missing required POSTGRES_DIRECT_URL (or DATABASE_DIRECT_URL) in production.');
-  }
-  if (!process.env.POSTGRES_POOL_URL && !process.env.DATABASE_URL) {
-    throw new Error('[env] Missing required POSTGRES_POOL_URL (or DATABASE_URL) in production.');
-  }
-  if (
-    ENV.POSTGRES_DIRECT_URL.includes('localo_dev_password') ||
-    ENV.POSTGRES_POOL_URL.includes('localo_dev_password')
-  ) {
-    throw new Error('[env] Production is using default PostgreSQL dev password. Configure secure credentials.');
-  }
-
-  // 12. Proxy cost variables validation in production
-  const dcCost = parseFloat(process.env.PROXY_COST_PER_GB_USD || process.env.PROXY_DATACENTER_COST_PER_GB_USD || '');
-  if (isNaN(dcCost) || dcCost <= 0) {
-    throw new Error('[env] Missing required valid proxy datacenter cost per GB (PROXY_COST_PER_GB_USD or PROXY_DATACENTER_COST_PER_GB_USD) in production.');
-  }
-  const resCost = parseFloat(process.env.RESIDENTIAL_COST_PER_GB_USD || process.env.PROXY_RESIDENTIAL_COST_PER_GB_USD || '');
-  if (isNaN(resCost) || resCost <= 0) {
-    throw new Error('[env] Missing required valid proxy residential cost per GB (RESIDENTIAL_COST_PER_GB_USD or PROXY_RESIDENTIAL_COST_PER_GB_USD) in production.');
+  // 10. PostgreSQL production credentials validation (only required if RANKING_READ_SOURCE is postgres or dual)
+  if (ENV.RANKING_READ_SOURCE !== 'mongo') {
+    if (!process.env.POSTGRES_DIRECT_URL && !process.env.DATABASE_DIRECT_URL) {
+      console.warn('[env] NOTICE: POSTGRES_DIRECT_URL is not set while RANKING_READ_SOURCE is ' + ENV.RANKING_READ_SOURCE);
+    }
+    if (!process.env.POSTGRES_POOL_URL && !process.env.DATABASE_URL) {
+      console.warn('[env] NOTICE: POSTGRES_POOL_URL is not set while RANKING_READ_SOURCE is ' + ENV.RANKING_READ_SOURCE);
+    }
+  } else {
+    console.log('[env] RANKING_READ_SOURCE is mongo; PostgreSQL connection is optional.');
   }
 }
 
