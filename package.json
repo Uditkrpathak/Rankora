@@ -1,0 +1,26 @@
+{
+  "name": "local-seo-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "Backend/*",
+    "Frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently --kill-others -n \"CORE,FRONTEND,WORKER\" -c \"blue,magenta,yellow\" \"npm run dev -w @localo/core-service\" \"npm run dev -w @rankora/frontend\" \"npm run dev:worker -w @localo/core-service\"",
+    "dev:core": "npm run dev -w @localo/core-service",
+    "dev:frontend": "npm run dev -w @rankora/frontend",
+    "dev:worker": "npm run dev:worker -w @localo/core-service",
+    "build": "npm run build --workspaces",
+    "start": "npm run start -w @localo/core-service",
+    "start:worker": "npm run start:worker -w @localo/core-service"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

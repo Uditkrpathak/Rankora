@@ -1,0 +1,77 @@
+# ==========================================
+# Rankora Multi-Stage Production Dockerfile
+# ==========================================
+
+# Stage 1: Build all packages and services
+FROM node:22-bookworm-slim AS builder
+
+WORKDIR /app
+
+# Copy root workspace manifests
+COPY package.json package-lock.json ./
+COPY packages/types/package.json packages/types/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY Backend/core-service/package.json Backend/core-service/package.json
+COPY Frontend/package.json Frontend/package.json
+
+# Install all dependencies (including devDependencies for TypeScript compilation)
+RUN npm ci
+
+# Copy entire source tree
+COPY . .
+
+# Build shared libraries, core-service, and frontend
+RUN npm run build --workspace=@localo/types --workspace=@localo/shared
+RUN npm run build -w @localo/core-service
+RUN npm run build -w @rankora/frontend
+
+# Prune devDependencies to keep image lean
+RUN npm prune --omit=dev
+
+# ==========================================
+# Stage 2: Production Backend Runner
+# ==========================================
+FROM node:22-bookworm-slim AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Install curl for container healthcheck and curl-impersonate for production TLS masking
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates tar gzip \
+    && ARCH=$(uname -m) \
+    && if [ "$ARCH" = "x86_64" ]; then \
+         CURL_IMP_URL="https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.1/curl-impersonate-v0.6.1.x86_64-linux-gnu.tar.gz"; \
+       elif [ "$ARCH" = "aarch64" ]; then \
+         CURL_IMP_URL="https://github.com/lwthiker/curl-impersonate/releases/download/v0.6.1/curl-impersonate-v0.6.1.aarch64-linux-gnu.tar.gz"; \
+       fi \
+    && if [ -n "$CURL_IMP_URL" ]; then \
+         mkdir -p /tmp/curl-imp \
+         && curl -sSL "$CURL_IMP_URL" | tar -xz -C /tmp/curl-imp \
+         && cp /tmp/curl-imp/curl-impersonate-chrome /usr/local/bin/curl_chrome116 \
+         && ln -sf /usr/local/bin/curl_chrome116 /usr/local/bin/curl-impersonate \
+         && rm -rf /tmp/curl-imp; \
+       fi \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV HTTP_FETCHER=curl-impersonate
+ENV CURL_IMPERSONATE_BIN=/usr/local/bin/curl_chrome116
+
+# Copy production node_modules and built packages
+COPY --from=builder /app/package.json /app/package-lock.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/Backend/core-service/package.json ./Backend/core-service/package.json
+COPY --from=builder /app/Backend/core-service/dist ./Backend/core-service/dist
+COPY --from=builder /app/Backend/core-service/uploads ./Backend/core-service/uploads
+
+# Ensure upload directory has appropriate permissions for unprivileged user
+RUN chown -R node:node /app
+
+USER node
+
+EXPOSE 5001
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:5001/ready || exit 1
+
+CMD ["npm", "run", "start", "-w", "@localo/core-service"]

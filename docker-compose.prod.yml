@@ -1,0 +1,122 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory-policy noeviction --appendonly yes
+    restart: always
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:16.4-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-localo_rankings}
+      POSTGRES_USER: ${POSTGRES_USER:-localo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-localo} -d ${POSTGRES_DB:-localo_rankings}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.22.1
+    restart: always
+    environment:
+      DB_USER: ${POSTGRES_USER:-localo}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-localo_rankings}
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 20
+      MIN_POOL_SIZE: 5
+      RESERVE_POOL_SIZE: 5
+      MAX_DB_CONNECTIONS: 50
+      ADMIN_USERS: ${POSTGRES_USER:-localo}
+      AUTH_TYPE: scram-sha-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432 -U ${POSTGRES_USER:-localo}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  core:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: rankora-core:latest
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      CORE_SERVICE_PORT: 5001
+      REDIS_URL: redis://redis:6379
+      POSTGRES_DIRECT_URL: postgresql://${POSTGRES_USER:-localo}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-localo_rankings}
+      POSTGRES_POOL_URL: postgresql://${POSTGRES_USER:-localo}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB:-localo_rankings}
+      TRUST_PROXY: "1"
+    volumes:
+      - core_uploads:/app/Backend/core-service/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  worker:
+    image: rankora-core:latest
+    command: ["npm", "run", "start:worker", "-w", "@localo/core-service"]
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379
+      POSTGRES_DIRECT_URL: postgresql://${POSTGRES_USER:-localo}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-localo_rankings}
+      POSTGRES_POOL_URL: postgresql://${POSTGRES_USER:-localo}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB:-localo_rankings}
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+      core:
+        condition: service_healthy
+
+  web:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./Frontend/dist:/usr/share/nginx/html:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      core:
+        condition: service_healthy
+
+volumes:
+  redis_data:
+  postgres_data:
+  core_uploads:

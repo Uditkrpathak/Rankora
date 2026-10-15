@@ -1,0 +1,161 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory-policy noeviction
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:16.4-alpine
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: localo_rankings
+      POSTGRES_USER: localo
+      POSTGRES_PASSWORD: localo_dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U localo -d localo_rankings"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    ports:
+      - "6432:6432"
+    restart: unless-stopped
+    environment:
+      DB_USER: localo
+      DB_PASSWORD: localo_dev_password
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: localo_rankings
+      POOL_MODE: transaction
+      LISTEN_PORT: 6432
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 20
+      MIN_POOL_SIZE: 5
+      RESERVE_POOL_SIZE: 5
+      AUTH_TYPE: plain
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6432", "-U", "localo"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  core:
+    image: localo-dev:local
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: ["npm", "run", "dev", "-w", "@localo/core-service"]
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      CORE_SERVICE_PORT: 5001
+      MONGO_URI: mongodb://mongo:27017/localseo_core
+      REDIS_URL: redis://redis:6379
+      POSTGRES_DIRECT_URL: postgresql://localo:localo_dev_password@postgres:5432/localo_rankings
+      POSTGRES_POOL_URL: postgresql://localo:localo_dev_password@pgbouncer:6432/localo_rankings
+      RANKING_READ_SOURCE: dual
+      JWT_ACCESS_SECRET: local-development-access-secret-change-before-deploy
+      JWT_REFRESH_SECRET: local-development-refresh-secret-change-before-deploy
+      TOKEN_ENCRYPTION_KEY: 6c9a2ffa9b3584fdbeb0915ec8eb5d8e702e5311189cf2fe65c665cd034f622a
+      FRONTEND_URL: http://localhost:5174
+      APP_URL: http://localhost:5000
+      SERP_PROVIDER: mock
+      REQUIRE_REDIS: "true"
+      TRUST_PROXY: "1"
+    ports:
+      - "5001:5001"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5001/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    image: localo-dev:local
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: ["npm", "run", "dev:worker", "-w", "@localo/core-service"]
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://mongo:27017/localseo_core
+      REDIS_URL: redis://redis:6379
+      POSTGRES_DIRECT_URL: postgresql://localo:localo_dev_password@postgres:5432/localo_rankings
+      POSTGRES_POOL_URL: postgresql://localo:localo_dev_password@pgbouncer:6432/localo_rankings
+      RANKING_READ_SOURCE: dual
+      JWT_ACCESS_SECRET: local-development-access-secret-change-before-deploy
+      JWT_REFRESH_SECRET: local-development-refresh-secret-change-before-deploy
+      TOKEN_ENCRYPTION_KEY: 6c9a2ffa9b3584fdbeb0915ec8eb5d8e702e5311189cf2fe65c665cd034f622a
+      SERP_PROVIDER: mock
+      REQUIRE_REDIS: "true"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+
+  frontend:
+    image: localo-dev:local
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: ["npm", "run", "dev", "-w", "@rankora/frontend", "--", "--host", "0.0.0.0"]
+    init: true
+    restart: unless-stopped
+    environment:
+      VITE_API_PROXY_TARGET: http://core:5001
+    ports:
+      - "5174:5173"
+    depends_on:
+      core:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
+  postgres_data:

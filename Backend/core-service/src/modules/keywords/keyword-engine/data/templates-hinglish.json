@@ -1,0 +1,82 @@
+{
+  "grocery_store": {
+    "seedTemplates": ["kirana store", "kirana dukan", "ration ki dukan", "daily needs dukan"],
+    "localTerms": ["kirana store", "kirana dukan", "parchun dukan"]
+  },
+  "supermarket": {
+    "seedTemplates": ["kirana store", "kirana dukan", "ration store"],
+    "localTerms": ["kirana store", "kirana dukan"]
+  },
+  "computer_store": {
+    "seedTemplates": ["computer ki dukan", "laptop repair dukan", "computer dukan"],
+    "localTerms": ["computer dukan", "laptop dukan"]
+  },
+  "computer_repair_service": {
+    "seedTemplates": ["computer repairing dukan", "laptop thik karne ki dukan"],
+    "localTerms": ["computer repair mistri", "laptop repairing shop"]
+  },
+  "pharmacy": {
+    "seedTemplates": ["dawakhana", "dawa ki dukan", "medical store near me"],
+    "localTerms": ["dawakhana", "dawa dukan"]
+  },
+  "dental_clinic": {
+    "seedTemplates": ["dant ke doctor", "dant ka hospital", "daant ka doctor"],
+    "localTerms": ["dant ke doctor", "daant ka hospital"]
+  },
+  "doctor": {
+    "seedTemplates": ["doctor clinic", "dawa clinic", "bimar doctor clinic"],
+    "localTerms": ["doctor ki clinic", "clinic dawakhana"]
+  },
+  "restaurant": {
+    "seedTemplates": ["dhaba", "family dhaba", "khana khana"],
+    "localTerms": ["dhaba", "bhojanalaya"]
+  },
+  "car_repair_facility": {
+    "seedTemplates": ["car mechanic near me", "gaadi service centre", "car mistri"],
+    "localTerms": ["car mechanic", "gaadi repair"]
+  },
+  "beauty_salon": {
+    "seedTemplates": ["ladies parlour", "beauty parlour near me", "shringaar parlour"],
+    "localTerms": ["ladies parlour", "makeup parlour"]
+  },
+  "real_estate_agency": {
+    "seedTemplates": ["property dealer near me", "makaan kiraye pe", "zameen dealer"],
+    "localTerms": ["property dealer", "kiraya makan"]
+  },
+  "plumber": {
+    "seedTemplates": ["plumber dukan", "nal mistri", "plumber near me"],
+    "localTerms": ["plumber mistri", "nal fitting"]
+  },
+  "electrician": {
+    "seedTemplates": ["electrician near me", "bijli mistri", "light fitting mistri"],
+    "localTerms": ["bijli mistri", "electric mistri"]
+  },
+  "jeweler": {
+    "seedTemplates": ["sunar ki dukan", "jewellery showroom", "chandi sona dukan"],
+    "localTerms": ["sunar", "soni ki dukan"]
+  },
+  "clothing_store": {
+    "seedTemplates": ["kapde ki dukan", "readymade kapde", "ladies suit dukan"],
+    "localTerms": ["kapde ki dukan", "vastra bhandar"]
+  },
+  "stationery_store": {
+    "seedTemplates": ["stationery ki dukan", "kitab ki dukan", "copy kitab dukan"],
+    "localTerms": ["kitab ki dukan", "copy pen dukan"]
+  },
+  "hardware_store": {
+    "seedTemplates": ["hardware ki dukan", "paint ki dukan", "loha cement dukan"],
+    "localTerms": ["hardware dukan", "paints dukan"]
+  },
+  "electronics_store": {
+    "seedTemplates": ["mobile ki dukan", "electronics dukan", "mobile recharge dukan"],
+    "localTerms": ["mobile ki dukan", "phone dukan"]
+  },
+  "tailor": {
+    "seedTemplates": ["darzi ki dukan", "ladies tailor near me", "silai centre"],
+    "localTerms": ["darzi", "tailor master"]
+  },
+  "optician": {
+    "seedTemplates": ["chashme ki dukan", "optical shop near me", "chashma store"],
+    "localTerms": ["chashme ki dukan", "optical shop"]
+  }
+}

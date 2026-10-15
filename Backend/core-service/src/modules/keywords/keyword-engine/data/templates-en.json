@@ -1,0 +1,192 @@
+{
+  "grocery_store": {
+    "seedTemplates": ["grocery store", "grocery shop", "daily needs store", "convenience store"],
+    "localTerms": ["provision store", "general store", "grocery market"],
+    "serviceNouns": ["home delivery", "fresh vegetables", "packaged food", "household supplies"]
+  },
+  "supermarket": {
+    "seedTemplates": ["supermarket", "grocery store", "departmental store", "daily needs store"],
+    "localTerms": ["hypermarket", "grocery market"],
+    "serviceNouns": ["packaged groceries", "household items", "fresh produce"]
+  },
+  "computer_store": {
+    "seedTemplates": ["computer store", "computer shop", "laptop store", "laptop shop", "pc accessories shop"],
+    "localTerms": ["computer dealer", "laptop showroom"],
+    "serviceNouns": ["laptop repair", "pc repair", "computer repair", "screen replacement", "ssd upgrade"]
+  },
+  "computer_repair_service": {
+    "seedTemplates": ["computer repair service", "laptop repair service", "pc repair service", "macbook repair"],
+    "localTerms": ["computer technician", "laptop service center"],
+    "serviceNouns": ["data recovery", "motherboard repair", "laptop servicing", "windows installation"]
+  },
+  "pharmacy": {
+    "seedTemplates": ["pharmacy", "medical store", "chemist", "chemist shop", "24 hour pharmacy", "medicine shop"],
+    "localTerms": ["druggist", "dispensary"],
+    "serviceNouns": ["home delivery medicine", "emergency medicine", "ayurvedic medicine", "surgical items"]
+  },
+  "dental_clinic": {
+    "seedTemplates": ["dentist", "dental clinic", "dental hospital", "teeth cleaning", "root canal treatment", "dental braces"],
+    "localTerms": ["dental care", "orthodontist"],
+    "serviceNouns": ["root canal", "teeth whitening", "dental implants", "teeth extraction", "braces"]
+  },
+  "doctor": {
+    "seedTemplates": ["doctor", "physician", "general physician", "clinic", "family doctor", "medical clinic"],
+    "localTerms": ["consultant doctor", "general practitioner"],
+    "serviceNouns": ["general consultation", "fever treatment", "health checkup"]
+  },
+  "restaurant": {
+    "seedTemplates": ["restaurant", "family restaurant", "veg restaurant", "fine dining", "best restaurant"],
+    "localTerms": ["food court", "dining place"],
+    "serviceNouns": ["home delivery", "dine in", "buffet", "takeaway"]
+  },
+  "cafe": {
+    "seedTemplates": ["cafe", "coffee shop", "bakery and cafe", "coffee house"],
+    "localTerms": ["espresso bar", "tea house"],
+    "serviceNouns": ["cold coffee", "specialty coffee", "breakfast cafe"]
+  },
+  "car_repair_facility": {
+    "seedTemplates": ["car repair", "car service center", "car workshop", "car mechanic", "wheel alignment", "car denting painting"],
+    "localTerms": ["auto garage", "motor garage"],
+    "serviceNouns": ["car wash", "oil change", "car ac service", "clutch repair"]
+  },
+  "gym": {
+    "seedTemplates": ["gym", "fitness center", "fitness gym", "unisex gym", "weight loss center"],
+    "localTerms": ["fitness club", "workout studio"],
+    "serviceNouns": ["personal trainer", "crossfit", "cardio workout", "zumba classes"]
+  },
+  "beauty_salon": {
+    "seedTemplates": ["beauty parlour", "beauty salon", "hair salon", "women beauty salon", "bridal makeup artist"],
+    "localTerms": ["ladies salon", "beauty studio"],
+    "serviceNouns": ["hair spa", "facial treatment", "waxing", "bridal makeup"]
+  },
+  "hair_salon": {
+    "seedTemplates": ["hair salon", "men salon", "barber shop", "haircut salon"],
+    "localTerms": ["gents salon", "barber"],
+    "serviceNouns": ["haircut", "beard styling", "hair coloring"]
+  },
+  "accounting_firm": {
+    "seedTemplates": ["chartered accountant", "ca firm", "tax consultant", "gst consultant", "income tax filing", "accounting services"],
+    "localTerms": ["tax advisor", "auditor"],
+    "serviceNouns": ["gst registration", "itr filing", "company audit", "tax filing"]
+  },
+  "law_firm": {
+    "seedTemplates": ["lawyer", "advocate", "law firm", "legal consultant", "property lawyer", "divorce lawyer"],
+    "localTerms": ["legal practitioner", "court lawyer"],
+    "serviceNouns": ["legal advice", "court case advocate", "property verification"]
+  },
+  "real_estate_agency": {
+    "seedTemplates": ["property dealer", "real estate agent", "property consultant", "flats for rent", "commercial property dealer"],
+    "localTerms": ["realtor", "property broker"],
+    "serviceNouns": ["buy flat", "rent apartment", "commercial office space"]
+  },
+  "plumber": {
+    "seedTemplates": ["plumber", "plumbing services", "emergency plumber", "sanitary repair"],
+    "localTerms": ["plumbing contractor", "pipe repair technician"],
+    "serviceNouns": ["pipe leakage repair", "bathroom fitting", "water tank cleaning"]
+  },
+  "electrician": {
+    "seedTemplates": ["electrician", "electrical repair", "electrical contractor", "wiring electrician"],
+    "localTerms": ["electrical technician", "wireman"],
+    "serviceNouns": ["fan repair", "switchboard wiring", "inverter installation"]
+  },
+  "coaching_center": {
+    "seedTemplates": ["coaching institute", "tuition classes", "competitive exam coaching"],
+    "localTerms": ["study circle", "learning academy"],
+    "serviceNouns": ["maths tuition", "science coaching", "board exam preparation"]
+  },
+  "school": {
+    "seedTemplates": ["cbse school", "icse school", "play school", "international school", "high school"],
+    "localTerms": ["public school", "convent school"],
+    "serviceNouns": ["admissions open", "nursery admission", "pre school"]
+  },
+  "hotel": {
+    "seedTemplates": ["hotel", "budget hotel", "luxury hotel", "guest house", "rooms for stay"],
+    "localTerms": ["lodging", "tourist hotel"],
+    "serviceNouns": ["room booking", "banquet hall", "conference room"]
+  },
+  "hospital": {
+    "seedTemplates": ["hospital", "multispeciality hospital", "emergency hospital", "maternity hospital", "eye hospital"],
+    "localTerms": ["nursing home", "healthcare center"],
+    "serviceNouns": ["24x7 emergency", "icu hospital", "opd consultation"]
+  },
+  "optician": {
+    "seedTemplates": ["optician", "optical shop", "eye glasses shop", "spectacles shop", "sunglasses store"],
+    "localTerms": ["eyewear store", "vision care"],
+    "serviceNouns": ["eye testing", "contact lenses", "frame repair"]
+  },
+  "jeweler": {
+    "seedTemplates": ["jeweller", "jewellery store", "gold jewellery shop", "diamond showroom"],
+    "localTerms": ["gold merchant", "jewellery showroom"],
+    "serviceNouns": ["hallmark gold", "custom jewellery", "silver ornaments"]
+  },
+  "clothing_store": {
+    "seedTemplates": ["clothing store", "garments shop", "men clothing store", "women apparel store", "ethnic wear shop"],
+    "localTerms": ["cloth house", "dress shop"],
+    "serviceNouns": ["readymade garments", "designer suits", "saree showroom"]
+  },
+  "dry_cleaner": {
+    "seedTemplates": ["dry cleaner", "laundry service", "steam press service", "dry cleaning shop"],
+    "localTerms": ["laundromat", "clothes press shop"],
+    "serviceNouns": ["saree dry clean", "suit dry clean", "carpet dry cleaning"]
+  },
+  "pet_store": {
+    "seedTemplates": ["pet shop", "veterinary clinic", "dog clinic", "pet food store", "pet grooming"],
+    "localTerms": ["pet animal store", "puppy shop"],
+    "serviceNouns": ["dog vaccination", "vet doctor", "pet food delivery"]
+  },
+  "courier_service": {
+    "seedTemplates": ["courier service", "parcel delivery", "domestic courier", "international courier"],
+    "localTerms": ["cargo agency", "express parcel"],
+    "serviceNouns": ["speed post", "document courier", "cargo delivery"]
+  },
+  "furniture_store": {
+    "seedTemplates": ["furniture store", "furniture shop", "wooden furniture showroom", "office furniture", "sofa manufacturer"],
+    "localTerms": ["furniture mart", "home decor"],
+    "serviceNouns": ["custom furniture", "sofa repair", "modular kitchen"]
+  },
+  "florist": {
+    "seedTemplates": ["florist", "flower shop", "bouquet delivery", "fresh flowers shop"],
+    "localTerms": ["flower market", "flower seller"],
+    "serviceNouns": ["flower decoration", "birthday bouquet", "wedding garlands"]
+  },
+  "bakery": {
+    "seedTemplates": ["bakery", "cake shop", "pastry shop", "custom cake bakery"],
+    "localTerms": ["confectionery shop", "bakehouse"],
+    "serviceNouns": ["birthday cake delivery", "eggless cakes", "fresh cookies"]
+  },
+  "corporate_office": {
+    "seedTemplates": ["corporate office", "head office", "regional office", "company office", "business enterprise"],
+    "localTerms": ["commercial office", "branch office"],
+    "serviceNouns": ["corporate headquarters", "branch office"]
+  },
+  "engineering_consultant": {
+    "seedTemplates": ["engineering company", "engineering consultant", "industrial engineering firm", "mechanical engineering services", "civil engineering consultant"],
+    "localTerms": ["industrial consultant", "plant engineers"],
+    "serviceNouns": ["industrial design", "plant engineering", "technical consultancy"]
+  },
+  "stationery_store": {
+    "seedTemplates": ["stationery shop", "stationery store", "book store", "book depot", "office supplies store", "school stationery"],
+    "localTerms": ["book seller", "stationers"],
+    "serviceNouns": ["school books", "office stationery", "art supplies", "photocopy printing"]
+  },
+  "printing_service": {
+    "seedTemplates": ["printing press", "digital printing services", "flex banner printing", "visiting card printing", "photocopy shop", "offset printing"],
+    "localTerms": ["print house", "flex graphics"],
+    "serviceNouns": ["pamphlet printing", "mug printing", "t shirt printing", "poster printing"]
+  },
+  "hardware_store": {
+    "seedTemplates": ["hardware store", "hardware shop", "sanitary store", "paint shop", "plywood shop", "building material supplier"],
+    "localTerms": ["iron store", "paints depot"],
+    "serviceNouns": ["power tools", "paints", "sanitary fittings", "plumbing items"]
+  },
+  "electronics_store": {
+    "seedTemplates": ["electronics store", "electronics shop", "mobile shop", "smartphone store", "home appliances store", "tv showroom"],
+    "localTerms": ["mobile store", "appliance showroom"],
+    "serviceNouns": ["mobile accessories", "smart tv", "ac showroom", "refrigerator"]
+  },
+  "tailor": {
+    "seedTemplates": ["tailor shop", "ladies tailor", "gents tailor", "boutique", "custom tailoring", "suit stitching"],
+    "localTerms": ["dressmaker", "designer boutique"],
+    "serviceNouns": ["suit stitching", "blouse stitching", "pant shirt stitching", "alteration"]
+  }
+}

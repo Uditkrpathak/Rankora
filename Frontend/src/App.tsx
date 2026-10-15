@@ -1,0 +1,181 @@
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './store';
+import { useGetMeQuery } from './store/api/authApi';
+import { setCredentials, setLoading } from './store/slices/authSlice';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { PublicOnlyRoute } from './components/PublicOnlyRoute';
+import { FEATURE_FLAGS } from './config/features';
+
+// Public Pages
+import { HomePage } from './features/home/HomePage';
+import { LoginPage } from './features/auth/LoginPage';
+import { RegisterPage } from './features/auth/RegisterPage';
+import { VerifyEmailPage } from './features/auth/VerifyEmailPage';
+import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
+import { SessionsPage } from './features/auth/SessionsPage';
+import { SecuritySettingsPage } from './features/auth/SecuritySettingsPage';
+import { PublicReportPage } from './features/rankings/PublicReportPage';
+
+// App Pages (protected)
+import { DashboardPage } from './features/dashboard/DashboardPage';
+import { SingleProfileDashboardPage } from './features/dashboard/SingleProfileDashboardPage';
+import { AddBusinessProfilesPage } from './features/locations/AddBusinessProfilesPage';
+import { ManualAddPage } from './features/locations/ManualAddPage';
+import { GbpCallbackPage } from './features/locations/GbpCallbackPage';
+import { RankTrackingPage } from './features/rankings/RankTrackingPage';
+import { ProfilePage } from './features/profile/ProfilePage';
+import { HelpPage } from './features/help/HelpPage';
+
+// Gated & Settings Pages
+import { AuditPage } from './features/audits/AuditPage';
+import { ReviewInboxPage } from './features/reviews/ReviewInboxPage';
+import { RecommendationsPage } from './features/recommendations/RecommendationsPage';
+import { CompetitorBenchmarkPage } from './features/competitors/CompetitorBenchmarkPage';
+import { WorkspaceSettingsPage } from './features/settings/WorkspaceSettingsPage';
+import { BillingPage } from './features/settings/BillingPage';
+import { AccountPage } from './features/settings/AccountPage';
+import { ConnectedAccountsPage } from './features/settings/ConnectedAccountsPage';
+import { ExplorePlansPage } from './features/settings/ExplorePlansPage';
+import { PublishedSitesPage } from './features/settings/PublishedSitesPage';
+import { TeamManagement } from './features/workspaces/TeamManagement';
+import { BusinessChatbot } from './components/chat/BusinessChatbot';
+import { NotificationsPage } from './features/notifications/NotificationsPage';
+import { NotificationSettingsPage } from './features/settings/NotificationSettingsPage';
+
+// Helper redirect component for location ID to business ID
+const LocationRedirect: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/business/${id || ''}`} replace />;
+};
+
+export const App: React.FC = () => {
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  const { data: meData, isError, isLoading: isMeLoading } = useGetMeQuery();
+
+  useEffect(() => {
+    if (meData?.data?.user) {
+      dispatch(
+        setCredentials({
+          user: meData.data.user,
+          workspaces: meData.data.workspaces,
+          activeWorkspace: meData.data.workspaces?.[0],
+          accessToken: '',
+        })
+      );
+    } else if (isError) {
+      dispatch(setLoading(false));
+    }
+  }, [meData, isError, dispatch]);
+
+  if (isMeLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white text-slate-900">
+        <div className="flex flex-col items-center gap-3 p-6 rounded-xl bg-white border border-slate-200 shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center">
+            <span className="text-base font-bold text-brand-600">R</span>
+          </div>
+          <div className="text-center">
+            <p className="text-xs font-bold text-slate-900">Rankora</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Initializing workspace...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Routes>
+        {/* ── Public Landing & Auth Routes ────────────────────────────── */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+        <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
+        <Route path="/reset-password" element={<PublicOnlyRoute><ResetPasswordPage /></PublicOnlyRoute>} />
+        <Route path="/reports/:shareToken" element={<PublicReportPage />} />
+
+        {/* ── Core Navigation Routes ─────────────────────────────────── */}
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/business/:id" element={<ProtectedRoute><SingleProfileDashboardPage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/help" element={<ProtectedRoute><HelpPage /></ProtectedRoute>} />
+
+        {/* ── Location Setup & Scans ─────────────────────────────────── */}
+        <Route path="/locations/add" element={<ProtectedRoute><AddBusinessProfilesPage /></ProtectedRoute>} />
+        <Route path="/locations/new" element={<Navigate to="/locations/add" replace />} />
+        <Route path="/locations/manual-add" element={<ProtectedRoute><ManualAddPage /></ProtectedRoute>} />
+        <Route path="/locations/google/callback" element={<ProtectedRoute><GbpCallbackPage /></ProtectedRoute>} />
+        <Route path="/rank-tracking" element={<ProtectedRoute><RankTrackingPage /></ProtectedRoute>} />
+        <Route path="/recommendations" element={<ProtectedRoute><RecommendationsPage /></ProtectedRoute>} />
+        <Route path="/locations/:id/recommendations" element={<ProtectedRoute><RecommendationsPage /></ProtectedRoute>} />
+        <Route path="/scans" element={<Navigate to="/rank-tracking" replace />} />
+
+        {/* ── Duplicate & Legacy Route Redirects ─────────────────────── */}
+        {/* Old /onboarding route redirects directly to /dashboard */}
+        <Route path="/onboarding" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/locations" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/locations/:id" element={<LocationRedirect />} />
+        <Route path="/locations/:id/profile" element={<LocationRedirect />} />
+        <Route path="/team" element={<Navigate to="/settings/workspace" replace />} />
+
+        {/* ── Security & Account Settings ────────────────────────────── */}
+        <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
+        <Route path="/security" element={<ProtectedRoute><SecuritySettingsPage /></ProtectedRoute>} />
+        <Route path="/settings" element={<Navigate to="/settings/workspace" replace />} />
+        <Route path="/settings/workspace" element={<ProtectedRoute><WorkspaceSettingsPage /></ProtectedRoute>} />
+        <Route path="/settings/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+        <Route path="/settings/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
+        <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettingsPage /></ProtectedRoute>} />
+        <Route path="/settings/connections" element={<ProtectedRoute><ConnectedAccountsPage /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+
+        {/* ── Feature Gated Routes (Hidden / Redirected when Backend Not Live) ── */}
+        {FEATURE_FLAGS.ENABLE_AUDITS ? (
+          <Route path="/audits" element={<ProtectedRoute><AuditPage /></ProtectedRoute>} />
+        ) : (
+          <Route path="/audits" element={<Navigate to="/dashboard" replace />} />
+        )}
+
+        {FEATURE_FLAGS.ENABLE_REVIEWS_INBOX ? (
+          <Route path="/reviews" element={<ProtectedRoute><ReviewInboxPage /></ProtectedRoute>} />
+        ) : (
+          <Route path="/reviews" element={<Navigate to="/dashboard" replace />} />
+        )}
+
+        {FEATURE_FLAGS.ENABLE_TEAM_CLIENTS ? (
+          <Route path="/settings/team" element={<ProtectedRoute requiredRoles={['owner', 'admin']}><TeamManagement /></ProtectedRoute>} />
+        ) : (
+          <Route path="/settings/team" element={<Navigate to="/settings/workspace" replace />} />
+        )}
+
+        {FEATURE_FLAGS.ENABLE_EXPLORE_PLANS ? (
+          <Route path="/settings/plans" element={<ProtectedRoute><ExplorePlansPage /></ProtectedRoute>} />
+        ) : (
+          <Route path="/settings/plans" element={<Navigate to="/settings/billing" replace />} />
+        )}
+
+        {FEATURE_FLAGS.ENABLE_PUBLISHED_SITES ? (
+          <Route path="/settings/published-sites" element={<ProtectedRoute><PublishedSitesPage /></ProtectedRoute>} />
+        ) : (
+          <Route path="/settings/published-sites" element={<Navigate to="/settings/workspace" replace />} />
+        )}
+
+        <Route path="/competitors" element={<ProtectedRoute><CompetitorBenchmarkPage /></ProtectedRoute>} />
+
+        {/* ── Fallback Catch-All ────────────────────────────────────────── */}
+        <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+      </Routes>
+
+      {/* ── Floating AI Business Copilot Chatbot ────────────────────── */}
+      {isAuthenticated && <BusinessChatbot />}
+    </>
+  );
+};
+
+export default App;

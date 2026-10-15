@@ -1,0 +1,218 @@
+{
+  "categories": {
+    "grocery_store": {
+      "displayName": "Grocery Store",
+      "familyCategories": ["grocery store", "supermarket", "general store", "convenience store", "kirana store", "department store", "food store"],
+      "nameHeuristicKeywords": ["groceries", "grocery", "kirana", "provision", "daily needs", "supermarket", "mart", "bazaar", "ration", "general store"]
+    },
+    "supermarket": {
+      "displayName": "Supermarket",
+      "familyCategories": ["supermarket", "grocery store", "department store", "hypermarket", "general store"],
+      "nameHeuristicKeywords": ["supermarket", "hypermarket", "mega mart", "departmental store"]
+    },
+    "computer_store": {
+      "displayName": "Computer Store",
+      "familyCategories": ["computer store", "computer shop", "computer repair service", "electronics store", "laptop repair service", "used computer store"],
+      "nameHeuristicKeywords": ["infotech", "computer", "laptop", "pc ", "it solutions", "technologies", "hardware"]
+    },
+    "computer_repair_service": {
+      "displayName": "Computer Repair Service",
+      "familyCategories": ["computer repair service", "computer store", "laptop repair service", "electronics repair shop"],
+      "nameHeuristicKeywords": ["computer repair", "laptop repair", "pc repair", "macbook repair"]
+    },
+    "pharmacy": {
+      "displayName": "Pharmacy",
+      "familyCategories": ["pharmacy", "chemist", "drug store", "medical store", "medical supply store", "ayurvedic clinic"],
+      "nameHeuristicKeywords": ["pharmacy", "medical", "chemist", "dawa", "pharma", "drug store"]
+    },
+    "dental_clinic": {
+      "displayName": "Dental Clinic",
+      "familyCategories": ["dentist", "dental clinic", "dental hygienist", "orthodontist", "cosmetic dentist", "pediatric dentist"],
+      "nameHeuristicKeywords": ["dental", "dentist", "tooth", "teeth", "dant", "orthodontic"]
+    },
+    "doctor": {
+      "displayName": "Doctor",
+      "familyCategories": ["doctor", "general practitioner", "physician", "medical clinic", "specialized clinic", "pediatrician"],
+      "nameHeuristicKeywords": ["doctor", "clinic", "hospital", "physician", "health", "consultant doctor"]
+    },
+    "restaurant": {
+      "displayName": "Restaurant",
+      "familyCategories": ["restaurant", "fast food restaurant", "family restaurant", "vegetarian restaurant", "dhaba", "diner", "bistro"],
+      "nameHeuristicKeywords": ["restaurant", "dhaba", "kitchen", "bhojanalaya", "dining", "food court"]
+    },
+    "cafe": {
+      "displayName": "Cafe",
+      "familyCategories": ["cafe", "coffee shop", "bakery and cafe", "coffee house", "espresso bar"],
+      "nameHeuristicKeywords": ["cafe", "coffee", "roastery", "tea lounge", "chai"]
+    },
+    "car_repair_facility": {
+      "displayName": "Car Repair Facility",
+      "familyCategories": ["car repair and maintenance service", "auto repair shop", "car service", "brake shop", "wheel alignment service", "oil change service", "car wash"],
+      "nameHeuristicKeywords": ["motor", "auto repair", "car repair", "car service", "garage", "tyre", "tire", "wheel alignment"]
+    },
+    "gym": {
+      "displayName": "Gym",
+      "familyCategories": ["gym", "fitness center", "personal trainer", "weight loss center", "crossfit gym", "fitness studio"],
+      "nameHeuristicKeywords": ["gym", "fitness", "workout", "crossfit", "iron gym", "bodybuilding"]
+    },
+    "beauty_salon": {
+      "displayName": "Beauty Salon",
+      "familyCategories": ["beauty salon", "hair salon", "nail salon", "spa", "skin care clinic", "make-up artist"],
+      "nameHeuristicKeywords": ["beauty salon", "beauty parlour", "parlor", "makeup studio", "bridal studio", "spa"]
+    },
+    "hair_salon": {
+      "displayName": "Hair Salon",
+      "familyCategories": ["hair salon", "barber shop", "beauty salon", "hairdresser"],
+      "nameHeuristicKeywords": ["barber", "hair salon", "hair cut", "hair studio"]
+    },
+    "accounting_firm": {
+      "displayName": "Chartered Accountant",
+      "familyCategories": ["chartered accountant", "accounting firm", "tax consultant", "financial consultant", "bookkeeping service"],
+      "nameHeuristicKeywords": ["chartered accountant", " ca ", "tax consultant", "accounting", "gst consultant", "audit firm"]
+    },
+    "law_firm": {
+      "displayName": "Law Firm",
+      "familyCategories": ["law firm", "lawyer", "legal services", "attorney", "solicitor"],
+      "nameHeuristicKeywords": ["advocate", "law firm", "lawyer", "legal", "attorney", "solicitor"]
+    },
+    "real_estate_agency": {
+      "displayName": "Real Estate Agency",
+      "familyCategories": ["real estate agency", "real estate agent", "property management company", "commercial real estate agency"],
+      "nameHeuristicKeywords": ["properties", "property dealer", "realtor", "real estate", "builder", "realty"]
+    },
+    "plumber": {
+      "displayName": "Plumber",
+      "familyCategories": ["plumber", "plumbing service", "drainage service", "sanitary contractor"],
+      "nameHeuristicKeywords": ["plumber", "plumbing", "sanitary repair", "pipe repair"]
+    },
+    "electrician": {
+      "displayName": "Electrician",
+      "familyCategories": ["electrician", "electrical repair shop", "electrical engineer", "electrical installation service"],
+      "nameHeuristicKeywords": ["electrician", "electrical works", "electrical contractor", "wiring repair"]
+    },
+    "coaching_center": {
+      "displayName": "Coaching Center",
+      "familyCategories": ["coaching center", "tutoring service", "educational institution", "training centre"],
+      "nameHeuristicKeywords": ["academy", "coaching", "tuition", "classes", "institute"]
+    },
+    "school": {
+      "displayName": "School",
+      "familyCategories": ["school", "high school", "primary school", "kindergarten", "preschool"],
+      "nameHeuristicKeywords": ["school", "public school", "vidyalaya", "grammar school"]
+    },
+    "hotel": {
+      "displayName": "Hotel",
+      "familyCategories": ["hotel", "motel", "resort", "guest house", "inn", "lodging"],
+      "nameHeuristicKeywords": ["hotel", "resort", "guest house", "lodge", "inn", "stay"]
+    },
+    "hospital": {
+      "displayName": "Hospital",
+      "familyCategories": ["hospital", "medical center", "emergency room", "general hospital", "specialized hospital"],
+      "nameHeuristicKeywords": ["hospital", "medical research institute", "nursing home", "healthcare"]
+    },
+    "optician": {
+      "displayName": "Optician",
+      "familyCategories": ["optician", "eyewear store", "contact lenses supplier", "optical shop"],
+      "nameHeuristicKeywords": ["optician", "optical", "eye wear", "spectacles", "lens"]
+    },
+    "jeweler": {
+      "displayName": "Jewelry Store",
+      "familyCategories": ["jewelry store", "jeweler", "goldsmith", "diamond merchant"],
+      "nameHeuristicKeywords": ["jewel", "jeweller", "jewellers", "ornaments", "goldsmith", "soni", "gold palace"]
+    },
+    "clothing_store": {
+      "displayName": "Clothing Store",
+      "familyCategories": ["clothing store", "boutique", "men's clothing store", "women's clothing store", "fashion retail"],
+      "nameHeuristicKeywords": ["garments", "clothing", "apparel", "fashion", "textiles", "dresses", "wear"]
+    },
+    "dry_cleaner": {
+      "displayName": "Dry Cleaner",
+      "familyCategories": ["dry cleaner", "laundry service", "laundromat"],
+      "nameHeuristicKeywords": ["dry clean", "dry cleaner", "drycleaners", "laundry"]
+    },
+    "pet_store": {
+      "displayName": "Pet Store",
+      "familyCategories": ["pet store", "veterinarian", "animal hospital", "pet supply store"],
+      "nameHeuristicKeywords": ["pet shop", "pet clinic", "vet clinic", "pet care", "veterinary"]
+    },
+    "courier_service": {
+      "displayName": "Courier Service",
+      "familyCategories": ["courier service", "shipping service", "logistics service", "freight forwarding service"],
+      "nameHeuristicKeywords": ["courier", "parcel", "express cargo", "logistics"]
+    },
+    "furniture_store": {
+      "displayName": "Furniture Store",
+      "familyCategories": ["furniture store", "furniture maker", "home goods store", "sofa shop"],
+      "nameHeuristicKeywords": ["furniture", "furnishing", "woodcraft", "interior furnishing", "sofa works"]
+    },
+    "florist": {
+      "displayName": "Florist",
+      "familyCategories": ["florist", "flower delivery", "gift shop"],
+      "nameHeuristicKeywords": ["florist", "flower shop", "flowers", "bouquet"]
+    },
+    "bakery": {
+      "displayName": "Bakery",
+      "familyCategories": ["bakery", "cake shop", "pastry shop", "confectionery"],
+      "nameHeuristicKeywords": ["bakery", "bakehouse", "cake shop", "pastries", "confectioner"]
+    },
+    "corporate_office": {
+      "displayName": "Corporate Office",
+      "familyCategories": ["corporate office", "headquarters", "company", "business center", "holding company"],
+      "nameHeuristicKeywords": ["corporate office", "head office", "corporate headquarters", "group of companies"]
+    },
+    "engineering_consultant": {
+      "displayName": "Engineering Consultant",
+      "familyCategories": ["engineering consultant", "mechanical engineer", "civil engineer", "industrial engineer"],
+      "nameHeuristicKeywords": ["engineering", "engineer", "industries", "manufacturing", "fabrication"]
+    },
+    "stationery_store": {
+      "displayName": "Stationery Store",
+      "familyCategories": ["stationery store", "book store", "office supply store"],
+      "nameHeuristicKeywords": ["stationery", "stationers", "book depot", "book store", "books"]
+    },
+    "printing_service": {
+      "displayName": "Printing Service",
+      "familyCategories": ["commercial printer", "digital printing service", "print shop", "copy shop"],
+      "nameHeuristicKeywords": ["printing", "printers", "flex print", "graphics print", "xerox", "photocopy"]
+    },
+    "hardware_store": {
+      "displayName": "Hardware Store",
+      "familyCategories": ["hardware store", "building materials supplier", "paint store", "sanitary store"],
+      "nameHeuristicKeywords": ["hardware", "sanitaryware", "paints", "timber", "plywood", "glass aluminium"]
+    },
+    "electronics_store": {
+      "displayName": "Electronics Store",
+      "familyCategories": ["electronics store", "appliance store", "cell phone store", "home audio store"],
+      "nameHeuristicKeywords": ["electronics", "mobile shop", "gadgets", "appliances", "telecom"]
+    },
+    "tailor": {
+      "displayName": "Tailor",
+      "familyCategories": ["tailor", "custom tailor", "dressmaker", "designer boutique"],
+      "nameHeuristicKeywords": ["tailor", "tailoring", "boutique", "stitching", "couture", "darzi"]
+    }
+  },
+  "genericBlocklist": [
+    "services",
+    "service",
+    "business_services",
+    "business services",
+    "general",
+    "professional_services",
+    "professional services",
+    "local_services",
+    "local services",
+    "business",
+    "local_business",
+    "local business",
+    "establishment",
+    "point_of_interest",
+    "premise",
+    "subpremise",
+    "store",
+    "food",
+    "health",
+    "finance",
+    "general_contractor",
+    "unspecified"
+  ]
+}
