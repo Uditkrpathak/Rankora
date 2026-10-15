@@ -37,7 +37,7 @@ export const ChatRequestSchema = z.object({
         content: z
           .string()
           .transform(sanitizeChatString)
-          .pipe(z.string().max(500, { message: 'History turn must not exceed 500 characters.' })),
+          .transform((str) => (str.length > 2000 ? str.slice(0, 2000) : str)),
       })
     )
     .max(6, { message: 'Conversation history is limited to the last 6 turns.' })

@@ -143,7 +143,7 @@ export const BusinessChatbot: React.FC = () => {
     try {
       const history = messages.slice(-6).map((m) => ({
         role: m.role,
-        content: m.content,
+        content: m.content.length > 1000 ? m.content.slice(0, 1000) : m.content,
       }));
 
       const res = await sendChatMessage({
