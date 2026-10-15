@@ -29,7 +29,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRoles,
-  requireVerifiedEmail = true
+  requireVerifiedEmail = false
 }) => {
   const location = useLocation();
   const dispatch = useDispatch();

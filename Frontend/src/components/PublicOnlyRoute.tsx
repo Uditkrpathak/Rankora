@@ -32,9 +32,6 @@ export const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({ children }) =>
   }
 
   if (isAuthenticated) {
-    if (user?.status === 'PENDING_VERIFICATION' || !user?.isEmailVerified) {
-      return <Navigate to="/verify-email" replace />;
-    }
     const destination = (location.state as any)?.from?.pathname || '/dashboard';
     return <Navigate to={destination} replace />;
   }

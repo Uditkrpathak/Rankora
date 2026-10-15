@@ -94,6 +94,17 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
 
   return (
     <>
+      {user && !user.isEmailVerified && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-800 flex items-center justify-between z-50">
+          <div className="flex items-center gap-2 truncate">
+            <span className="font-bold flex-shrink-0">⚠️ Action required:</span>
+            <span className="truncate">Your email ({user.email}) is unverified. Verify your email to activate full workspace scanning.</span>
+          </div>
+          <Link to="/verify-email" className="font-bold text-amber-900 underline hover:text-amber-950 ml-4 flex-shrink-0">
+            Verify email →
+          </Link>
+        </div>
+      )}
       <header className="sticky top-0 z-40 w-full h-14 bg-white border-b border-slate-200 transition-all">
         <div className="w-full px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-6">
           {/* Left: Brand Logo & Desktop Nav Links with Generous Spacing */}
