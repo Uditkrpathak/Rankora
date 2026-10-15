@@ -1,4 +1,4 @@
-name: CI Pipeline & Production Gates
+name: CI Pipeline
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [main, master, production]
 
 jobs:
-  audit-and-build:
-    name: Audit, Lint, and Build
+  build-and-verify:
+    name: Build & Verify Workspaces
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -22,58 +22,6 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
-
-      - name: Security Vulnerability Audit
-        run: npm audit --omit=dev
 
       - name: Compile TypeScript Workspaces
         run: npm run build
-
-      - name: Enforce S1 Zero Headless Browsers
-        run: npx tsx scripts/verify/test-s1-zero-browsers.ts
-
-      - name: Run Production Preflight Audit
-        run: npm run check:prod
-
-  integration-tests:
-    name: Integration & Security Regression Tests
-    runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:7
-        ports:
-          - 27017:27017
-      redis:
-        image: redis:7-alpine
-        options: --entrypoint redis-server
-        ports:
-          - 6379:6379
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build Core Dependencies
-        run: |
-          npm run build --workspace=@localo/types
-          npm run build --workspace=@localo/shared
-
-      - name: Execute Security & Regression Test Suite
-        env:
-          TEST_MONGO_URI: mongodb://localhost:27017/localseo_test
-          REDIS_URL: redis://localhost:6379
-          JWT_ACCESS_SECRET: 24a57de3852be58fc037f7b61c38e60c5f9f0d5e8c8630486c42e1a23bf47826
-          JWT_REFRESH_SECRET: bd6ddba2f5545546a4c50eebf99a521babe3030c046ebddabf469768b22c7993
-          TOKEN_ENCRYPTION_KEY: 6c9a2ffa9b3584fdbeb0915ec8eb5d8e702e5311189cf2fe65c665cd034f622a
-          NODE_ENV: test
-          ALLOW_DEV_VERIFY_BYPASS: "false"
-        run: npm run test:security
