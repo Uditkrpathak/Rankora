@@ -253,7 +253,7 @@ async function enrichTopicsWithAI(reviews: IStoredReview[], locationName: string
   if (reviewTexts.length === 0) return null;
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch(`${ENV.AI_BASE_URL}/chat/completions`, {
       method: 'POST',
       signal: AbortSignal.timeout(25000),
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ENV.OPENAI_API_KEY}` },

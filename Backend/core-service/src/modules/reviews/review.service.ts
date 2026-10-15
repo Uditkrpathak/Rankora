@@ -563,7 +563,7 @@ Return JSON format with exactly 3 keys:
 2. "friendly": Warm, enthusiastic, personal, empathetic tone with natural warmth in the target language.
 3. "seo_optimized": Naturally incorporates local SEO keywords like "${category} in ${city}" and "${businessName}" into the reply for Google ranking relevance without sounding keyword-stuffed in the target language.`;
 
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        const res = await fetch(`${ENV.AI_BASE_URL}/chat/completions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ENV.OPENAI_API_KEY}` },
           body: JSON.stringify({

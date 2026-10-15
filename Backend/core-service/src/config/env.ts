@@ -52,6 +52,7 @@ export interface IEnvConfig {
   readonly FRONTEND_URL: string;
   readonly APP_URL: string;
   readonly AI_PROVIDER: string;
+  readonly AI_BASE_URL: string;
   readonly AI_MODEL: string;
   readonly OPENAI_API_KEY: string;
   readonly AI_TIMEOUT_MS: number;
@@ -139,7 +140,8 @@ export const ENV: IEnvConfig = {
   APP_URL: process.env.APP_URL || 'http://localhost:5000',
 
   AI_PROVIDER: process.env.AI_PROVIDER || process.env.LLM_PROVIDER || (isProd ? 'openai' : 'stub'),
-  AI_MODEL: process.env.AI_MODEL || process.env.LLM_MODEL_FAST || 'gpt-4o-mini',
+  AI_BASE_URL: (process.env.AI_BASE_URL || process.env.OPENAI_BASE_URL || (process.env.OPENAI_API_KEY?.startsWith('gsk_') ? 'https://api.groq.com/openai/v1' : 'https://api.openai.com/v1')).replace(/\/+$/, ''),
+  AI_MODEL: process.env.AI_MODEL || process.env.LLM_MODEL_FAST || (process.env.OPENAI_API_KEY?.startsWith('gsk_') ? 'qwen/qwen3.8-27b' : 'gpt-4o-mini'),
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || process.env.LLM_API_KEY || '',
   AI_TIMEOUT_MS: parseInt(process.env.AI_TIMEOUT_MS || '10000', 10),
   AI_INPUT_TOKEN_PRICE_PER_M: parseFloat(process.env.AI_INPUT_TOKEN_PRICE_PER_M || '0.15'),

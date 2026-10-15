@@ -95,7 +95,7 @@ export class OpenAiLlmProvider implements LlmProvider {
         const controller = new AbortController();
         timer = setTimeout(() => controller.abort(), remainingTimeMs);
 
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        const res = await fetch(`${ENV.AI_BASE_URL}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

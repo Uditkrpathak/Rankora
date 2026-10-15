@@ -17,7 +17,7 @@ export class OpenAiProvider implements AiProvider {
 
   public async generate(request: AiGenerationRequest): Promise<AiGenerationResult> {
     if (!this.apiKey) throw new AiProviderError('OpenAI is selected but OPENAI_API_KEY is not configured.', 'AI_PROVIDER_NOT_CONFIGURED');
-    const response = await this.fetchImpl('https://api.openai.com/v1/chat/completions', {
+    const response = await this.fetchImpl(`${ENV.AI_BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
       signal: AbortSignal.timeout(20000),
