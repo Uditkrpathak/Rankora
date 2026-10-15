@@ -83,7 +83,8 @@ export const GeoGridHeatmap: React.FC<GeoGridHeatmapProps> = ({
 
     const map = L.map(elementRef.current, { zoomControl: false, scrollWheelZoom: true });
     L.control.zoom({ position: 'topright' }).addTo(map);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const tileUrl = (import.meta as any).env?.VITE_MAP_TILE_URL || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    L.tileLayer(tileUrl, {
       maxZoom: 19,
       className: 'clean-light-map-tiles',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',

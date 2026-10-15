@@ -6,7 +6,11 @@ function getCookie(name: string): string | null {
   return matches ? decodeURIComponent(matches[1]) : null;
 }
 
-const rawBaseUrl = ((import.meta as any).env?.VITE_API_URL || '').replace(/\/+$/, '');
+const rawBaseUrl = (
+  (import.meta as any).env?.VITE_API_BASE_URL ||
+  (import.meta as any).env?.VITE_API_URL ||
+  ''
+).replace(/\/+$/, '');
 
 const baseQuery = fetchBaseQuery({
   baseUrl: rawBaseUrl ? `${rawBaseUrl}/` : '/',
