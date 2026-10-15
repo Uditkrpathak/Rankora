@@ -47,17 +47,17 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-black text-white flex flex-col md:flex-row selection:bg-white selection:text-black">
       {/* ── Sidebar ─────────────────────────────────────────────────── */}
-      <aside className="w-full md:w-64 bg-slate-900/90 border-r border-slate-800/80 flex flex-col flex-shrink-0 z-20">
-        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-          <Link to="/admin" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center font-bold text-white shadow-lg shadow-brand-600/30">
+      <aside className="w-full md:w-64 bg-[#09090b] border-r border-[#27272a] flex flex-col flex-shrink-0 z-20">
+        <div className="p-5 border-b border-[#27272a] flex items-center justify-between">
+          <Link to="/admin" className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-black text-sm shadow-xs">
               R
             </div>
             <div>
               <span className="text-sm font-bold tracking-tight text-white block">Rankora Admin</span>
-              <span className="text-[10px] text-brand-400 font-semibold uppercase tracking-wider block">
+              <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
                 {user?.platformRole === 'SUPER_ADMIN' ? 'Super Administrator' : 'Administrator'}
               </span>
             </div>
@@ -65,7 +65,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </div>
 
         <nav className="p-3 space-y-1 flex-1">
-          <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          <div className="px-3 py-2 text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">
             Management
           </div>
           {navItems.map((item) => {
@@ -80,25 +80,25 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 to={item.to}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-brand-600/15 text-brand-400 border border-brand-500/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    ? 'bg-white text-black shadow-xs font-bold'
+                    : 'text-neutral-400 hover:text-white hover:bg-[#18181b]'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-brand-400' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-neutral-400'}`} />
                   <span>{item.label}</span>
                 </div>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-brand-400" />}
+                {isActive && <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />}
               </Link>
             );
           })}
         </nav>
 
         {/* ── Bottom App Links ───────────────────────────────────────── */}
-        <div className="p-3 border-t border-slate-800/80 space-y-1">
+        <div className="p-3 border-t border-[#27272a] space-y-1">
           <Link
             to="/dashboard"
-            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition"
+            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#18181b] transition"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Open User Dashboard</span>
@@ -106,7 +106,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition cursor-pointer text-left"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-[#18181b] transition cursor-pointer text-left"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
@@ -114,19 +114,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </div>
 
         {/* ── Admin Badge ────────────────────────────────────────────── */}
-        <div className="p-3.5 bg-slate-950/50 border-t border-slate-800/60 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-xs text-white">
+        <div className="p-3.5 bg-black border-t border-[#27272a] flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-700 flex items-center justify-center font-bold text-xs text-white">
             {user?.name?.[0]?.toUpperCase() || 'A'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
-            <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
+            <p className="text-[10px] text-neutral-500 font-mono truncate">{user?.email}</p>
           </div>
         </div>
       </aside>
 
       {/* ── Main Content Area ──────────────────────────────────────── */}
-      <main className="flex-1 min-w-0 overflow-y-auto">
+      <main className="flex-1 min-w-0 overflow-y-auto bg-black">
         <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
           {children}
         </div>

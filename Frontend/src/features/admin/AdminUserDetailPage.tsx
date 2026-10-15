@@ -133,8 +133,8 @@ export const AdminUserDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="p-12 text-center text-xs text-slate-400 space-y-3">
-          <div className="w-8 h-8 rounded-full border-2 border-brand-500/20 border-t-brand-500 animate-spin mx-auto" />
+        <div className="p-12 text-center text-xs font-mono text-neutral-400 space-y-3">
+          <div className="w-8 h-8 rounded-full border-2 border-neutral-700 border-t-white animate-spin mx-auto" />
           <p>Loading user profile and limits...</p>
         </div>
       </AdminLayout>
@@ -144,10 +144,10 @@ export const AdminUserDetailPage: React.FC = () => {
   if (isError || !user) {
     return (
       <AdminLayout>
-        <div className="p-8 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center space-y-3">
-          <AlertCircle className="w-6 h-6 mx-auto text-rose-400" />
-          <p className="font-semibold">User not found or access restricted.</p>
-          <Link to="/admin/users" className="text-white underline hover:no-underline">
+        <div className="p-8 rounded-2xl bg-[#09090b] border border-[#27272a] text-neutral-300 font-mono text-xs text-center space-y-3">
+          <AlertCircle className="w-6 h-6 mx-auto text-neutral-400" />
+          <p className="font-bold text-white">User not found or access restricted.</p>
+          <Link to="/admin/users" className="text-white underline hover:no-underline font-mono">
             ← Return to User Directory
           </Link>
         </div>
@@ -264,22 +264,22 @@ export const AdminUserDetailPage: React.FC = () => {
     <AdminLayout>
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-slate-900 border border-brand-500/40 text-brand-300 text-xs shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3">
-          <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-neutral-900 border border-neutral-700 text-white text-xs font-mono shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3">
+          <CheckCircle2 className="w-4 h-4 text-white flex-shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Confirmation Dialog Modal */}
       {confirmModal.open && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="max-w-md w-full p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
-            <h3 className="text-sm font-bold text-white">{confirmModal.title}</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">{confirmModal.description}</p>
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="max-w-md w-full p-6 rounded-2xl bg-[#09090b] border border-[#27272a] shadow-2xl space-y-4 font-mono">
+            <h3 className="text-sm font-bold uppercase text-white">{confirmModal.title}</h3>
+            <p className="text-xs text-neutral-400 leading-relaxed">{confirmModal.description}</p>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setConfirmModal({ ...confirmModal, open: false })}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold transition cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-[#18181b] hover:bg-neutral-800 text-xs text-neutral-300 font-semibold border border-[#27272a] transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -288,7 +288,7 @@ export const AdminUserDetailPage: React.FC = () => {
                   setConfirmModal({ ...confirmModal, open: false });
                   await confirmModal.action();
                 }}
-                className="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs text-white font-bold transition cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-200 text-xs text-black font-bold transition cursor-pointer"
               >
                 Confirm & Apply
               </button>
@@ -298,29 +298,29 @@ export const AdminUserDetailPage: React.FC = () => {
       )}
 
       {/* ── Header ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#27272a]">
         <div className="flex items-center gap-3">
           <Link
             to="/admin/users"
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition"
+            className="p-2 rounded-xl bg-[#121214] hover:bg-neutral-800 border border-[#27272a] text-neutral-400 hover:text-white transition"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white tracking-tight">{user.name}</h1>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+              <h1 className="text-xl font-bold font-mono text-white tracking-tight">{user.name}</h1>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border ${
                 user.status === 'SUSPENDED'
-                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                  : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  ? 'bg-neutral-950 text-neutral-400 border-neutral-800'
+                  : 'bg-neutral-900 text-white border-neutral-700'
               }`}>
                 {user.status}
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-white text-black">
                 {user.planName}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">{user.email}</p>
+            <p className="text-xs text-neutral-400 mt-0.5 font-mono">{user.email}</p>
           </div>
         </div>
 
@@ -329,19 +329,19 @@ export const AdminUserDetailPage: React.FC = () => {
           <button
             onClick={handleResetUsage}
             disabled={isResettingUsage}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 font-semibold transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#121214] hover:bg-neutral-800 border border-[#27272a] text-xs text-neutral-300 font-mono font-semibold transition cursor-pointer"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+            <RotateCcw className="w-3.5 h-3.5 text-white" />
             <span>Reset Usage</span>
           </button>
 
           <button
             onClick={handleToggleStatus}
             disabled={isStatusSaving}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-semibold border transition cursor-pointer ${
               user.status === 'SUSPENDED'
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                : 'bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30'
+                ? 'bg-white hover:bg-neutral-200 text-black border-white'
+                : 'bg-[#18181b] hover:bg-neutral-800 text-neutral-200 border-[#27272a]'
             }`}
           >
             <ShieldAlert className="w-3.5 h-3.5" />
@@ -351,7 +351,7 @@ export const AdminUserDetailPage: React.FC = () => {
       </div>
 
       {/* ── Navigation Tabs ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 border-b border-slate-800/80 pb-px overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-[#27272a] pb-px overflow-x-auto">
         {[
           { key: 'overview', label: 'Overview', icon: User },
           { key: 'limits', label: 'Limits & Overrides', icon: Sliders },
@@ -365,10 +365,10 @@ export const AdminUserDetailPage: React.FC = () => {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-mono font-semibold border-b-2 transition cursor-pointer whitespace-nowrap ${
                 isActive
-                  ? 'border-brand-500 text-brand-400 bg-brand-500/5'
-                  : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                  ? 'border-white text-white bg-white/5 font-bold'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200 hover:border-neutral-700'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -381,11 +381,11 @@ export const AdminUserDetailPage: React.FC = () => {
       {/* ── Tab Content ─────────────────────────────────────────────── */}
       {/* 1. OVERVIEW TAB */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-mono">
           <div className="lg:col-span-2 space-y-6">
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/80 shadow-xl space-y-5">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-brand-400" />
+            <div className="p-6 rounded-2xl bg-[#09090b] border border-[#27272a] shadow-xl space-y-5">
+              <h2 className="text-sm font-bold uppercase text-white flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-white" />
                 <span>Current Usage vs Effective Limits</span>
               </h2>
 
@@ -418,22 +418,20 @@ export const AdminUserDetailPage: React.FC = () => {
                 ].map((item) => {
                   const percent = Math.min(100, Math.round((item.used / item.limit) * 100));
                   return (
-                    <div key={item.title} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
+                    <div key={item.title} className="p-4 rounded-xl bg-black border border-[#27272a] space-y-2">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-slate-300">{item.title}</span>
-                        <span className="text-[11px] font-mono text-slate-400">
-                          <strong>{item.used}</strong> / {item.limit} {item.unit}
+                        <span className="font-bold text-white">{item.title}</span>
+                        <span className="text-[11px] text-neutral-400">
+                          <strong className="text-white">{item.used}</strong> / {item.limit}
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
                         <div
-                          className={`h-full transition-all ${
-                            percent >= 90 ? 'bg-rose-500' : percent >= 70 ? 'bg-amber-500' : 'bg-brand-500'
-                          }`}
+                          className="h-full bg-white transition-all"
                           style={{ width: `${percent}%` }}
                         />
                       </div>
-                      <p className="text-[10px] text-slate-500 text-right">{percent}% quota used</p>
+                      <p className="text-[10px] text-neutral-500 text-right">{percent}% quota used</p>
                     </div>
                   );
                 })}
@@ -442,32 +440,32 @@ export const AdminUserDetailPage: React.FC = () => {
           </div>
 
           {/* User Meta Card */}
-          <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/80 shadow-xl space-y-4">
-            <h2 className="text-sm font-bold text-white">Account Details</h2>
+          <div className="p-6 rounded-2xl bg-[#09090b] border border-[#27272a] shadow-xl space-y-4 font-mono">
+            <h2 className="text-sm font-bold uppercase text-white">Account Details</h2>
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between py-1.5 border-b border-slate-800">
-                <span className="text-slate-400">Platform Role</span>
-                <span className="font-bold text-white font-mono">{user.platformRole}</span>
+              <div className="flex justify-between py-1.5 border-b border-[#18181b]">
+                <span className="text-neutral-500">Platform Role</span>
+                <span className="font-bold text-white">{user.platformRole}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-slate-800">
-                <span className="text-slate-400">Account Status</span>
-                <span className="font-semibold text-white">{user.status}</span>
+              <div className="flex justify-between py-1.5 border-b border-[#18181b]">
+                <span className="text-neutral-500">Account Status</span>
+                <span className="font-bold text-white">{user.status}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-slate-800">
-                <span className="text-slate-400">Plan Started</span>
-                <span className="text-slate-300">{user.planStartedAt ? new Date(user.planStartedAt).toLocaleDateString() : 'N/A'}</span>
+              <div className="flex justify-between py-1.5 border-b border-[#18181b]">
+                <span className="text-neutral-500">Plan Started</span>
+                <span className="text-neutral-300">{user.planStartedAt ? new Date(user.planStartedAt).toLocaleDateString() : 'N/A'}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-slate-800">
-                <span className="text-slate-400">Plan Expires</span>
-                <span className="text-slate-300">{user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : 'Never / Auto-renew'}</span>
+              <div className="flex justify-between py-1.5 border-b border-[#18181b]">
+                <span className="text-neutral-500">Plan Expires</span>
+                <span className="text-neutral-300">{user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : 'Never / Auto'}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-slate-800">
-                <span className="text-slate-400">Last Login</span>
-                <span className="text-slate-300">{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}</span>
+              <div className="flex justify-between py-1.5 border-b border-[#18181b]">
+                <span className="text-neutral-500">Last Login</span>
+                <span className="text-neutral-300">{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-slate-800">
-                <span className="text-slate-400">Joined</span>
-                <span className="text-slate-300">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
+              <div className="flex justify-between py-1.5 border-b border-[#18181b]">
+                <span className="text-neutral-500">Joined</span>
+                <span className="text-neutral-300">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -476,10 +474,10 @@ export const AdminUserDetailPage: React.FC = () => {
 
       {/* 2. LIMITS TAB */}
       {activeTab === 'limits' && (
-        <div className="max-w-3xl p-6 rounded-2xl bg-slate-900/80 border border-slate-800/80 shadow-xl space-y-6">
+        <div className="max-w-3xl p-6 rounded-2xl bg-[#09090b] border border-[#27272a] shadow-xl space-y-6 font-mono">
           <div>
-            <h2 className="text-sm font-bold text-white">Custom Resource Limit Overrides</h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <h2 className="text-sm font-bold uppercase text-white">Custom Resource Limit Overrides</h2>
+            <p className="text-xs text-neutral-400 mt-1">
               Toggle "Use Plan Default" to automatically inherit limits from the user's plan ({user.planName}), or enter custom limits.
             </p>
           </div>
@@ -494,21 +492,21 @@ export const AdminUserDetailPage: React.FC = () => {
             ].map((f) => {
               const isDefault = useDefaultMap[f.key];
               return (
-                <div key={f.key} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div key={f.key} className="p-4 rounded-xl bg-black border border-[#27272a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-white block">{f.label}</label>
-                    <span className="text-[11px] text-slate-400">
-                      Plan Default: <strong className="text-slate-300">{f.def}</strong> {f.unit}
+                    <label className="text-xs font-bold text-white block">{f.label}</label>
+                    <span className="text-[11px] text-neutral-400">
+                      Plan Default: <strong className="text-neutral-200">{f.def}</strong> {f.unit}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
+                    <label className="flex items-center gap-1.5 text-xs text-neutral-300 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={isDefault}
                         onChange={(e) => setUseDefaultMap({ ...useDefaultMap, [f.key]: e.target.checked })}
-                        className="rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500"
+                        className="rounded border-neutral-700 bg-neutral-900 text-white focus:ring-0"
                       />
                       <span>Use Plan Default</span>
                     </label>
@@ -519,7 +517,7 @@ export const AdminUserDetailPage: React.FC = () => {
                         min="1"
                         value={customLimits[f.key] ?? f.def}
                         onChange={(e) => setCustomLimits({ ...customLimits, [f.key]: parseInt(e.target.value) || 0 })}
-                        className="w-24 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-bold text-white text-right outline-none focus:ring-2 focus:ring-brand-500"
+                        className="w-24 px-3 py-1.5 rounded-xl bg-[#121214] border border-[#27272a] text-xs font-bold text-white text-right outline-none focus:border-neutral-500 font-mono"
                       />
                     )}
                   </div>
@@ -532,7 +530,7 @@ export const AdminUserDetailPage: React.FC = () => {
             <button
               onClick={handleSaveLimits}
               disabled={isLimitsSaving}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-600/20 transition cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{isLimitsSaving ? 'Saving Overrides...' : 'Save Limits'}</span>
@@ -543,10 +541,10 @@ export const AdminUserDetailPage: React.FC = () => {
 
       {/* 3. PERMISSIONS TAB */}
       {activeTab === 'permissions' && (
-        <div className="max-w-3xl p-6 rounded-2xl bg-slate-900/80 border border-slate-800/80 shadow-xl space-y-6">
+        <div className="max-w-3xl p-6 rounded-2xl bg-[#09090b] border border-[#27272a] shadow-xl space-y-6 font-mono">
           <div>
-            <h2 className="text-sm font-bold text-white">Feature Access Permissions</h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <h2 className="text-sm font-bold uppercase text-white">Feature Access Permissions</h2>
+            <p className="text-xs text-neutral-400 mt-1">
               Enable or restrict specific platform features for this user account.
             </p>
           </div>
@@ -563,21 +561,21 @@ export const AdminUserDetailPage: React.FC = () => {
             ].map((p) => {
               const isChecked = permsState[p.key] ?? false;
               return (
-                <div key={p.key} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
+                <div key={p.key} className="p-4 rounded-xl bg-black border border-[#27272a] flex items-center justify-between gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-white block">{p.label}</label>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{p.desc}</p>
+                    <label className="text-xs font-bold text-white block">{p.label}</label>
+                    <p className="text-[11px] text-neutral-400 mt-0.5">{p.desc}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setPermsState({ ...permsState, [p.key]: !isChecked })}
                     className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      isChecked ? 'bg-brand-600' : 'bg-slate-800'
+                      isChecked ? 'bg-white' : 'bg-neutral-800'
                     }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        isChecked ? 'translate-x-5' : 'translate-x-0'
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${
+                        isChecked ? 'translate-x-5 bg-black' : 'translate-x-0 bg-neutral-400'
                       }`}
                     />
                   </button>
@@ -590,7 +588,7 @@ export const AdminUserDetailPage: React.FC = () => {
             <button
               onClick={handleSavePermissions}
               disabled={isPermsSaving}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-600/20 transition cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{isPermsSaving ? 'Saving Permissions...' : 'Save Permissions'}</span>
@@ -601,19 +599,19 @@ export const AdminUserDetailPage: React.FC = () => {
 
       {/* 4. PLAN TAB */}
       {activeTab === 'plan' && (
-        <div className="max-w-2xl p-6 rounded-2xl bg-slate-900/80 border border-slate-800/80 shadow-xl space-y-6">
+        <div className="max-w-2xl p-6 rounded-2xl bg-[#09090b] border border-[#27272a] shadow-xl space-y-6 font-mono">
           <div>
-            <h2 className="text-sm font-bold text-white">Manage Subscription Plan</h2>
-            <p className="text-xs text-slate-400 mt-1">Assign an administrative plan tier and set expiration bounds.</p>
+            <h2 className="text-sm font-bold uppercase text-white">Manage Subscription Plan</h2>
+            <p className="text-xs text-neutral-400 mt-1">Assign an administrative plan tier and set expiration bounds.</p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Select Plan Tier</label>
+              <label className="block text-xs font-bold text-neutral-200 mb-1.5">Select Plan Tier</label>
               <select
                 value={selectedPlanName}
                 onChange={(e) => setSelectedPlanName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-[#27272a] text-xs text-white outline-none focus:border-neutral-500"
               >
                 <option value="Trial">Trial (14-day evaluation, 10 locations)</option>
                 <option value="Starter">Starter (3 locations, 50 credits)</option>
@@ -623,18 +621,18 @@ export const AdminUserDetailPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Plan Expiry Date (Optional)</label>
+              <label className="block text-xs font-bold text-neutral-200 mb-1.5">Plan Expiry Date (Optional)</label>
               <input
                 type="date"
                 value={planExpiresAt}
                 onChange={(e) => setPlanExpiresAt(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-black border border-[#27272a] text-xs text-white outline-none focus:border-neutral-500"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Leave empty for open-ended access.</p>
+              <p className="text-[10px] text-neutral-500 mt-1">Leave empty for open-ended access.</p>
             </div>
 
             {user.assignedByUserId && (
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 text-xs text-slate-400">
+              <div className="p-3 rounded-xl bg-black border border-[#27272a] text-xs text-neutral-400">
                 Assigned by Admin ID: <strong className="text-white font-mono">{user.assignedByUserId}</strong>
               </div>
             )}
@@ -644,7 +642,7 @@ export const AdminUserDetailPage: React.FC = () => {
             <button
               onClick={handleSavePlan}
               disabled={isPlanSaving}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-600/20 transition cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{isPlanSaving ? 'Updating Plan...' : 'Apply Plan'}</span>
@@ -655,25 +653,25 @@ export const AdminUserDetailPage: React.FC = () => {
 
       {/* 5. ACTIVITY / AUDIT LOG TAB */}
       {activeTab === 'activity' && (
-        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/80 shadow-xl space-y-4">
+        <div className="p-6 rounded-2xl bg-[#09090b] border border-[#27272a] shadow-xl space-y-4 font-mono">
           <div>
-            <h2 className="text-sm font-bold text-white">User Audit History</h2>
-            <p className="text-xs text-slate-400 mt-1">Immutable ledger of administrative actions applied to this user.</p>
+            <h2 className="text-sm font-bold uppercase text-white">User Audit History</h2>
+            <p className="text-xs text-neutral-400 mt-1">Immutable ledger of administrative actions applied to this user.</p>
           </div>
 
           {auditHistory.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-500">
+            <div className="p-8 text-center text-xs text-neutral-500">
               No audit logs recorded for this account yet.
             </div>
           ) : (
-            <div className="divide-y divide-slate-800/60">
+            <div className="divide-y divide-[#18181b]">
               {auditHistory.map((item: any) => (
                 <div key={item._id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                   <div>
-                    <span className="font-semibold text-white">{item.action}</span>
-                    <span className="text-slate-500 ml-2">by {item.actorRole || 'ADMIN'}</span>
+                    <span className="font-bold text-white">{item.action}</span>
+                    <span className="text-neutral-500 ml-2">by {item.actorRole || 'ADMIN'}</span>
                   </div>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-neutral-400">
                     {new Date(item.createdAt).toLocaleString()}
                   </span>
                 </div>

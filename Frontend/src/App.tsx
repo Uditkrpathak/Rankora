@@ -184,15 +184,15 @@ export const App: React.FC = () => {
         <Route path="/competitors" element={<ProtectedRoute><CompetitorBenchmarkPage /></ProtectedRoute>} />
 
         {/* ── Admin Management Routes (ADMIN & SUPER_ADMIN) ─────────── */}
-        <Route path="/admin" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminLayout><AdminDashboardPage /></AdminLayout></RoleRoute>} />
-        <Route path="/admin/users" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminLayout><AdminUsersPage /></AdminLayout></RoleRoute>} />
-        <Route path="/admin/users/:id" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminLayout><AdminUserDetailPage /></AdminLayout></RoleRoute>} />
+        <Route path="/admin" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminDashboardPage /></RoleRoute>} />
+        <Route path="/admin/users" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminUsersPage /></RoleRoute>} />
+        <Route path="/admin/users/:id" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminUserDetailPage /></RoleRoute>} />
 
         {/* ── Super Admin Only Routes (SUPER_ADMIN) ──────────────────── */}
-        <Route path="/admin/admins" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminAdminsPage /></AdminLayout></RoleRoute>} />
-        <Route path="/admin/admins/:id" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminAdminDetailPage /></AdminLayout></RoleRoute>} />
-        <Route path="/admin/plans" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminPlansPage /></AdminLayout></RoleRoute>} />
-        <Route path="/admin/audit-log" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminAuditLogPage /></AdminLayout></RoleRoute>} />
+        <Route path="/admin/admins" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminAdminsPage /></RoleRoute>} />
+        <Route path="/admin/admins/:id" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminAdminDetailPage /></RoleRoute>} />
+        <Route path="/admin/plans" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminPlansPage /></RoleRoute>} />
+        <Route path="/admin/audit-log" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminAuditLogPage /></RoleRoute>} />
 
         {/* ── Fallback Catch-All ────────────────────────────────────────── */}
         <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />

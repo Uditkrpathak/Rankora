@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useListLocationsQuery } from '../../store/api/locationApi';
@@ -120,7 +121,8 @@ export const BusinessChatbot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isSending]);
 
-  if (!isAuthenticated) return null;
+  const location = useLocation();
+  if (!isAuthenticated || location.pathname.startsWith('/admin')) return null;
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputMessage).trim();
