@@ -278,16 +278,19 @@ export const LocationsPage: React.FC = () => {
         )}
 
         {/* Page Title & Add Button */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', margin: 0 }}>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               My Business Profiles
             </h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Manage your local SEO locations, track rank positions, and monitor profile health.
+            </p>
           </div>
 
           <Link
             to="/locations/add"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs shadow-sm transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-sm hover:shadow-md transition active:scale-95 shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add Business Profile</span>
@@ -297,7 +300,7 @@ export const LocationsPage: React.FC = () => {
         {/* 1. Plan Counters Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* All active */}
-          <div className="bg-white rounded-2xl border border-brand-200/80 p-5 shadow-xs relative overflow-hidden">
+          <div className="bg-white rounded-2xl border border-brand-200/80 p-5 shadow-xs relative overflow-hidden group hover:shadow-md transition">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">All Active Profiles</span>
               <span className="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold border border-brand-200">
@@ -312,24 +315,24 @@ export const LocationsPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Optimization */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+          {/* Connected Profiles */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs group hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Optimization Shield</span>
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Connected Accounts</span>
               <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                Auto-Pilot
+                Ready
               </span>
             </div>
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
-              {counters.optimizationSlotsUsed}
+              {counters.activeProfiles}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-medium">
-              Profiles with AI Protection
+              Live tracked listings
             </p>
           </div>
 
           {/* Pinned */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs group hover:shadow-md transition">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pinned Profiles</span>
             </div>
@@ -342,7 +345,7 @@ export const LocationsPage: React.FC = () => {
           </div>
 
           {/* Inactive */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs group hover:shadow-md transition">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Inactive / Paused</span>
             </div>
@@ -355,40 +358,19 @@ export const LocationsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. Toolbar & Bulk Selector Row (Matching Screenshot 3) */}
-        <div
-          style={{
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '14px',
-            padding: '12px 18px',
-            marginBottom: '20px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '14px',
-          }}
-        >
+        {/* 2. Toolbar & Bulk Selector Row */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 mb-6 shadow-xs flex flex-wrap items-center justify-between gap-3.5">
           {/* Left: Bulk Checkbox + Search + Filters */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', flex: 1 }}>
+          <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[260px]">
             {/* Search Box */}
-            <div style={{ position: 'relative', width: '200px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <div className="relative w-52">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search profiles"
+                placeholder="Search profiles..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '7px 10px 7px 32px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '12px',
-                  color: '#0f172a',
-                  outline: 'none',
-                }}
+                className="w-full pl-8.5 pr-3 py-1.5 rounded-xl border border-slate-200/90 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition shadow-2xs"
               />
             </div>
 
@@ -396,17 +378,9 @@ export const LocationsPage: React.FC = () => {
             <select
               value={tagFilter}
               onChange={(e) => setTagFilter(e.target.value)}
-              style={{
-                padding: '7px 10px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '12px',
-                color: '#334155',
-                background: '#ffffff',
-                cursor: 'pointer',
-              }}
+              className="px-3 py-1.5 rounded-xl border border-slate-200/90 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition cursor-pointer shadow-2xs"
             >
-              <option value="">Tag</option>
+              <option value="">Tag (All)</option>
               <option value="agency">Agency</option>
               <option value="retail">Retail</option>
             </select>
@@ -415,48 +389,31 @@ export const LocationsPage: React.FC = () => {
             <select
               value={googleAccountFilter}
               onChange={(e) => setGoogleAccountFilter(e.target.value)}
-              style={{
-                padding: '7px 10px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '12px',
-                color: '#334155',
-                background: '#ffffff',
-                cursor: 'pointer',
-              }}
+              className="px-3 py-1.5 rounded-xl border border-slate-200/90 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition cursor-pointer shadow-2xs"
             >
               <option value="">Google account</option>
             </select>
 
             {/* Select X Profiles Checkbox */}
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#475569', cursor: 'pointer', marginLeft: '6px' }}>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 cursor-pointer ml-1 select-none">
               <input
                 type="checkbox"
                 checked={selectedIds.length === locations.length && locations.length > 0}
                 onChange={handleSelectAll}
-                style={{ borderRadius: '4px', cursor: 'pointer' }}
+                className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
               />
               <span>Select {locations.length} profiles</span>
             </label>
           </div>
 
           {/* Right: Sort & Show Keywords Switch */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Sort by</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 font-semibold">Sort by</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                style={{
-                  padding: '7px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: '#1e293b',
-                  background: '#ffffff',
-                  cursor: 'pointer',
-                }}
+                className="px-3 py-1.5 rounded-xl border border-slate-200/90 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition cursor-pointer shadow-2xs"
               >
                 <option value="lastOpened">Last opened</option>
                 <option value="rank_asc">Rank (best first)</option>
@@ -466,13 +423,13 @@ export const LocationsPage: React.FC = () => {
               </select>
             </div>
 
-            {/* Show Keywords Checkbox (Matching Screenshot 3) */}
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', userSelect: 'none', fontSize: '12px', fontWeight: 600, color: '#1e293b' }}>
+            {/* Show Keywords Checkbox */}
+            <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold text-slate-700">
               <input
                 type="checkbox"
                 checked={showKeywords}
                 onChange={(e) => setShowKeywords(e.target.checked)}
-                style={{ accentColor: '#2563eb', width: '15px', height: '15px', cursor: 'pointer' }}
+                className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
               />
               <span>Show keywords</span>
             </label>

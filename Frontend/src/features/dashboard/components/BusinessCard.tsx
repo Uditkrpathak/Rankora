@@ -27,7 +27,7 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
 
   return (
     <>
-      <Card className="w-full bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:shadow-xs hover:border-slate-300 transition duration-150 space-y-4">
+      <Card className="w-full bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-brand-200/80 transition-all duration-200 space-y-5">
         {/* 1. Header with Name, Avatar, Address, Audit Score, View Map, and Optimization switch */}
         <BusinessCardHeader
           location={location}

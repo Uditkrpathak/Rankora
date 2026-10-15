@@ -498,13 +498,14 @@ export const OnboardingWizard: React.FC = () => {
               </div>
             </div>
 
-            {/* Skip Link */}
-            <div>
+            {/* Skip / Direct Entry Button */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
+                type="button"
                 onClick={handleSkipGoogle}
-                className="text-xs text-slate-500 hover:text-slate-800 font-medium underline underline-offset-4 cursor-pointer transition"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
               >
-                Skip this step and enter location manually →
+                <span>Continue without Google (Enter location directly) →</span>
               </button>
             </div>
           </div>

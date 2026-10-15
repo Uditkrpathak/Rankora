@@ -253,20 +253,20 @@ export const BusinessCardHeader: React.FC<BusinessCardHeaderProps> = ({
           </div>
         </div>
 
-        {/* Bottom: View Map Pill Button + QR Review Stand + Optimization Switch */}
+        {/* Bottom: View Map Pill Button + QR Review Stand */}
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             to={`/rank-tracking?locationId=${location._id}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold border border-brand-200/80 transition shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50/90 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200/80 transition-all duration-150 shadow-2xs hover:shadow-xs active:scale-95"
           >
-            <Compass className="w-3.5 h-3.5 text-brand-600" />
+            <Compass className="w-3.5 h-3.5 text-blue-600" />
             <span>View Map</span>
           </Link>
 
           <button
             type="button"
             onClick={() => setBoosterOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/80 transition shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50/90 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/80 transition-all duration-150 shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
           >
             <QrCode className="w-3.5 h-3.5 text-amber-600" />
             <span>Review Stand</span>

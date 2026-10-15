@@ -105,162 +105,95 @@ export const AddBusinessProfilesPage: React.FC = () => {
         {/* Back Link */}
         <Link
           to="/locations"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontSize: '18px',
-            fontWeight: 800,
-            color: '#0f172a',
-            textDecoration: 'none',
-            marginBottom: '24px',
-            letterSpacing: '-0.02em',
-          }}
+          className="inline-flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight hover:text-brand-600 transition mb-6"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={20} />
           <span>Add Business Profiles</span>
         </Link>
 
-        {/* Find your business Card (Matching Screenshots 1 & 2) */}
-        <div
-          style={{
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '20px',
-            padding: '28px 32px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-            marginBottom: '20px',
-          }}
-        >
-          <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+        {/* Find your business Card */}
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs mb-5">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1.5">
             Find your business
           </h2>
-          <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 18px' }}>
-            Search for your business exactly as customers would use its name on Google.
+          <p className="text-xs sm:text-sm text-slate-500 mb-5 leading-relaxed">
+            Search for your business exactly as customers would find its name on Google Maps.
           </p>
 
-          {/* Blue Info Callout Box (Matching Screenshot 1) */}
-          <div
-            style={{
-              background: '#f0f7ff',
-              border: '1px solid #e0eeff',
-              borderRadius: '12px',
-              padding: '14px 18px',
-              fontSize: '13px',
-              color: '#334155',
-              lineHeight: '1.5',
-              marginBottom: '20px',
-            }}
-          >
+          {/* Blue Info Callout Box */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-100/90 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed mb-5 shadow-2xs">
             Want customers to always find you? Connect your Google account to{' '}
             <a
               href="#connect-google"
               onClick={handleConnectGoogle}
-              style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'none' }}
+              className="text-brand-600 font-bold hover:underline cursor-pointer"
             >
               sync your Business Profiles
             </a>
             . You'll get tools to assist you with higher rankings in Google.
           </div>
 
-          {/* Search Autocomplete Input (Matching Screenshot 1 & 2) */}
-          <div style={{ position: 'relative' }}>
+          {/* Search Autocomplete Input */}
+          <div className="relative">
             <Search
               size={18}
-              style={{
-                position: 'absolute',
-                left: '16px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8',
-              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
             />
 
             <input
               type="text"
-              placeholder="Your Business Profile name"
+              placeholder="Enter your business name or city..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '13px 40px 13px 44px',
-                borderRadius: '12px',
-                border: '1.5px solid #3b82f6',
-                fontSize: '14px',
-                color: '#0f172a',
-                outline: 'none',
-                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-                fontFamily: 'inherit',
-              }}
+              className="w-full pl-11 pr-11 py-3.5 rounded-2xl border-2 border-brand-500/80 bg-white text-sm font-medium text-slate-900 placeholder-slate-400 outline-none shadow-sm focus:ring-4 focus:ring-brand-500/15 focus:border-brand-600 transition"
               autoFocus
             />
 
             {query && (
               <button
+                type="button"
                 onClick={() => setQuery('')}
-                style={{
-                  position: 'absolute',
-                  right: '14px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: '#f1f5f9',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: '#64748b',
-                }}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
               >
                 <X size={12} />
               </button>
             )}
           </div>
 
+          {/* Manual Entry Fallback Link */}
+          <div className="mt-4 pt-1 flex items-center justify-between text-xs text-slate-500">
+            <span>Can't find your business on Google?</span>
+            <Link
+              to="/locations/manual-add"
+              className="text-brand-600 font-bold hover:underline inline-flex items-center gap-1"
+            >
+              Enter details manually →
+            </Link>
+          </div>
+
           {/* Error Message */}
           {errorMessage && (
-            <div
-              style={{
-                marginTop: '14px',
-                padding: '10px 14px',
-                borderRadius: '10px',
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                color: '#dc2626',
-                fontSize: '13px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <AlertCircle size={16} />
+            <div className="mt-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
         </div>
 
-        {/* Autocomplete Dropdown List (Matching Screenshot 2) */}
+        {/* Autocomplete Dropdown List */}
         {query.trim().length >= 2 && (
-          <div
-            style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '16px',
-              boxShadow: '0 10px 25px -5px rgba(0,0,0,0.08)',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-lg overflow-hidden">
             {isSearching ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <RefreshCw size={16} style={{ animation: 'spin 1.5s linear infinite', color: '#2563eb' }} />
+              <div className="p-8 text-center text-slate-500 text-xs font-medium flex items-center justify-center gap-2.5">
+                <RefreshCw size={16} className="animate-spin text-brand-600" />
                 <span>Searching Google Maps places...</span>
               </div>
             ) : places.length === 0 ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
-                No places found matching "<strong>{query}</strong>". Try a different name or city.
+              <div className="p-8 text-center text-slate-500 text-xs">
+                No places found matching "<strong>{query}</strong>". Try a different name, or{' '}
+                <Link to="/locations/manual-add" className="text-brand-600 font-bold hover:underline">
+                  add it manually
+                </Link>.
               </div>
             ) : (
               <div>
@@ -268,17 +201,7 @@ export const AddBusinessProfilesPage: React.FC = () => {
                   <div
                     key={place.placeId || index}
                     onClick={() => handleSelectPlace(place)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '14px',
-                      padding: '16px 20px',
-                      borderBottom: index < places.length - 1 ? '1px solid #f1f5f9' : 'none',
-                      cursor: addingPlaceId ? 'wait' : 'pointer',
-                      transition: 'background 0.15s ease',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '#ffffff')}
+                    className="flex items-center gap-3.5 p-4 sm:p-4.5 border-b border-slate-100 last:border-none hover:bg-slate-50/80 transition cursor-pointer group"
                   >
                     {/* Place Thumbnail / Avatar */}
                     <BusinessAvatar
@@ -289,27 +212,23 @@ export const AddBusinessProfilesPage: React.FC = () => {
                       website={place.website}
                       category={place.category}
                       size="md"
-                      className="w-[42px] h-[42px] rounded-lg shrink-0"
+                      className="w-11 h-11 rounded-xl shrink-0 shadow-2xs group-hover:scale-105 transition"
                     />
 
                     {/* Place Name & Full Address */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '0 0 2px' }}>
-                        <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <span className="text-sm font-extrabold text-slate-900 group-hover:text-brand-600 transition">
                           {place.name}
                         </span>
                         {(place.resolvedCategory || place.suggestedCategory || place.category) && (
-                          <span style={{
-                            fontSize: '11px', padding: '2px 8px', borderRadius: '12px',
-                            background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 600,
-                            display: 'inline-flex', alignItems: 'center', gap: '3px',
-                          }}>
-                            <Sparkles size={11} />
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 inline-flex items-center gap-1">
+                            <Sparkles size={10} />
                             {(place.resolvedCategory || place.suggestedCategory || place.category).replace(/_/g, ' ').toUpperCase()}
                           </span>
                         )}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div className="text-xs text-slate-500 truncate font-medium">
                         {place.address}
                       </div>
                     </div>
@@ -320,25 +239,10 @@ export const AddBusinessProfilesPage: React.FC = () => {
                         <button
                           type="button"
                           disabled={Boolean(addingPlaceId)}
-                          style={{
-                            padding: '6px 14px',
-                            borderRadius: '8px',
-                            border: 'none',
-                            background: isThisAdding ? '#2563eb' : '#2563eb',
-                            color: '#ffffff',
-                            fontSize: '12.5px',
-                            fontWeight: 600,
-                            cursor: addingPlaceId ? 'wait' : 'pointer',
-                            flexShrink: 0,
-                            boxShadow: '0 1px 3px rgba(37,99,235,0.2)',
-                            opacity: (addingPlaceId && !isThisAdding) ? 0.4 : 1,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                          }}
+                          className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-xs hover:shadow active:scale-95 shrink-0 inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                         >
                           {isThisAdding && (
-                            <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                            <RefreshCw size={12} className="animate-spin" />
                           )}
                           {isThisAdding ? 'Adding...' : 'Add'}
                         </button>

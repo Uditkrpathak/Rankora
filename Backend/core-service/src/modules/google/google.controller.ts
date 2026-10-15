@@ -46,6 +46,17 @@ export class GoogleController {
           'https://www.googleapis.com/auth/userinfo.email',
         ];
 
+    if (!ENV.GOOGLE_CLIENT_ID) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'GOOGLE_OAUTH_NOT_CONFIGURED',
+          message: 'Google OAuth is not configured on this environment (missing GOOGLE_CLIENT_ID). Please continue by entering your location directly.',
+        },
+      });
+      return;
+    }
+
     const params = new URLSearchParams({
       client_id: ENV.GOOGLE_CLIENT_ID,
       redirect_uri: redirectUri,
