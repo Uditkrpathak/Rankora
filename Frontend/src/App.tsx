@@ -6,11 +6,14 @@ import { useGetMeQuery } from './store/api/authApi';
 import { setCredentials, setLoading } from './store/slices/authSlice';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicOnlyRoute } from './components/PublicOnlyRoute';
+import { RoleRoute } from './components/RoleRoute';
 import { FEATURE_FLAGS } from './config/features';
 
 // Public Pages
 import { HomePage } from './features/home/HomePage';
 import { LoginPage } from './features/auth/LoginPage';
+import { AdminLoginPage } from './features/auth/AdminLoginPage';
+import { ForcedChangePasswordPage } from './features/auth/ForcedChangePasswordPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { VerifyEmailPage } from './features/auth/VerifyEmailPage';
 import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage';
@@ -44,6 +47,16 @@ import { TeamManagement } from './features/workspaces/TeamManagement';
 import { BusinessChatbot } from './components/chat/BusinessChatbot';
 import { NotificationsPage } from './features/notifications/NotificationsPage';
 import { NotificationSettingsPage } from './features/settings/NotificationSettingsPage';
+
+// Admin Management Pages
+import { AdminLayout } from './features/admin/AdminLayout';
+import { AdminDashboardPage } from './features/admin/AdminDashboardPage';
+import { AdminUsersPage } from './features/admin/AdminUsersPage';
+import { AdminUserDetailPage } from './features/admin/AdminUserDetailPage';
+import { AdminAdminsPage } from './features/admin/AdminAdminsPage';
+import { AdminAdminDetailPage } from './features/admin/AdminAdminDetailPage';
+import { AdminPlansPage } from './features/admin/AdminPlansPage';
+import { AdminAuditLogPage } from './features/admin/AdminAuditLogPage';
 
 // Helper redirect component for location ID to business ID
 const LocationRedirect: React.FC = () => {
@@ -94,6 +107,8 @@ export const App: React.FC = () => {
         {/* ── Public Landing & Auth Routes ────────────────────────────── */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+        <Route path="/admin/login" element={<PublicOnlyRoute><AdminLoginPage /></PublicOnlyRoute>} />
+        <Route path="/change-password" element={<ProtectedRoute><ForcedChangePasswordPage /></ProtectedRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
@@ -167,6 +182,17 @@ export const App: React.FC = () => {
         )}
 
         <Route path="/competitors" element={<ProtectedRoute><CompetitorBenchmarkPage /></ProtectedRoute>} />
+
+        {/* ── Admin Management Routes (ADMIN & SUPER_ADMIN) ─────────── */}
+        <Route path="/admin" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminLayout><AdminDashboardPage /></AdminLayout></RoleRoute>} />
+        <Route path="/admin/users" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminLayout><AdminUsersPage /></AdminLayout></RoleRoute>} />
+        <Route path="/admin/users/:id" element={<RoleRoute roles={['ADMIN', 'SUPER_ADMIN']}><AdminLayout><AdminUserDetailPage /></AdminLayout></RoleRoute>} />
+
+        {/* ── Super Admin Only Routes (SUPER_ADMIN) ──────────────────── */}
+        <Route path="/admin/admins" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminAdminsPage /></AdminLayout></RoleRoute>} />
+        <Route path="/admin/admins/:id" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminAdminDetailPage /></AdminLayout></RoleRoute>} />
+        <Route path="/admin/plans" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminPlansPage /></AdminLayout></RoleRoute>} />
+        <Route path="/admin/audit-log" element={<RoleRoute roles={['SUPER_ADMIN']}><AdminLayout><AdminAuditLogPage /></AdminLayout></RoleRoute>} />
 
         {/* ── Fallback Catch-All ────────────────────────────────────────── */}
         <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />

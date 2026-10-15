@@ -65,6 +65,62 @@ const UserSchema = new Schema<UserDocument>(
       required: true,
       trim: true
     },
+    platformRole: {
+      type: String,
+      enum: ['SUPER_ADMIN', 'ADMIN', 'USER'],
+      default: 'USER',
+      index: true
+    },
+    mustChangePassword: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    planName: {
+      type: String,
+      enum: ['Trial', 'Starter', 'Pro Growth', 'Agency Scale'],
+      default: 'Trial',
+      index: true
+    },
+    planStartedAt: {
+      type: Date,
+      default: Date.now
+    },
+    planExpiresAt: {
+      type: Date,
+      required: false
+    },
+    assignedByUserId: {
+      type: String,
+      required: false
+    },
+    createdByUserId: {
+      type: String,
+      required: false
+    },
+    limitOverrides: {
+      keywordScanLimit: { type: Number, default: null },
+      scanCreditsPerMonth: { type: Number, default: null },
+      locationLimit: { type: Number, default: null },
+      chatbotQuotaPerMonth: { type: Number, default: null },
+      teamSeatLimit: { type: Number, default: null }
+    },
+    usage: {
+      keywordsScannedThisMonth: { type: Number, default: 0 },
+      scanCreditsUsed: { type: Number, default: 0 },
+      chatbotUsed: { type: Number, default: 0 },
+      locationsCount: { type: Number, default: 0 },
+      usageResetAt: { type: Date, default: Date.now }
+    },
+    permissions: {
+      canScan: { type: Boolean, default: true },
+      canUseChatbot: { type: Boolean, default: true },
+      canUseGeoGrid: { type: Boolean, default: true },
+      canUseCompetitorMatrix: { type: Boolean, default: true },
+      canExportPdf: { type: Boolean, default: true },
+      canInviteTeam: { type: Boolean, default: true },
+      canUseApi: { type: Boolean, default: false }
+    },
     systemRole: {
       type: String,
       enum: ['USER', 'ADMIN'] as SystemRole[],
@@ -74,7 +130,7 @@ const UserSchema = new Schema<UserDocument>(
     status: {
       type: String,
       enum: ['PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'BANNED', 'DELETED', 'PENDING_DELETION', 'PENDING_REVIEW'] as UserStatus[],
-      default: 'PENDING_VERIFICATION',
+      default: 'ACTIVE',
       index: true
     },
     emailVerifiedAt: {
@@ -199,7 +255,22 @@ const UserSchema = new Schema<UserDocument>(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
+    toJSON: {
+      virtuals: true,
+      transform: (_doc, ret: any) => {
+        delete ret.passwordHash;
+        delete ret.emailVerificationTokenHash;
+        delete ret.passwordResetTokenHash;
+        delete ret.emailChangeTokenHash;
+        if (ret.twoFactor) {
+          delete ret.twoFactor.secretEncrypted;
+          delete ret.twoFactor.tempSecretEncrypted;
+          delete ret.twoFactor.recoveryCodesHashed;
+          delete ret.twoFactor.recoveryCodesEncrypted;
+        }
+        return ret;
+      }
+    },
     toObject: { virtuals: true }
   }
 );

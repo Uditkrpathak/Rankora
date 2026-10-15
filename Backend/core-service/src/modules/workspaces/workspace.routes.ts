@@ -16,7 +16,12 @@ import { gscRouter } from '../gsc/gsc.routes';
 import { chatRouter } from '../chat/chat.routes';
 import { notificationRouter } from '../notifications/notification.routes';
 
+import { blockSuspended, requirePasswordChanged } from '../../middleware/platform.middleware';
+
 export const workspaceRouter = Router();
+
+workspaceRouter.use(blockSuspended);
+workspaceRouter.use(requirePasswordChanged);
 
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
   Promise.resolve(fn(req, res, next)).catch(next);

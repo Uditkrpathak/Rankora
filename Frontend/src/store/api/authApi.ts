@@ -47,6 +47,40 @@ export const authApi = createApi({
       }
     }),
 
+    adminLogin: builder.mutation<any, any>({
+      query: (credentials) => ({
+        url: '/v1/auth/admin-login',
+        method: 'POST',
+        body: credentials
+      }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (!data.data?.mfaRequired) {
+            dispatch(setCredentials({
+              user: data.data.user,
+              accessToken: data.data.tokens?.accessToken,
+              csrfToken: data.data.tokens?.csrfToken
+            }));
+          }
+        } catch {}
+      }
+    }),
+
+    forceChangePassword: builder.mutation<any, { currentPassword: string; newPassword: string }>({
+      query: (body) => ({
+        url: '/v1/auth/change-password',
+        method: 'POST',
+        body
+      }),
+      invalidatesTags: ['User']
+    }),
+
+    getMeLimits: builder.query<any, void>({
+      query: () => '/v1/me/limits',
+      providesTags: ['User']
+    }),
+
     googleLogin: builder.mutation<any, { idToken: string; workspaceName?: string }>({
       query: (body) => ({
         url: '/v1/auth/google',
@@ -252,6 +286,9 @@ export const authApi = createApi({
 export const {
   useRegisterMutation,
   useLoginMutation,
+  useAdminLoginMutation,
+  useForceChangePasswordMutation,
+  useGetMeLimitsQuery,
   useGoogleLoginMutation,
   useVerifyEmailMutation,
   useResendVerificationMutation,

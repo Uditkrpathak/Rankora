@@ -16,6 +16,16 @@ const AuditLogSchema = new Schema<AuditLogDocument>(
       required: true,
       index: true
     },
+    actorRole: {
+      type: String,
+      required: false,
+      index: true
+    },
+    targetUserId: {
+      type: String,
+      required: false,
+      index: true
+    },
     action: {
       type: String,
       required: true,
@@ -23,11 +33,11 @@ const AuditLogSchema = new Schema<AuditLogDocument>(
     },
     resourceType: {
       type: String,
-      required: true
+      required: false
     },
     resourceId: {
       type: String,
-      required: true
+      required: false
     },
     before: {
       type: Schema.Types.Mixed,

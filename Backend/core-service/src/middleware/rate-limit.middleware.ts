@@ -77,12 +77,39 @@ export const authRateLimiter = rateLimit({
   standardHeaders: true, // Draft-6 RateLimit headers
   legacyHeaders: false,
   skipSuccessfulRequests: false,
-  store: getRedisStore('auth'),
+  store: getRedisStore('auth_ip'),
   message: {
     success: false,
     error: {
       code: 'TOO_MANY_REQUESTS',
       message: 'Too many authentication attempts from this IP address. Please try again in 15 minutes.',
+    },
+  },
+});
+
+/**
+ * Per-email rate limiter across all IP addresses.
+ * Protects against distributed botnets attempting credential stuffing against a single target account.
+ */
+export const emailAuthRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per email address per 15-minute window
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false,
+  keyGenerator: (req) => {
+    const rawEmail = req.body?.email;
+    if (typeof rawEmail === 'string' && rawEmail.trim()) {
+      return `email:${rawEmail.trim().toLowerCase()}`;
+    }
+    return `ip:${req.ip || 'unknown'}`;
+  },
+  store: getRedisStore('auth_email'),
+  message: {
+    success: false,
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Too many login attempts for this account. Please wait 15 minutes before trying again.',
     },
   },
 });

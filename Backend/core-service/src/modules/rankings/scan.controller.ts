@@ -71,7 +71,20 @@ export class ScanController {
       return;
     }
 
+    let didIncrement = false;
+    let cost = 0;
+
     try {
+      if (req.user) {
+        const { userLimitsService } = await import('../admin/user-limits.service');
+        await userLimitsService.assertPermission(req.user._id.toString(), 'canScan');
+        await userLimitsService.assertPermission(req.user._id.toString(), 'canUseGeoGrid');
+
+        cost = scanShape === 'SUNFLOWER' ? SUNFLOWER_SCAN_CREDIT_COST : GridGenerator.calculateCreditCost(Number(gridSize) || DEFAULT_GRID_SIZE);
+        await userLimitsService.assertAndIncrementKeywordScan(req.user._id.toString(), 1, cost);
+        didIncrement = true;
+      }
+
       const scan = await scanService.triggerScan({
         workspaceId,
         locationId,
@@ -91,6 +104,14 @@ export class ScanController {
         data: scan,
       });
     } catch (err: any) {
+      if (req.user && didIncrement) {
+        try {
+          const { userLimitsService } = await import('../admin/user-limits.service');
+          await userLimitsService.refundKeywordScan(req.user._id.toString(), 1, cost);
+        } catch (refundErr) {
+          console.error('Failed to refund scan credits on trigger failure:', refundErr);
+        }
+      }
       let status = 400;
       let errorCode = 'SCAN_TRIGGER_FAILED';
       const msg: string = err?.message || 'Failed to trigger scan';

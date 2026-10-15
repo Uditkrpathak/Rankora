@@ -58,6 +58,12 @@ export class AuthService {
     // Check duplicate email
     const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
+      if (existing.status === 'DELETED' || existing.status === 'PENDING_DELETION') {
+        const err: any = new Error('This account was previously deactivated or deleted. Please contact support or an administrator for review.');
+        err.statusCode = 403;
+        err.code = 'ACCOUNT_DELETED_CONTACT_SUPPORT';
+        throw err;
+      }
       throw new Error('EMAIL_ALREADY_EXISTS');
     }
 
@@ -80,6 +86,26 @@ export class AuthService {
             email: normalizedEmail,
             passwordHash,
             name: input.name.trim(),
+            platformRole: 'USER',
+            mustChangePassword: false,
+            planName: 'Trial',
+            planStartedAt: new Date(),
+            usage: {
+              keywordsScannedThisMonth: 0,
+              scanCreditsUsed: 0,
+              chatbotUsed: 0,
+              locationsCount: 0,
+              usageResetAt: new Date()
+            },
+            permissions: {
+              canScan: true,
+              canUseChatbot: true,
+              canUseGeoGrid: true,
+              canUseCompetitorMatrix: true,
+              canExportPdf: true,
+              canInviteTeam: true,
+              canUseApi: false
+            },
             status: 'PENDING_VERIFICATION',
             isEmailVerified: false,
             hasClaimedTrial: true,
@@ -196,6 +222,20 @@ export class AuthService {
       throw new Error('INVALID_CREDENTIALS');
     }
 
+    // Check deleted or suspended status
+    if (user.status === 'DELETED' || user.status === 'PENDING_DELETION') {
+      await this.recordFailedAttempt(normalizedEmail, ip);
+      const err: any = new Error('ACCOUNT_DELETED');
+      err.statusCode = 403;
+      throw err;
+    }
+
+    if (user.status === 'SUSPENDED') {
+      const err: any = new Error('ACCOUNT_SUSPENDED');
+      err.statusCode = 403;
+      throw err;
+    }
+
     // Verify Password
     const isValid = await argon2.verify(user.passwordHash, input.password);
     if (!isValid) {
@@ -206,6 +246,10 @@ export class AuthService {
     // Reset failed login counter on success
     await cacheStore.del(attemptsKey);
     await cacheStore.del(lockoutKey);
+
+    // Update lastLoginAt
+    user.lastLoginAt = new Date();
+    await user.save();
 
     // Check MFA
     if (user.mfaEnabled) {
@@ -231,7 +275,110 @@ export class AuthService {
     // Log Login
     await AuditLog.create({
       actorUserId: user._id.toString(),
+      actorRole: user.platformRole || 'USER',
       action: 'USER_LOGGED_IN',
+      resourceType: 'User',
+      resourceId: user._id.toString(),
+      ip,
+      userAgent,
+      correlationId
+    });
+
+    return { mfaRequired: false, user, tokens };
+  }
+
+  /**
+   * Admin-only login endpoint (ADMIN and SUPER_ADMIN only)
+   */
+  public async adminLogin(
+    input: LoginInput,
+    ip?: string,
+    userAgent?: string,
+    correlationId?: string
+  ): Promise<
+    | { mfaRequired: true; mfaChallengeToken: string }
+    | { mfaRequired: false; user: UserDocument; tokens: AuthTokens }
+  > {
+    const normalizedEmail = input.email.toLowerCase().trim();
+    const lockoutKey = `lockout:${normalizedEmail}:${ip || 'unknown'}`;
+    const attemptsKey = `login_attempts:${normalizedEmail}:${ip || 'unknown'}`;
+
+    const isLocked = await cacheStore.get(lockoutKey);
+    if (isLocked) {
+      const ttl = await cacheStore.ttl(lockoutKey);
+      const err: any = new Error('ACCOUNT_TEMPORARILY_LOCKED');
+      err.retryAfter = ttl > 0 ? ttl : 60;
+      throw err;
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user || !user.passwordHash) {
+      await this.recordFailedAttempt(normalizedEmail, ip);
+      throw new Error('INVALID_CREDENTIALS');
+    }
+
+    // Only allow ADMIN and SUPER_ADMIN
+    const role = user.platformRole || 'USER';
+    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
+      await this.recordFailedAttempt(normalizedEmail, ip);
+      throw new Error('INVALID_CREDENTIALS');
+    }
+
+    // Check deleted or suspended status
+    if (user.status === 'DELETED' || user.status === 'PENDING_DELETION') {
+      await this.recordFailedAttempt(normalizedEmail, ip);
+      const err: any = new Error('ACCOUNT_DELETED');
+      err.statusCode = 403;
+      throw err;
+    }
+
+    if (user.status === 'SUSPENDED') {
+      const err: any = new Error('ACCOUNT_SUSPENDED');
+      err.statusCode = 403;
+      throw err;
+    }
+
+    // Verify Password
+    const isValid = await argon2.verify(user.passwordHash, input.password);
+    if (!isValid) {
+      await this.recordFailedAttempt(normalizedEmail, ip);
+      throw new Error('INVALID_CREDENTIALS');
+    }
+
+    // Reset failed login counter on success
+    await cacheStore.del(attemptsKey);
+    await cacheStore.del(lockoutKey);
+
+    // Update lastLoginAt
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    // Check MFA
+    if (user.mfaEnabled) {
+      const { generateSecureToken } = await import('@localo/shared');
+      const mfaChallengeToken = generateSecureToken(32);
+      
+      await cacheStore.set(
+        `mfa_challenge:${mfaChallengeToken}`,
+        user._id.toString(),
+        SECURITY_POLICIES.MFA_CHALLENGE_TTL_SECONDS
+      );
+
+      return { mfaRequired: true, mfaChallengeToken };
+    }
+
+    // Issue Token Bundle
+    const tokens = await tokenService.issueTokenBundle({
+      userId: user._id.toString(),
+      userAgent,
+      ipAddress: ip
+    });
+
+    // Log Admin Login
+    await AuditLog.create({
+      actorUserId: user._id.toString(),
+      actorRole: user.platformRole,
+      action: 'ADMIN_LOGGED_IN',
       resourceType: 'User',
       resourceId: user._id.toString(),
       ip,

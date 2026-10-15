@@ -7,7 +7,10 @@
     "start": "node dist/src/server.js",
     "start:worker": "node dist/src/worker.js",
     "dev": "tsx watch src/server.ts",
-    "dev:worker": "tsx watch src/worker.ts"
+    "dev:worker": "tsx watch src/worker.ts",
+    "seed:superadmin": "tsx scripts/seed-superadmin.ts",
+    "backfill:users": "tsx scripts/backfill-user-platform-fields.ts",
+    "test:platform": "tsx scripts/test-phase3-suite.ts"
   },
   "dependencies": {
     "@localo/shared": "*",

@@ -17,6 +17,9 @@ export class InviteService {
   }) {
     const normalizedEmail = params.email.toLowerCase().trim();
 
+    const { userLimitsService } = await import('../admin/user-limits.service');
+    await userLimitsService.assertCanInviteOrJoinTeam(params.workspaceId, params.inviterUserId);
+
     // Check if user is already a member
     const existingMembership = await WorkspaceMember.findOne({
       workspaceId: params.workspaceId,
@@ -137,6 +140,9 @@ export class InviteService {
     if (!invite) {
       throw new Error('INVALID_OR_EXPIRED_INVITE');
     }
+
+    const { userLimitsService } = await import('../admin/user-limits.service');
+    await userLimitsService.assertCanInviteOrJoinTeam(invite.workspaceId.toString(), userId);
 
     // Add membership
     const member = await WorkspaceMember.findOneAndUpdate(

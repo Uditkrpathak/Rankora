@@ -26,6 +26,11 @@ export class CompetitorController {
     const locationId = req.params.locId;
 
     try {
+      if (req.user) {
+        const { userLimitsService } = await import('../admin/user-limits.service');
+        await userLimitsService.assertPermission(req.user._id.toString(), 'canUseCompetitorMatrix');
+      }
+
       const benchmark = await competitorService.getBenchmark(locationId, workspaceId);
       res.json({
         success: true,

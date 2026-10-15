@@ -5,6 +5,7 @@ import { authenticate } from '../../middleware/auth.middleware';
 import { requireDevEnvironment } from '../../middleware/requireDevEnvironment';
 import {
   authRateLimiter,
+  emailAuthRateLimiter,
   registerRateLimiter,
   passwordResetRateLimiter,
   failClosedIfRedisDown,
@@ -24,7 +25,9 @@ const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
 // Public auth endpoints protected by rate limiting & fail-closed guards
 authRouter.get('/public-config', asyncHandler((req: any, res: any) => authController.getPublicConfig(req, res)));
 authRouter.post('/register', failClosedIfRedisDown, registerRateLimiter, asyncHandler((req: any, res: any) => authController.register(req, res)));
-authRouter.post('/login', failClosedIfRedisDown, authRateLimiter, asyncHandler((req: any, res: any) => authController.login(req, res)));
+authRouter.post('/login', failClosedIfRedisDown, authRateLimiter, emailAuthRateLimiter, asyncHandler((req: any, res: any) => authController.login(req, res)));
+authRouter.post('/admin-login', failClosedIfRedisDown, authRateLimiter, emailAuthRateLimiter, asyncHandler((req: any, res: any) => authController.adminLogin(req, res)));
+authRouter.post('/change-password', authenticate, asyncHandler((req: any, res: any) => authController.changePassword(req, res)));
 authRouter.post('/google', failClosedIfRedisDown, authRateLimiter, asyncHandler((req: any, res: any) => authController.googleLogin(req, res)));
 authRouter.post('/refresh', asyncHandler((req: any, res: any) => authController.refresh(req, res)));
 authRouter.post('/logout', asyncHandler((req: any, res: any) => authController.logout(req, res)));

@@ -440,6 +440,7 @@ export class AccountService {
 
     user.passwordHash = newHash;
     user.argon2Version = ARGON2_CONFIG.version;
+    user.mustChangePassword = false;
     // Note: in-session password change does NOT bump sessionVersion (keeps current session alive)
     await user.save();
 

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { JWTPayload, Permission, UserRole } from '@localo/types';
-import { ROLE_PERMISSIONS, hasPermission } from '@localo/shared';
+import { ROLE_PERMISSIONS, hasPermission, EXPIRED_PLAN_BEHAVIOR, PLAN_DEFAULTS } from '@localo/shared';
 import { ENV } from '../config/env';
 import { User, UserDocument } from '../models/User';
 import { Workspace, WorkspaceDocument } from '../models/Workspace';
@@ -74,6 +74,57 @@ export async function authenticate(req: AuthenticatedRequest, res: Response, nex
         error: { code: 'USER_NOT_FOUND', message: 'User account not found or deleted' }
       });
       return;
+    }
+
+    if (user.status === 'SUSPENDED') {
+      res.status(403).json({
+        success: false,
+        error: { code: 'ACCOUNT_SUSPENDED', message: 'Your account has been suspended. Please contact support.' }
+      });
+      return;
+    }
+
+    // Lazy plan expiration check: if planExpiresAt has passed, handle per EXPIRED_PLAN_BEHAVIOR on every request
+    if (user.planExpiresAt && new Date(user.planExpiresAt).getTime() < Date.now()) {
+      if (EXPIRED_PLAN_BEHAVIOR === 'FALLBACK_TO_TRIAL' && user.planName !== 'Trial') {
+        user.planName = 'Trial';
+        user.limitOverrides = {
+          keywordScanLimit: null,
+          scanCreditsPerMonth: null,
+          locationLimit: null,
+          chatbotQuotaPerMonth: null,
+          teamSeatLimit: null
+        };
+        user.permissions = { ...PLAN_DEFAULTS['Trial'].permissions };
+        await user.save();
+      }
+    }
+
+    // Centrally enforce mustChangePassword on ALL authenticated routes.
+    // Exempt only: /auth/change-password, /auth/me, and /auth/logout.
+    if (user.mustChangePassword) {
+      const fullPath = (req.baseUrl || '') + (req.path || '');
+      const isExempt =
+        fullPath.endsWith('/auth/change-password') ||
+        fullPath.endsWith('/v1/auth/change-password') ||
+        fullPath.endsWith('/api/auth/change-password') ||
+        fullPath.endsWith('/auth/me') ||
+        fullPath.endsWith('/v1/auth/me') ||
+        fullPath.endsWith('/api/auth/me') ||
+        fullPath.endsWith('/auth/logout') ||
+        fullPath.endsWith('/v1/auth/logout') ||
+        fullPath.endsWith('/api/auth/logout');
+
+      if (!isExempt) {
+        res.status(403).json({
+          success: false,
+          error: {
+            code: 'PASSWORD_CHANGE_REQUIRED',
+            message: 'You must change your temporary password before accessing platform resources.'
+          }
+        });
+        return;
+      }
     }
 
     req.user = user;
@@ -185,14 +236,25 @@ export function verifyCsrf(req: Request, res: Response, next: NextFunction): voi
   const reqPath = (req.originalUrl || req.url || '').split('?')[0];
   if (
     reqPath.startsWith('/v1/auth/register') ||
+    reqPath.startsWith('/api/auth/register') ||
     reqPath.startsWith('/v1/auth/login') ||
+    reqPath.startsWith('/api/auth/login') ||
+    reqPath.startsWith('/v1/auth/admin-login') ||
+    reqPath.startsWith('/api/auth/admin-login') ||
     reqPath.startsWith('/v1/auth/google') ||
+    reqPath.startsWith('/api/auth/google') ||
     reqPath.startsWith('/v1/auth/refresh') ||
+    reqPath.startsWith('/api/auth/refresh') ||
     reqPath.startsWith('/v1/auth/forgot-password') ||
+    reqPath.startsWith('/api/auth/forgot-password') ||
     reqPath.startsWith('/v1/auth/reset-password') ||
+    reqPath.startsWith('/api/auth/reset-password') ||
     reqPath.startsWith('/v1/auth/verify-email') ||
+    reqPath.startsWith('/api/auth/verify-email') ||
     reqPath.startsWith('/v1/auth/resend-verification') ||
+    reqPath.startsWith('/api/auth/resend-verification') ||
     reqPath.startsWith('/v1/auth/mfa/challenge') ||
+    reqPath.startsWith('/api/auth/mfa/challenge') ||
     reqPath.startsWith('/v1/webhooks') ||
     reqPath.startsWith('/v1/public') ||
     reqPath.startsWith('/v1/mcp') ||
@@ -232,4 +294,6 @@ export function verifyCsrf(req: Request, res: Response, next: NextFunction): voi
 
   next();
 }
+
+export const requireAuth = authenticate;
 

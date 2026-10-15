@@ -97,6 +97,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
+  // 3b. Forced Password Change Required
+  if (user?.mustChangePassword && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
+
   // 4. Authenticated but Email Unverified
   if (
     requireVerifiedEmail &&

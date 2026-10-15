@@ -9,6 +9,9 @@ export class LocationController {
     const actorUserId = req.user!._id.toString();
     const ip = req.ip || req.socket.remoteAddress;
 
+    const { userLimitsService } = await import('../admin/user-limits.service');
+    await userLimitsService.assertCanCreateLocation(actorUserId);
+
     const input = createLocationSchema.parse(req.body);
     const location = await locationService.createLocation(workspaceId, input, actorUserId, ip);
 
@@ -83,6 +86,9 @@ export class LocationController {
       });
       return;
     }
+
+    const { userLimitsService } = await import('../admin/user-limits.service');
+    await userLimitsService.decrementLocationsCount(actorUserId);
 
     res.status(200).json({
       success: true,

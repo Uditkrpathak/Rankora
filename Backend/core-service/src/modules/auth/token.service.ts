@@ -135,6 +135,15 @@ export class TokenService {
       throw new Error('INVALID_REFRESH_TOKEN');
     }
 
+    // Reject refresh token if user is suspended or deleted
+    const user = await User.findById(foundToken.userId);
+    if (!user || user.status === 'DELETED') {
+      throw new Error('USER_NOT_FOUND');
+    }
+    if (user.status === 'SUSPENDED') {
+      throw new Error('ACCOUNT_SUSPENDED');
+    }
+
     // 🚨 REPLAY ATTACK DETECTION
     if (foundToken.isRevoked) {
       if (foundToken.revocationReason === 'ROTATED') {

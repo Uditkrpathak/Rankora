@@ -15,12 +15,14 @@ import { protectionApi } from './api/protectionApi';
 import { gscApi } from './api/gscApi';
 import { chatApi } from './api/chatApi';
 import { notificationApi } from './api/notificationApi';
+import { adminApi } from './api/adminApi';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     locations: locationReducer,
     [authApi.reducerPath]: authApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
     [workspaceApi.reducerPath]: workspaceApi.reducer,
     [locationApi.reducerPath]: locationApi.reducer,
     [gbpApi.reducerPath]: gbpApi.reducer,
@@ -38,6 +40,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       authApi.middleware,
+      adminApi.middleware,
       workspaceApi.middleware,
       locationApi.middleware,
       gbpApi.middleware,

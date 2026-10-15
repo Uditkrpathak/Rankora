@@ -15,6 +15,11 @@ export class KeywordsController {
 
     const validated = BulkAddKeywordsSchema.parse(req.body);
 
+    if (actorUserId) {
+      const { userLimitsService } = await import('../admin/user-limits.service');
+      await userLimitsService.assertAndIncrementKeywordScan(actorUserId.toString(), validated.keywords.length);
+    }
+
     const result = await keywordsService.bulkAddKeywords(
       workspaceId,
       locationId,
@@ -92,6 +97,11 @@ export class KeywordsController {
     const actorUserId = (req as any).user?.id || (req as any).user?._id;
     const ip = req.ip;
 
+    if (actorUserId) {
+      const { userLimitsService } = await import('../admin/user-limits.service');
+      await userLimitsService.assertAndIncrementKeywordScan(actorUserId.toString(), 1);
+    }
+
     const result = await keywordsService.refreshKeyword(
       workspaceId,
       locationId,
@@ -112,6 +122,12 @@ export class KeywordsController {
   public async exportKeywords(req: Request, res: Response): Promise<void> {
     const workspaceId = (req.params.id || req.params.workspaceId) as string;
     const locationId = req.params.locationId as string;
+    const actorUserId = (req as any).user?.id || (req as any).user?._id;
+
+    if (actorUserId) {
+      const { userLimitsService } = await import('../admin/user-limits.service');
+      await userLimitsService.assertPermission(actorUserId.toString(), 'canExportPdf');
+    }
 
     await keywordsService.exportKeywordsCsv(workspaceId, locationId, res);
   }

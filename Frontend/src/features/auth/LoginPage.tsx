@@ -31,7 +31,14 @@ export const LoginPage: React.FC = () => {
       if (res.data?.mfaRequired) {
         setMfaChallengeToken(res.data.mfaChallengeToken);
       } else {
-        navigate(destination, { replace: true });
+        const u = res.data?.user;
+        if (u?.mustChangePassword) {
+          navigate('/change-password', { replace: true });
+        } else if (u?.platformRole === 'ADMIN' || u?.platformRole === 'SUPER_ADMIN') {
+          navigate('/admin', { replace: true });
+        } else {
+          navigate(destination === '/login' || destination === '/admin/login' ? '/dashboard' : destination, { replace: true });
+        }
       }
     } catch (err: any) {
       setError(err);
@@ -44,8 +51,15 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      await mfaChallenge({ mfaChallengeToken, code: mfaCode }).unwrap();
-      navigate(destination, { replace: true });
+      const res = await mfaChallenge({ mfaChallengeToken, code: mfaCode }).unwrap();
+      const u = res.data?.user;
+      if (u?.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+      } else if (u?.platformRole === 'ADMIN' || u?.platformRole === 'SUPER_ADMIN') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(destination === '/login' || destination === '/admin/login' ? '/dashboard' : destination, { replace: true });
+      }
     } catch (err: any) {
       setError(err);
     }
@@ -53,8 +67,15 @@ export const LoginPage: React.FC = () => {
 
   const handleGoogleSignIn = async (idToken: string) => {
     try {
-      await googleLogin({ idToken }).unwrap();
-      navigate(destination, { replace: true });
+      const res = await googleLogin({ idToken }).unwrap();
+      const u = res.data?.user;
+      if (u?.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+      } else if (u?.platformRole === 'ADMIN' || u?.platformRole === 'SUPER_ADMIN') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(destination === '/login' || destination === '/admin/login' ? '/dashboard' : destination, { replace: true });
+      }
     } catch (err: any) {
       setError(err);
     }
@@ -191,6 +212,13 @@ export const LoginPage: React.FC = () => {
         Don't have an account?{' '}
         <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-800 transition">
           Create an account
+        </Link>
+      </div>
+
+      <div className="mt-3 text-center text-[11px] text-slate-400">
+        Staff & System Administrators:{' '}
+        <Link to="/admin/login" className="text-slate-500 hover:text-brand-600 underline transition font-medium">
+          Admin portal sign in
         </Link>
       </div>
     </AuthLayout>

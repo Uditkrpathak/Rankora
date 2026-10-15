@@ -19,6 +19,7 @@ import {
   ChevronDown,
   Settings,
   Link2,
+  Shield,
 } from 'lucide-react';
 
 interface AppNavbarProps {
@@ -78,8 +79,11 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
   const scanCredits = wsDetail?.data?.limits?.scanCredits;
   const creditsDisplay = typeof scanCredits === 'number' ? `${scanCredits} credits` : null;
 
+  const isAdmin = user?.platformRole === 'ADMIN' || user?.platformRole === 'SUPER_ADMIN';
+
   const navLinks = [
     { label: 'Home', to: '/dashboard' },
+    ...(isAdmin ? [{ label: 'Admin', to: '/admin' }] : []),
     { label: 'Reviews', to: '/reviews' },
     { label: 'Help', to: '/help' },
   ];
@@ -196,6 +200,17 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
                   </div>
 
                   <div className="py-1">
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        role="menuitem"
+                        onClick={() => setAvatarMenuOpen(false)}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-brand-600 hover:bg-brand-50 hover:text-brand-700 transition font-semibold"
+                      >
+                        <Shield className="w-3.5 h-3.5 text-brand-600" />
+                        <span>Admin Console</span>
+                      </Link>
+                    )}
                     <Link
                       to="/settings/account"
                       role="menuitem"
@@ -311,6 +326,15 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
                   {link.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3.5 py-2 rounded-lg text-xs font-semibold text-brand-600 hover:bg-brand-50 transition"
+                >
+                  Admin Console
+                </Link>
+              )}
               <Link
                 to="/settings/account"
                 onClick={() => setMobileMenuOpen(false)}

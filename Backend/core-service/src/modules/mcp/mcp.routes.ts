@@ -1,4 +1,4 @@
-﻿import { Router, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { scanService } from '../rankings/scan.service';
 import { logger } from '../../config/logger';
 
@@ -50,6 +50,12 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
   }
 
   try {
+    const actorUserId = (req as any).user?._id || (req as any).user?.id;
+    if (actorUserId) {
+      const { userLimitsService } = await import('../admin/user-limits.service');
+      await userLimitsService.assertPermission(actorUserId.toString(), 'canUseApi');
+    }
+
     if (method === 'tools/list') {
       res.json({
         jsonrpc: '2.0',

@@ -4,10 +4,14 @@ export interface UserState {
   id: string;
   email: string;
   name: string;
+  platformRole?: 'SUPER_ADMIN' | 'ADMIN' | 'USER';
+  mustChangePassword?: boolean;
+  planName?: string;
   status: 'PENDING_VERIFICATION' | 'ACTIVE' | 'SUSPENDED' | 'DELETED' | 'PENDING_DELETION';
   isEmailVerified: boolean;
   mfaEnabled: boolean;
   avatarUrl?: string;
+  lastLoginAt?: string | Date;
 }
 
 export interface WorkspaceState {

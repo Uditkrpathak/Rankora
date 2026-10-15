@@ -167,6 +167,9 @@ export class WorkspaceController {
       return;
     }
 
+    const { userLimitsService } = await import('../admin/user-limits.service');
+    await userLimitsService.assertPermission(req.user._id.toString(), 'canInviteTeam');
+
     try {
       const invite = await inviteService.createInvite({
         workspaceId: id,

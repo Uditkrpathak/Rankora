@@ -163,8 +163,19 @@ import { openApiSpec } from './docs/openapi';
 app.get('/docs/openapi.json', (req, res) => res.json(openApiSpec));
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
+import { adminRouter } from './modules/admin/admin.routes';
+import { superadminRouter } from './modules/admin/superadmin.routes';
+import { meLimitsRouter } from './modules/admin/me-limits.routes';
+
 // Routes
 app.use('/v1/auth', authRouter);
+app.use('/api/auth', authRouter);
+app.use('/v1/admin', adminRouter);
+app.use('/api/admin', adminRouter);
+app.use('/v1/superadmin', superadminRouter);
+app.use('/api/superadmin', superadminRouter);
+app.use('/v1/me/limits', meLimitsRouter);
+app.use('/api/me/limits', meLimitsRouter);
 app.use('/v1/workspaces', workspaceRouter);
 app.use('/v1/places', placesRouter);
 app.use('/v1/public', publicRouter);
@@ -172,6 +183,11 @@ app.use('/v1/mcp', mcpRouter);
 app.use('/api/mcp', mcpRouter);
 
 const DEFAULT_ERROR_MESSAGES: Record<string, string> = {
+  ACCOUNT_SUSPENDED: 'Your account has been suspended. Please contact support.',
+  PASSWORD_CHANGE_REQUIRED: 'You must change your password before continuing.',
+  FORBIDDEN_ADMIN_ACCESS: 'You do not have permission to manage administrator accounts.',
+  LIMIT_EXCEEDED: 'Limit reached: set by your administrator.',
+  FEATURE_DISABLED: 'This feature has been disabled by your administrator.',
   INVALID_CREDENTIALS: 'The email address or password you entered is incorrect.',
   ACCOUNT_TEMPORARILY_LOCKED: 'This account has been temporarily locked due to consecutive failed attempts. Please try again in 5 minutes.',
   EMAIL_ALREADY_EXISTS: 'An account with this email address already exists. Please sign in instead.',

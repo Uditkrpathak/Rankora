@@ -81,9 +81,13 @@ export class AuthController {
           id: user._id,
           email: user.email,
           name: user.name,
+          platformRole: user.platformRole || 'USER',
+          mustChangePassword: !!user.mustChangePassword,
+          planName: user.planName || 'Trial',
           status: user.status,
           isEmailVerified: user.isEmailVerified,
-          mfaEnabled: user.mfaEnabled
+          mfaEnabled: user.mfaEnabled,
+          lastLoginAt: user.lastLoginAt
         },
         activeWorkspace: workspace ? {
           id: workspace._id,
@@ -135,10 +139,14 @@ export class AuthController {
           id: user._id,
           email: user.email,
           name: user.name,
+          platformRole: user.platformRole || 'USER',
+          mustChangePassword: !!user.mustChangePassword,
+          planName: user.planName || 'Trial',
           status: user.status,
           isEmailVerified: user.isEmailVerified,
           mfaEnabled: user.mfaEnabled,
-          avatarUrl: user.avatarUrl
+          avatarUrl: user.avatarUrl,
+          lastLoginAt: user.lastLoginAt
         },
         activeWorkspace: workspace ? {
           id: workspace._id,
@@ -146,6 +154,54 @@ export class AuthController {
           role: membership?.role || 'member',
           plan: workspace.plan.key
         } : undefined,
+        tokens: {
+          accessToken: tokens.accessToken,
+          csrfToken: tokens.csrfToken,
+          expiresIn: tokens.expiresIn
+        }
+      }
+    });
+  }
+
+  public async adminLogin(req: Request, res: Response): Promise<void> {
+    const validated = loginSchema.parse(req.body);
+    const ip = req.ip || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const correlationId = req.headers['x-correlation-id'] as string;
+
+    const result = await authService.adminLogin(validated, ip, userAgent, correlationId);
+
+    if (result.mfaRequired) {
+      res.status(200).json({
+        success: true,
+        data: {
+          mfaRequired: true,
+          mfaChallengeToken: result.mfaChallengeToken
+        }
+      });
+      return;
+    }
+
+    const { user, tokens } = result;
+    setAuthCookies(res, tokens.refreshToken, tokens.csrfToken);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        mfaRequired: false,
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          platformRole: user.platformRole || 'USER',
+          mustChangePassword: !!user.mustChangePassword,
+          planName: user.planName || 'Trial',
+          status: user.status,
+          isEmailVerified: user.isEmailVerified,
+          mfaEnabled: user.mfaEnabled,
+          avatarUrl: user.avatarUrl,
+          lastLoginAt: user.lastLoginAt
+        },
         tokens: {
           accessToken: tokens.accessToken,
           csrfToken: tokens.csrfToken,
@@ -219,6 +275,13 @@ export class AuthController {
       });
     } catch (err: any) {
       clearAuthCookies(res);
+      if (err.message === 'ACCOUNT_SUSPENDED') {
+        res.status(403).json({
+          success: false,
+          error: { code: 'ACCOUNT_SUSPENDED', message: 'Your account has been suspended. Please contact support.' }
+        });
+        return;
+      }
       const code = err.message === 'TOKEN_REPLAY_DETECTED' ? 'TOKEN_REPLAY_DETECTED' : 'INVALID_REFRESH_TOKEN';
       res.status(401).json({
         success: false,
@@ -464,10 +527,14 @@ export class AuthController {
           id: req.user._id,
           email: req.user.email,
           name: req.user.name,
+          platformRole: req.user.platformRole || 'USER',
+          mustChangePassword: !!req.user.mustChangePassword,
+          planName: req.user.planName || 'Trial',
           status: req.user.status,
           isEmailVerified: req.user.isEmailVerified,
           mfaEnabled: req.user.mfaEnabled,
-          avatarUrl: req.user.avatarUrl
+          avatarUrl: req.user.avatarUrl,
+          lastLoginAt: req.user.lastLoginAt
         },
         workspaces
       }

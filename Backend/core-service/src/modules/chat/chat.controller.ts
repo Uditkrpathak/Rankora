@@ -55,6 +55,11 @@ export class ChatController {
 
     // 3. Process chat query through service
     try {
+      if (req.user) {
+        const { userLimitsService } = await import('../admin/user-limits.service');
+        await userLimitsService.assertAndIncrementChatbot(req.user._id.toString());
+      }
+
       const response = await chatService.handleChat(
         req.params.id,
         req.params.locId,
