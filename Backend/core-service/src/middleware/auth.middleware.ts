@@ -181,6 +181,26 @@ export function verifyCsrf(req: Request, res: Response, next: NextFunction): voi
     return next();
   }
 
+  // Public unauthenticated routes and webhooks are exempt from CSRF
+  const reqPath = (req.originalUrl || req.url || '').split('?')[0];
+  if (
+    reqPath.startsWith('/v1/auth/register') ||
+    reqPath.startsWith('/v1/auth/login') ||
+    reqPath.startsWith('/v1/auth/google') ||
+    reqPath.startsWith('/v1/auth/refresh') ||
+    reqPath.startsWith('/v1/auth/forgot-password') ||
+    reqPath.startsWith('/v1/auth/reset-password') ||
+    reqPath.startsWith('/v1/auth/verify-email') ||
+    reqPath.startsWith('/v1/auth/resend-verification') ||
+    reqPath.startsWith('/v1/auth/mfa/challenge') ||
+    reqPath.startsWith('/v1/webhooks') ||
+    reqPath.startsWith('/v1/public') ||
+    reqPath.startsWith('/v1/mcp') ||
+    reqPath.startsWith('/api/mcp')
+  ) {
+    return next();
+  }
+
   const cookieToken = req.cookies?.csrfToken;
   if (cookieToken && typeof cookieToken === 'string') {
     const headerToken = req.headers['x-csrf-token'];

@@ -19,7 +19,8 @@ export const authApi = createApi({
           dispatch(setCredentials({
             user: data.data.user,
             activeWorkspace: data.data.activeWorkspace,
-            accessToken: data.data.tokens.accessToken
+            accessToken: data.data.tokens?.accessToken,
+            csrfToken: data.data.tokens?.csrfToken
           }));
         } catch {}
       }
@@ -38,7 +39,8 @@ export const authApi = createApi({
             dispatch(setCredentials({
               user: data.data.user,
               activeWorkspace: data.data.activeWorkspace,
-              accessToken: data.data.tokens.accessToken
+              accessToken: data.data.tokens?.accessToken,
+              csrfToken: data.data.tokens?.csrfToken
             }));
           }
         } catch {}
@@ -57,7 +59,8 @@ export const authApi = createApi({
           dispatch(setCredentials({
             user: data.data.user,
             activeWorkspace: data.data.activeWorkspace,
-            accessToken: data.data.tokens.accessToken
+            accessToken: data.data.tokens?.accessToken,
+            csrfToken: data.data.tokens?.csrfToken
           }));
         } catch {}
       }
