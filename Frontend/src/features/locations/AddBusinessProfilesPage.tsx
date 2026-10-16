@@ -9,7 +9,12 @@ import {
   useLazySearchPlacesQuery,
   useAddFromPlacesSearchMutation,
 } from '../../store/api/locationApi';
-import { useLazyGetGoogleAuthUrlQuery } from '../../store/api/gbpApi';
+import {
+  useLazyGetGoogleAuthUrlQuery,
+  useGetGoogleStatusQuery,
+  useGetDiscoveredLocationsQuery,
+  useImportLocationMutation,
+} from '../../store/api/gbpApi';
 import {
   ArrowLeft,
   Search,
@@ -20,6 +25,8 @@ import {
   Building2,
   CheckCircle2,
   AlertCircle,
+  Download,
+  Globe,
 } from 'lucide-react';
 import { BusinessAvatar } from '../../components/ui/BusinessAvatar';
 
@@ -34,6 +41,20 @@ export const AddBusinessProfilesPage: React.FC = () => {
   const [triggerSearch, { data: searchResults, isFetching: isSearching }] = useLazySearchPlacesQuery();
   const [addPlace] = useAddFromPlacesSearchMutation();
   const [triggerGetAuthUrl, { isFetching: isAuthUrlLoading }] = useLazyGetGoogleAuthUrlQuery();
+  const { data: googleStatus } = useGetGoogleStatusQuery(workspaceId, { skip: !workspaceId });
+  const isGoogleConnected = Boolean(googleStatus?.isConnected);
+  const googleEmail = googleStatus?.googleEmail || '';
+
+  const {
+    data: discoveredLocations = [],
+    isLoading: isDiscovering,
+    refetch: refetchDiscovered,
+  } = useGetDiscoveredLocationsQuery(workspaceId, {
+    skip: !workspaceId || !isGoogleConnected,
+  });
+
+  const [importLocation] = useImportLocationMutation();
+  const [importingGbpId, setImportingGbpId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [addingPlaceId, setAddingPlaceId] = useState<string | null>(null);
 
@@ -43,6 +64,32 @@ export const AddBusinessProfilesPage: React.FC = () => {
       triggerSearch({ workspaceId, q: debouncedQuery.trim() });
     }
   }, [debouncedQuery, workspaceId, triggerSearch]);
+
+  const handleImportGbp = async (loc: any) => {
+    if (importingGbpId) return;
+    setErrorMessage(null);
+    setImportingGbpId(loc.gbpLocationId || loc.placeId);
+    try {
+      await importLocation({
+        workspaceId,
+        body: loc,
+      }).unwrap();
+
+      toast.success(`"${loc.name}" imported with verified Google ownership!`);
+      navigate('/dashboard', {
+        state: {
+          activatedProfileName: loc.name,
+          successMessage: `"${loc.name}" connected and synced successfully.`,
+        },
+      });
+    } catch (err: any) {
+      const msg = err?.data?.error?.message || 'Failed to import Google Business Profile.';
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setImportingGbpId(null);
+    }
+  };
 
   const handleSelectPlace = async (place: any) => {
     if (addingPlaceId) return;
@@ -111,27 +158,136 @@ export const AddBusinessProfilesPage: React.FC = () => {
           <span>Add Business Profiles</span>
         </Link>
 
+        {/* ── Discovered Google Business Profiles Section ── */}
+        {isGoogleConnected && (
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs mb-6">
+            <div className="flex items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-600 shadow-2xs">
+                  <CheckCircle2 size={20} />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                    Google Business Profile Connected
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Linked to <span className="font-bold text-slate-700">{googleEmail}</span>
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => refetchDiscovered()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs"
+              >
+                <RefreshCw size={12} className={isDiscovering ? 'animate-spin' : ''} />
+                Refresh listings
+              </button>
+            </div>
+
+            {isDiscovering ? (
+              <div className="p-8 text-center text-slate-500 text-xs font-medium flex items-center justify-center gap-2.5">
+                <RefreshCw size={16} className="animate-spin text-brand-600" />
+                <span>Scanning Google accounts for your business listings...</span>
+              </div>
+            ) : discoveredLocations.length > 0 ? (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-500 font-medium mb-2">
+                  Select a business below to import it into your workspace with verified Google ownership:
+                </p>
+                {discoveredLocations.map((loc: any, idx: number) => {
+                  const isThisImporting = importingGbpId === (loc.gbpLocationId || loc.placeId);
+                  return (
+                    <div
+                      key={loc.gbpLocationId || loc.placeId || idx}
+                      className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-brand-500/50 hover:bg-brand-50/20 transition bg-slate-50/50"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand-600 shrink-0 shadow-2xs">
+                          <Building2 size={20} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                            <span className="text-sm font-bold text-slate-900 truncate">
+                              {loc.name}
+                            </span>
+                            {loc.primaryCategory && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                                {loc.primaryCategory}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 truncate font-medium">
+                            {loc.address || `${loc.city || ''}, ${loc.state || ''}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleImportGbp(loc)}
+                        disabled={Boolean(importingGbpId) || loc.isImported}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs shrink-0 inline-flex items-center gap-1.5 cursor-pointer ${
+                          loc.isImported
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                            : 'bg-brand-600 hover:bg-brand-700 text-white active:scale-95'
+                        }`}
+                      >
+                        {isThisImporting ? (
+                          <>
+                            <RefreshCw size={12} className="animate-spin" />
+                            Importing...
+                          </>
+                        ) : loc.isImported ? (
+                          <>
+                            <CheckCircle2 size={12} className="text-emerald-500" />
+                            Imported
+                          </>
+                        ) : (
+                          <>
+                            <Download size={12} />
+                            Import & Track
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-900 leading-relaxed">
+                <span className="font-bold">Notice:</span> Google reported <strong>0 verified business listings</strong> directly owned by <strong>{googleEmail}</strong> on <a href="https://business.google.com" target="_blank" rel="noreferrer" className="underline font-bold">business.google.com</a>.
+                <br />
+                You can search and add any storefront or clinic on Google Maps using the search bar below!
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Find your business Card */}
         <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs mb-5">
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1.5">
-            Find your business
+            {isGoogleConnected ? 'Search & add any business' : 'Find your business'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mb-5 leading-relaxed">
             Search for your business exactly as customers would find its name on Google Maps.
           </p>
 
-          {/* Blue Info Callout Box */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-100/90 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed mb-5 shadow-2xs">
-            Want customers to always find you? Connect your Google account to{' '}
-            <a
-              href="#connect-google"
-              onClick={handleConnectGoogle}
-              className="text-brand-600 font-bold hover:underline cursor-pointer"
-            >
-              sync your Business Profiles
-            </a>
-            . You'll get tools to assist you with higher rankings in Google.
-          </div>
+          {/* Blue Info Callout Box (Only if Google NOT connected yet) */}
+          {!isGoogleConnected && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-100/90 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed mb-5 shadow-2xs">
+              Want customers to always find you? Connect your Google account to{' '}
+              <a
+                href="#connect-google"
+                onClick={handleConnectGoogle}
+                className="text-brand-600 font-bold hover:underline cursor-pointer"
+              >
+                sync your Business Profiles
+              </a>
+              . You'll get tools to assist you with higher rankings in Google.
+            </div>
+          )}
 
           {/* Search Autocomplete Input */}
           <div className="relative">
