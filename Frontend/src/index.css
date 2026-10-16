@@ -12,12 +12,20 @@
   --text-secondary: #4B5563;
   --text-muted: #6B7280;
 
-  --brand-blue: #006EEE;
-  --brand-purple: #623CD0;
+  --brand-indigo: #2E3192;
+  --brand-cyan: #1CB5D6;
+  --brand-navy: #0E1230;
+  --brand-soft-surface: #F4F7FC;
+  --brand-heading: #141833;
+  --brand-body: #5A6180;
+  --brand-green: #1FA971;
+
+  --brand-blue: #2E3192;
+  --brand-purple: #2E3192;
   --brand-gradient: linear-gradient(
-    110deg,
-    #623CD0 0%,
-    #006EEE 100%
+    135deg,
+    #2E3192 0%,
+    #1CB5D6 100%
   );
 
   --brand-50: #eff6ff;
@@ -44,12 +52,13 @@ body,
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #FFFFFF;
-  color: var(--text-primary);
-  font-size: 13px;
-  line-height: 1.45;
+  color: #141833;
+  font-size: 15px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .primary-button {
@@ -71,8 +80,31 @@ body {
 
 /* Accessible focus ring */
 *:focus-visible {
-  outline: 2px solid var(--brand-blue);
+  outline: 2px solid #1CB5D6;
   outline-offset: 1px;
+}
+
+/* Bento Card Style */
+.bento-card {
+  border-radius: 20px;
+  border: 1px solid rgba(46, 49, 146, 0.10);
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(14, 18, 48, 0.04), 0 12px 32px rgba(46, 49, 146, 0.08);
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(14, 18, 48, 0.06), 0 20px 40px rgba(46, 49, 146, 0.12), -4px -4px 24px rgba(28, 181, 214, 0.12);
+  border-color: rgba(28, 181, 214, 0.35);
+}
+
+/* Hero Dotted Background */
+.hero-dotted-grid {
+  background-image: radial-gradient(rgba(28, 181, 214, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Compact flat loading skeletons */
