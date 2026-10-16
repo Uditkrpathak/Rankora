@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useListLocationsQuery } from '../../store/api/locationApi';
@@ -28,6 +28,7 @@ import {
   BarChart3,
   Activity,
   ArrowUp,
+  Plus,
 } from 'lucide-react';
 
 interface Message {
@@ -51,6 +52,10 @@ const DEFAULT_SUGGESTIONS = [
   'Draft an SEO update post for Google Maps',
 ];
 
+const NO_BUSINESS_SUGGESTIONS = [
+  'Add your business profile →',
+];
+
 export const BusinessChatbot: React.FC = () => {
   const { activeWorkspace, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const workspaceId = activeWorkspace?.id || '';
@@ -72,6 +77,7 @@ export const BusinessChatbot: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   // Rate limit countdown effect
   useEffect(() => {
@@ -102,20 +108,34 @@ export const BusinessChatbot: React.FC = () => {
 
   // Initialize professional greeting on open (zero emojis, analytical framing)
   useEffect(() => {
-    if (isOpen && messages.length === 0 && activeLocation) {
-      setMessages([
-        {
-          id: 'welcome',
-          role: 'assistant',
-          content: `**Local Intelligence Summary** for **${activeLocation.name}**\n\nVerified Google Business Profile and local search ranking data are loaded. You can query customer review sentiment, inspect competitive ranking positions, or generate communications grounded in your live business metrics.`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          source: 'deterministic',
-          badge: 'Verified Rankora Live Data',
-          suggestions: DEFAULT_SUGGESTIONS,
-        },
-      ]);
+    if (isOpen && messages.length === 0) {
+      if (activeLocation) {
+        setMessages([
+          {
+            id: 'welcome',
+            role: 'assistant',
+            content: `**Local Intelligence Summary** for **${activeLocation.name}**\n\nVerified Google Business Profile and local search ranking data are loaded. You can query customer review sentiment, inspect competitive ranking positions, or generate communications grounded in your live business metrics.`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            source: 'deterministic',
+            badge: 'Verified Rankora Live Data',
+            suggestions: DEFAULT_SUGGESTIONS,
+          },
+        ]);
+      } else if (locations.length === 0) {
+        setMessages([
+          {
+            id: 'welcome-no-business',
+            role: 'assistant',
+            content: `**Welcome to Rankora Assistant!**\n\nI provide AI-powered answers grounded directly in your **Google Business Profile**, competitor rankings, and review analytics.\n\nTo unlock these insights, please add your first business to this workspace.`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            source: 'deterministic',
+            badge: 'Setup Required',
+            suggestions: NO_BUSINESS_SUGGESTIONS,
+          },
+        ]);
+      }
     }
-  }, [isOpen, activeLocation]);
+  }, [isOpen, activeLocation, locations.length, messages.length]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -126,7 +146,14 @@ export const BusinessChatbot: React.FC = () => {
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputMessage).trim();
-    if (!text || isSending || !workspaceId || !selectedLocationId) return;
+    if (!text || isSending || !workspaceId) return;
+
+    if (locations.length === 0 || !selectedLocationId || text.includes('Add your business profile')) {
+      navigate('/locations/add');
+      setIsOpen(false);
+      return;
+    }
+
     if (rateLimitSeconds !== null && rateLimitSeconds > 0) return;
 
     // Enforce 300 character client boundary
@@ -232,6 +259,18 @@ export const BusinessChatbot: React.FC = () => {
   };
 
   const handleClearHistory = () => {
+    if (locations.length === 0) {
+      setMessages([
+        {
+          id: 'reset-no-business',
+          role: 'assistant',
+          content: `**No business connected yet.**\n\nPlease add a business profile to activate Rankora Assistant.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          suggestions: NO_BUSINESS_SUGGESTIONS,
+        },
+      ]);
+      return;
+    }
     setMessages([
       {
         id: 'reset',
@@ -472,6 +511,31 @@ export const BusinessChatbot: React.FC = () => {
               </div>
             ))}
 
+            {locations.length === 0 && (
+              <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center space-y-3 my-2">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200/60 text-brand-600 flex items-center justify-center mx-auto shadow-2xs">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-xs font-bold text-slate-900">Track your first business</div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed max-w-[220px] mx-auto font-medium">
+                    Add your business to analyze customer reviews, track keyword rankings, and chat with AI.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate('/locations/add');
+                    setIsOpen(false);
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Business Profile</span>
+                </button>
+              </div>
+            )}
+
             {isSending && (
               <div className="flex items-center gap-2 p-3 bg-white rounded-xl border border-slate-200 w-max text-xs text-slate-600">
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-600" />
@@ -506,7 +570,9 @@ export const BusinessChatbot: React.FC = () => {
                 maxLength={300}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder={
-                  rateLimitSeconds !== null && rateLimitSeconds > 0
+                  locations.length === 0
+                    ? 'Add a business to unlock Rankora Assistant...'
+                    : rateLimitSeconds !== null && rateLimitSeconds > 0
                     ? `Please wait ${rateLimitSeconds}s...`
                     : `Ask about reviews, rankings, competitors, or drafts...`
                 }
@@ -515,11 +581,11 @@ export const BusinessChatbot: React.FC = () => {
               />
               <button
                 type="submit"
-                disabled={!inputMessage.trim() || isSending || (rateLimitSeconds !== null && rateLimitSeconds > 0)}
+                disabled={(!inputMessage.trim() && locations.length > 0) || isSending || (rateLimitSeconds !== null && rateLimitSeconds > 0)}
                 className="p-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white disabled:text-slate-400 rounded-lg transition cursor-pointer disabled:cursor-not-allowed shrink-0"
-                title="Send query"
+                title={locations.length === 0 ? 'Add business' : 'Send query'}
               >
-                <ArrowUp className="w-4 h-4" />
+                {locations.length === 0 ? <Plus className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}
               </button>
             </form>
             {/* Helper line & Counter */}
