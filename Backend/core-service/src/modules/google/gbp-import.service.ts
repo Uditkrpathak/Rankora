@@ -34,6 +34,11 @@ export class GbpImportService {
     for (const conn of connections) {
       try {
         const accessToken = await googleVaultService.getValidAccessToken(workspaceId, conn.googleEmail);
+        if (!accessToken) {
+          throw new Error('GBP OAuth access token is missing');
+        }
+        console.log('GBP access token present:', Boolean(accessToken));
+
         const accounts = await gbpClientService.listAccounts(accessToken, workspaceId);
 
         for (const acc of accounts) {

@@ -1279,8 +1279,15 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Bottom Line */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-[#2E3192]/10 text-center text-[11px] text-[#8E97B8]">
-          &copy; 2026 Rankora by Agumentik Software Private Limited. All rights reserved.
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-[#2E3192]/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#8E97B8]">
+          <div>
+            &copy; 2026 Rankora by Agumentik Software Private Limited. All rights reserved.
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/terms" className="hover:text-[#2E3192] transition">Terms of Service</Link>
+            <span>&bull;</span>
+            <Link to="/privacy" className="hover:text-[#2E3192] transition">Privacy Policy</Link>
+          </div>
         </div>
       </footer>
     </div>

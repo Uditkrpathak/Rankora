@@ -21,6 +21,8 @@ import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
 import { SessionsPage } from './features/auth/SessionsPage';
 import { SecuritySettingsPage } from './features/auth/SecuritySettingsPage';
 import { PublicReportPage } from './features/rankings/PublicReportPage';
+import { PrivacyPolicyPage } from './features/legal/PrivacyPolicyPage';
+import { TermsOfServicePage } from './features/legal/TermsOfServicePage';
 
 // App Pages (protected)
 import { DashboardPage } from './features/dashboard/DashboardPage';
@@ -114,6 +116,8 @@ export const App: React.FC = () => {
         <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
         <Route path="/reset-password" element={<PublicOnlyRoute><ResetPasswordPage /></PublicOnlyRoute>} />
         <Route path="/reports/:shareToken" element={<PublicReportPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
 
         {/* ── Core Navigation Routes ─────────────────────────────────── */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />

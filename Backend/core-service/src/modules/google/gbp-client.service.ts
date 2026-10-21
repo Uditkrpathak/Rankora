@@ -106,8 +106,23 @@ export class GbpClientService {
         const errorBody = await response.text().catch(() => '');
 
         console.error(`[GBP API Error] Workspace: ${workspaceId}, Status: ${status}, URL: ${url}`);
+        let parsed: any = null;
+        try {
+          parsed = JSON.parse(errorBody);
+          console.error("GBP API status:", status);
+          console.error("GBP API response:", parsed);
+        } catch {
+          console.error("GBP API status:", status);
+          console.error("GBP API response:", errorBody);
+        }
 
-        if ([429, 500, 502, 503, 504].includes(status) && attempt < maxRetries) {
+        const isZeroQuota = status === 429 && (
+          errorBody.includes('Quota exceeded') ||
+          errorBody.includes('Requests per minute') ||
+          parsed?.error?.status === 'RESOURCE_EXHAUSTED'
+        );
+
+        if (!isZeroQuota && [429, 500, 502, 503, 504].includes(status) && attempt < maxRetries) {
           attempt++;
           const jitter = Math.random() * 200;
           await new Promise((resolve) => setTimeout(resolve, delay + jitter));
@@ -116,13 +131,17 @@ export class GbpClientService {
         }
 
         this.recordFailure(workspaceId);
-        let googleMessage = '';
-        try {
-          const parsed = JSON.parse(errorBody);
-          googleMessage = parsed?.error?.message || '';
-        } catch {
-          // Keep the provider response out of the user-facing message if it is not JSON.
+
+        if (isZeroQuota) {
+          const quotaErr: any = new Error(
+            `Google Business Profile API quota is 0 for this Cloud project. Please submit the Google Business Profile API Access Request Form to activate default quota.`
+          );
+          quotaErr.statusCode = 429;
+          quotaErr.code = 'GBP_QUOTA_ZERO';
+          throw quotaErr;
         }
+
+        let googleMessage = parsed?.error?.message || '';
 
         const err: any = new Error(
           status === 403
@@ -145,7 +164,7 @@ export class GbpClientService {
           throw timeoutErr;
         }
 
-        if (attempt < maxRetries && err.statusCode && [429, 500, 502, 503, 504].includes(err.statusCode)) {
+        if (attempt < maxRetries && err.statusCode && [429, 500, 502, 503, 504].includes(err.statusCode) && err.code !== 'GBP_QUOTA_ZERO') {
           attempt++;
           const jitter = Math.random() * 200;
           await new Promise((resolve) => setTimeout(resolve, delay + jitter));
@@ -163,6 +182,11 @@ export class GbpClientService {
    * Discovers GBP accounts for connected user (prod-locked for mock mode)
    */
   public async listAccounts(accessToken: string, workspaceId: string): Promise<Array<{ name: string; accountName: string; type: string }>> {
+    if (!accessToken) {
+      throw new Error("GBP OAuth access token is missing");
+    }
+    console.log("GBP access token present:", Boolean(accessToken));
+
     if (accessToken.startsWith('mock_')) {
       if (ENV.NODE_ENV === 'production') {
         throw new Error('MOCK_GBP_DISCOVERY_FORBIDDEN_IN_PRODUCTION');
@@ -181,7 +205,12 @@ export class GbpClientService {
       if (pageToken) params.set('pageToken', pageToken);
       const data = await this.requestWithRetry(
         `https://mybusinessaccountmanagement.googleapis.com/v1/accounts?${params.toString()}`,
-        { headers: { Authorization: `Bearer ${accessToken}` } },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: 'application/json',
+          },
+        },
         workspaceId
       );
 
