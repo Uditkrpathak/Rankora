@@ -91,22 +91,13 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="grid grid-cols-1 gap-3 text-xs">
             <div className="p-3 rounded-lg border border-slate-100 bg-slate-50/50 space-y-1">
               <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
                 Account Status
               </span>
               <p className="font-medium text-slate-800 capitalize">
                 {user?.status?.toLowerCase().replace(/_/g, ' ') || 'Active'}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg border border-slate-100 bg-slate-50/50 space-y-1">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
-                Two-Factor Authentication
-              </span>
-              <p className="font-medium text-slate-800">
-                {user?.mfaEnabled ? 'Enabled' : 'Disabled'}
               </p>
             </div>
           </div>

@@ -6,9 +6,6 @@ import { updateUserProfile, logOut } from '../../store/slices/authSlice';
 import {
   useUpdateMeMutation,
   useUploadAvatarMutation,
-  useRequestEmailChangeMutation,
-  useChangePasswordMutation,
-  useCreatePasswordMutation,
   useRequestAccountDeletionMutation
 } from '../../store/api/authApi';
 import { useListLocationsQuery } from '../../store/api/locationApi';
@@ -16,16 +13,12 @@ import { BusinessAvatar } from '../../components/ui/BusinessAvatar';
 import { SettingsLayout } from './SettingsLayout';
 import {
   User,
-  Mail,
-  Lock,
   Shield,
   Laptop,
   AlertTriangle,
   Camera,
   CheckCircle2,
   XCircle,
-  Eye,
-  EyeOff,
   Sparkles,
   Loader2,
   Check,
@@ -53,13 +46,7 @@ export const AccountPage: React.FC = () => {
   // RTK Query Mutations
   const [updateMe, { isLoading: isUpdatingName }] = useUpdateMeMutation();
   const [uploadAvatar, { isLoading: isUploadingAvatar }] = useUploadAvatarMutation();
-  const [requestEmailChange, { isLoading: isRequestingEmail }] = useRequestEmailChangeMutation();
-  const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation();
-  const [createPassword, { isLoading: isRequestingCreatePassword }] = useCreatePasswordMutation();
   const [requestAccountDeletion, { isLoading: isDeletingAccount }] = useRequestAccountDeletionMutation();
-
-  const [createPasswordSuccess, setCreatePasswordSuccess] = useState<string | null>(null);
-  const [createPasswordError, setCreatePasswordError] = useState<string | null>(null);
 
   // Name editing state
   const [isEditingName, setIsEditingName] = useState(false);
@@ -74,46 +61,12 @@ export const AccountPage: React.FC = () => {
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Email change modal
-  const [showEmailModal, setShowEmailModal] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
-  const [emailPassword, setEmailPassword] = useState('');
-  const [emailModalSuccess, setEmailModalSuccess] = useState<string | null>(null);
-  const [emailModalError, setEmailModalError] = useState<string | null>(null);
-
-  // Password change modal
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPass, setShowCurrentPass] = useState(false);
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [passModalSuccess, setPassModalSuccess] = useState<string | null>(null);
-  const [passModalError, setPassModalError] = useState<string | null>(null);
-
   // Account deletion modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteConfirmPhrase, setDeleteConfirmPhrase] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string | null>(null);
-
-  // Real-time password rules checklist
-  const passwordRules = {
-    length: newPassword.length >= 8,
-    uppercase: /[A-Z]/.test(newPassword),
-    lowercase: /[a-z]/.test(newPassword),
-    number: /[0-9]/.test(newPassword),
-    special: /[^A-Za-z0-9]/.test(newPassword),
-    matches: newPassword.length > 0 && newPassword === confirmPassword
-  };
-  const isNewPasswordValid =
-    passwordRules.length &&
-    passwordRules.uppercase &&
-    passwordRules.lowercase &&
-    passwordRules.number &&
-    passwordRules.special &&
-    passwordRules.matches;
 
   // Handlers
   const handleSaveName = async (e: React.FormEvent) => {
@@ -177,76 +130,7 @@ export const AccountPage: React.FC = () => {
     }
   };
 
-  const handleRequestEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setEmailModalError(null);
-    setEmailModalSuccess(null);
 
-    if (!newEmail.trim() || !emailPassword) {
-      setEmailModalError('Please enter both your new email and current password.');
-      return;
-    }
-
-    try {
-      const res = await requestEmailChange({
-        newEmail: newEmail.trim(),
-        currentPassword: emailPassword
-      }).unwrap();
-
-      setEmailModalSuccess(
-        res.data?.message ||
-          `A verification link has been sent to ${newEmail}. A security notice was also delivered to your current address.`
-      );
-      setNewEmail('');
-      setEmailPassword('');
-    } catch (err: any) {
-      setEmailModalError(err?.data?.error?.message || 'Failed to request email change.');
-    }
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPassModalError(null);
-    setPassModalSuccess(null);
-
-    if (!currentPassword) {
-      setPassModalError('Please provide your current password.');
-      return;
-    }
-    if (!isNewPasswordValid) {
-      setPassModalError('Please fulfill all password requirements before saving.');
-      return;
-    }
-
-    try {
-      await changePassword({
-        currentPassword,
-        newPassword
-      }).unwrap();
-
-      setPassModalSuccess('Password successfully updated! A security confirmation email has been sent.');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setTimeout(() => {
-        setShowPasswordModal(false);
-        setPassModalSuccess(null);
-      }, 2500);
-    } catch (err: any) {
-      setPassModalError(err?.data?.error?.message || 'Failed to update password.');
-    }
-  };
-
-  const handleRequestCreatePassword = async () => {
-    setCreatePasswordError(null);
-    setCreatePasswordSuccess(null);
-    try {
-      const res = await createPassword().unwrap();
-      setCreatePasswordSuccess(res.data?.message || 'A confirmation link has been sent to your email.');
-    } catch (err: any) {
-      setCreatePasswordError(err?.data?.error?.message || 'Failed to send password creation link.');
-    }
-  };
 
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -581,95 +465,6 @@ export const AccountPage: React.FC = () => {
           )}
         </div>
 
-        {/* Account Credentials (Email & Password) */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900 mb-5 flex items-center gap-2">
-            <Lock className="w-4 h-4 text-brand-600" />
-            Login Credentials
-          </h2>
-
-          <div className="divide-y divide-slate-100">
-            {/* Email Row */}
-            <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm font-semibold text-slate-800">Email Address</span>
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Current: <span className="font-medium text-slate-700">{user?.email}</span>
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowEmailModal(true);
-                  setEmailModalError(null);
-                  setEmailModalSuccess(null);
-                }}
-                className="self-start sm:self-auto px-3.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-lg text-xs font-semibold shadow-xs hover:bg-slate-50 transition"
-              >
-                Change Email
-              </button>
-            </div>
-
-            {/* Password Row */}
-            <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm font-semibold text-slate-800">Password</span>
-                  {user?.hasPassword === false && (
-                    <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
-                      OAuth Only (No Password)
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  {user?.hasPassword === false
-                    ? 'Your account was created via Google OAuth. Set a password to enable password sign-in and account updates.'
-                    : 'Secured with Argon2id encryption. In-session changes require your current password.'}
-                </p>
-                {createPasswordSuccess && (
-                  <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {createPasswordSuccess}
-                  </p>
-                )}
-                {createPasswordError && (
-                  <p className="text-xs text-red-600 font-medium mt-1 flex items-center gap-1">
-                    <XCircle className="w-3.5 h-3.5" />
-                    {createPasswordError}
-                  </p>
-                )}
-              </div>
-              {user?.hasPassword === false ? (
-                <button
-                  type="button"
-                  onClick={handleRequestCreatePassword}
-                  disabled={isRequestingCreatePassword}
-                  className="self-start sm:self-auto px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {isRequestingCreatePassword && <Loader2 className="w-3 h-3 animate-spin" />}
-                  Set Password
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPasswordModal(true);
-                    setPassModalError(null);
-                    setPassModalSuccess(null);
-                  }}
-                  className="self-start sm:self-auto px-3.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-lg text-xs font-semibold shadow-xs hover:bg-slate-50 transition"
-                >
-                  Change Password
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Security & Devices Shortcuts (Reused pages) */}
         <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
           <h2 className="text-base font-semibold text-slate-900 mb-2 flex items-center gap-2">
@@ -677,40 +472,10 @@ export const AccountPage: React.FC = () => {
             Security & Authentication
           </h2>
           <p className="text-xs text-slate-500 mb-5">
-            Configure multi-factor authentication (MFA) and monitor active logged-in device sessions.
+            Monitor active logged-in device sessions across all your devices.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* 2FA Card */}
-            <Link
-              to="/security"
-              className="p-4 rounded-xl border border-slate-200 hover:border-brand-300 hover:bg-brand-50/30 transition group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="p-2 rounded-lg bg-brand-50 text-brand-600 group-hover:bg-brand-100 transition">
-                    <Shield className="w-5 h-5" />
-                  </div>
-                  {user?.mfaEnabled ? (
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                      2FA Enabled
-                    </span>
-                  ) : (
-                    <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                      Disabled
-                    </span>
-                  )}
-                </div>
-                <h4 className="text-sm font-semibold text-slate-900">Two-Factor Authentication</h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Add an extra layer of protection to your account using TOTP authenticator apps.
-                </p>
-              </div>
-              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-brand-600 group-hover:translate-x-0.5 transition-transform">
-                Configure 2FA <ExternalLink className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-
+          <div className="grid grid-cols-1 gap-4">
             {/* Active Sessions Card */}
             <Link
               to="/sessions"
@@ -764,297 +529,7 @@ export const AccountPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Modal: Change Email Address ──────────────────────────────────────── */}
-      {showEmailModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-brand-600" />
-                Change Email Address
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowEmailModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            {emailModalSuccess ? (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
-                  <p className="font-semibold mb-1 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Confirmation Link Dispatched!
-                  </p>
-                  <p className="text-slate-600">{emailModalSuccess}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowEmailModal(false)}
-                  className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold hover:bg-slate-800"
-                >
-                  Done
-                </button>
-              </div>
-            ) : user?.hasPassword === false ? (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
-                  <p className="font-semibold mb-1 flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    Password Required to Change Email
-                  </p>
-                  <p className="text-slate-600">
-                    Because your account was created with Google OAuth, it does not currently have a password. Please set a password first to verify your identity before updating your email.
-                  </p>
-                </div>
-
-                {createPasswordSuccess && (
-                  <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                    <span>{createPasswordSuccess}</span>
-                  </div>
-                )}
-                {createPasswordError && (
-                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                    <XCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>{createPasswordError}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowEmailModal(false)}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRequestCreatePassword}
-                    disabled={isRequestingCreatePassword}
-                    className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    {isRequestingCreatePassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    Send Password Creation Link
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleRequestEmailChange} className="space-y-4">
-                <p className="text-xs text-slate-500">
-                  Changing your email updates your login identity. We will send a confirmation link to your new address and a security alert to your current inbox.
-                </p>
-
-                {emailModalError && (
-                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                    <XCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>{emailModalError}</span>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    New Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-900"
-                    placeholder="you@newcompany.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Current Password (Re-authentication)
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={emailPassword}
-                    onChange={(e) => setEmailPassword(e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-900"
-                    placeholder="••••••••••••"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowEmailModal(false)}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isRequestingEmail}
-                    className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    {isRequestingEmail && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    Send Verification
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Modal: Change Password ─────────────────────────────────────────── */}
-      {showPasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-brand-600" />
-                Change Password
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowPasswordModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {passModalSuccess ? (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                <span>{passModalSuccess}</span>
-              </div>
-            ) : (
-              <form onSubmit={handleChangePassword} className="space-y-4">
-                {passModalError && (
-                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                    <XCircle className="w-4 h-4 flex-shrink-0" />
-                    <span>{passModalError}</span>
-                  </div>
-                )}
-
-                {/* Current Password */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Current Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showCurrentPass ? 'text' : 'password'}
-                      required
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full pl-3.5 pr-10 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-900"
-                      placeholder="••••••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPass(!showCurrentPass)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* New Password */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showNewPass ? 'text' : 'password'}
-                      required
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full pl-3.5 pr-10 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-900"
-                      placeholder="Enter new strong password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPass(!showNewPass)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm Password */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-slate-900"
-                    placeholder="Repeat new password"
-                  />
-                </div>
-
-                {/* Live Password Rules Checklist */}
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs text-slate-600">
-                  <div className="font-semibold text-slate-700 mb-1">Password Requirements:</div>
-                  <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                    <div className={`flex items-center gap-1.5 ${passwordRules.length ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {passwordRules.length ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5" />}
-                      8+ characters
-                    </div>
-                    <div className={`flex items-center gap-1.5 ${passwordRules.uppercase ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {passwordRules.uppercase ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5" />}
-                      Uppercase letter
-                    </div>
-                    <div className={`flex items-center gap-1.5 ${passwordRules.lowercase ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {passwordRules.lowercase ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5" />}
-                      Lowercase letter
-                    </div>
-                    <div className={`flex items-center gap-1.5 ${passwordRules.number ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {passwordRules.number ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5" />}
-                      Number (0-9)
-                    </div>
-                    <div className={`flex items-center gap-1.5 ${passwordRules.special ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {passwordRules.special ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5" />}
-                      Special symbol
-                    </div>
-                    <div className={`flex items-center gap-1.5 ${passwordRules.matches ? 'text-emerald-700' : 'text-slate-400'}`}>
-                      {passwordRules.matches ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5" />}
-                      Passwords match
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordModal(false)}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isChangingPassword || !isNewPasswordValid}
-                    className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
-                  >
-                    {isChangingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    Update Password
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ── Modal: Delete Account (Danger Zone) ────────────────────────────── */}
       {showDeleteModal && (
