@@ -11,6 +11,7 @@ import { getEffectiveLimits, EXPIRED_PLAN_BEHAVIOR, PLAN_DEFAULTS } from '@local
 import { requireRole } from '../src/middleware/platform.middleware';
 import { authenticate } from '../src/middleware/auth.middleware';
 import { authService } from '../src/modules/auth/auth.service';
+import { accountService } from '../src/modules/auth/account.service';
 
 // 1. Refuse execution if NODE_ENV=production
 if (process.env.NODE_ENV?.trim().toLowerCase() === 'production') {
@@ -479,6 +480,325 @@ async function runSuite() {
       if (EXPIRED_PLAN_BEHAVIOR === 'FALLBACK_TO_TRIAL') {
         assert.strictEqual(refreshed?.planName, 'Trial', 'Expired plan must lazily fall back to Trial');
       }
+    });
+
+    // ── Test 13: create-password rejects if password exists, sends confirmation if OAuth only ───
+    await test('13. create-password: 30m expiry, rejection if password exists, never serialized', async () => {
+      // 13a. User with existing password must be rejected
+      const userWithPwd = await User.create({
+        name: 'User With Password',
+        email: `pwd-exists-${testSuffix}@testsuite.local`,
+        passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$dummyhash',
+        status: 'ACTIVE'
+      });
+      testUsersToCleanup.push(userWithPwd._id.toString());
+
+      let rejected = false;
+      try {
+        await accountService.requestCreatePassword(userWithPwd._id.toString());
+      } catch (err: any) {
+        rejected = true;
+        assert.strictEqual(err.code, 'PASSWORD_ALREADY_EXISTS');
+      }
+      assert.strictEqual(rejected, true, 'Must reject create-password if user already has a password');
+
+      // 13b. OAuth-only user (no password) can request and confirm password
+      const oauthUser = await User.create({
+        name: 'Google OAuth User',
+        email: `oauth-user-${testSuffix}@testsuite.local`,
+        googleSub: `googlesub-${testSuffix}`,
+        status: 'ACTIVE'
+      });
+      testUsersToCleanup.push(oauthUser._id.toString());
+
+      const result = await accountService.requestCreatePassword(oauthUser._id.toString());
+      assert.strictEqual(result.success, true);
+      assert.ok(result.rawToken, 'rawToken returned in non-prod environment for testing');
+
+      // Verify token expiry is set to 30 minutes
+      const userBeforeConfirm = await User.findById(oauthUser._id).select('+createPasswordTokenHash +createPasswordExpiresAt');
+      assert.ok(userBeforeConfirm?.createPasswordExpiresAt);
+      const diffMs = userBeforeConfirm.createPasswordExpiresAt.getTime() - Date.now();
+      assert.ok(diffMs > 28 * 60 * 1000 && diffMs <= 30 * 60 * 1000, 'create-password token expiry must be 30 minutes');
+
+      // Verify createPasswordTokenHash is select: false (not returned in normal queries)
+      const plainQueryUser = await User.findById(oauthUser._id);
+      assert.strictEqual(plainQueryUser?.createPasswordTokenHash, undefined, 'createPasswordTokenHash must have select: false');
+      assert.strictEqual(plainQueryUser?.createPasswordExpiresAt, undefined, 'createPasswordExpiresAt must have select: false');
+
+      // Verify createPasswordTokenHash is never serialized in toJSON
+      const serializedJson = userBeforeConfirm.toJSON();
+      assert.strictEqual(serializedJson.createPasswordTokenHash, undefined, 'createPasswordTokenHash must NEVER be serialized in toJSON');
+      assert.strictEqual(serializedJson.createPasswordExpiresAt, undefined, 'createPasswordExpiresAt must NEVER be serialized in toJSON');
+
+      // 13c. Verify unauthenticated create-password endpoint returns generic response
+      const unauthNonexistent = await accountService.requestCreatePasswordByEmail(`nonexistent-${testSuffix}@testsuite.local`);
+      assert.strictEqual(unauthNonexistent.message, 'If an account exists without a password, a confirmation link has been sent.');
+      assert.strictEqual((unauthNonexistent as any).rawToken, undefined, 'rawToken must not be returned in unauthenticated response');
+
+      const unauthExistingPwd = await accountService.requestCreatePasswordByEmail(userWithPwd.email);
+      assert.strictEqual(unauthExistingPwd.message, 'If an account exists without a password, a confirmation link has been sent.');
+      assert.strictEqual((unauthExistingPwd as any).rawToken, undefined, 'rawToken must not be returned for password-protected accounts');
+
+      // 13d. Confirm password creation using token and verify other sessions revoked
+      const initialSessionVersion = oauthUser.sessionVersion || 1;
+      const confirmResult = await accountService.confirmCreatePassword(result.rawToken!, 'StrongP@ssw0rd!');
+      assert.strictEqual(confirmResult.success, true);
+
+      // Verify user now has password, token fields are cleared, and sessionVersion was incremented (revoking other sessions)
+      const updatedUser = await User.findById(oauthUser._id);
+      assert.ok(updatedUser?.passwordHash, 'User now has a passwordHash');
+      assert.strictEqual(updatedUser?.createPasswordTokenHash, undefined);
+      assert.strictEqual(updatedUser?.createPasswordExpiresAt, undefined);
+      assert.strictEqual(updatedUser?.sessionVersion, initialSessionVersion + 1, 'sessionVersion must be incremented to revoke other sessions');
+
+      // Second attempt to create password must be rejected
+      let secondAttemptRejected = false;
+      try {
+        await accountService.requestCreatePassword(oauthUser._id.toString());
+      } catch (err: any) {
+        secondAttemptRejected = true;
+        assert.strictEqual(err.code, 'PASSWORD_ALREADY_EXISTS');
+      }
+      assert.strictEqual(secondAttemptRejected, true, 'Subsequent create-password request rejected once password exists');
+    });
+
+    // ── Test 14: Password-registered user logging in with Google gets linked, not duplicated ───
+    await test('14. Password-registered user logging in with Google gets linked, not duplicated', async () => {
+      const email = `pwd-linked-${testSuffix}@testsuite.local`;
+      const pwdUser = await User.create({
+        name: 'Password User',
+        email,
+        passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$dummyhash',
+        isEmailVerified: true,
+        status: 'ACTIVE'
+      });
+      testUsersToCleanup.push(pwdUser._id.toString());
+      assert.strictEqual(pwdUser.googleSub, undefined, 'Initially has no googleSub');
+
+      const gSub = `sub_linked_${testSuffix}`;
+      const { user: loggedInUser } = await authService.googleLogin({
+        idToken: `mock_google_${gSub}:${email}`
+      });
+
+      assert.strictEqual(loggedInUser._id.toString(), pwdUser._id.toString(), 'Must link to the existing user record');
+      assert.strictEqual(loggedInUser.googleSub, gSub, 'googleSub must be linked on existing user');
+      assert.ok(loggedInUser.passwordHash, 'Password hash must be preserved');
+
+      // Verify database count to guarantee no duplication
+      const userCount = await User.countDocuments({ email });
+      assert.strictEqual(userCount, 1, 'User must not be duplicated');
+    });
+
+    // ── Test 15: Legacy user without googleSub can log in via Google ───
+    await test('15. Legacy user without googleSub can log in via Google email fallback', async () => {
+      const legacyEmail = `legacy-user-${testSuffix}@testsuite.local`;
+      const legacyUser = await User.create({
+        name: 'Legacy User',
+        email: legacyEmail,
+        status: 'ACTIVE'
+      });
+      testUsersToCleanup.push(legacyUser._id.toString());
+      assert.strictEqual(legacyUser.googleSub, undefined, 'Legacy user has no googleSub initially');
+
+      const legacySub = `sub_legacy_${testSuffix}`;
+      const { user: authenticatedLegacy } = await authService.googleLogin({
+        idToken: `mock_google_${legacySub}:${legacyEmail}`
+      });
+
+      assert.strictEqual(authenticatedLegacy._id.toString(), legacyUser._id.toString(), 'Legacy user successfully logged in');
+      assert.strictEqual(authenticatedLegacy.googleSub, legacySub, 'googleSub set on legacy user');
+      assert.strictEqual(authenticatedLegacy.status, 'ACTIVE');
+    });
+
+    // ── Test 16: Google login matches user by googleId (googleSub) even after email change ───
+    await test('16. Google login matches user by googleId (googleSub) even after email change', async () => {
+      const gSub = `sub-immutable-${testSuffix}`;
+      const originalEmail = `guser-${testSuffix}@testsuite.local`;
+      const changedEmail = `guser-changed-${testSuffix}@testsuite.local`;
+
+      // Create initial Google user
+      const gUser = await User.create({
+        name: 'Google Sub User',
+        email: originalEmail,
+        googleSub: gSub,
+        status: 'ACTIVE'
+      });
+      testUsersToCleanup.push(gUser._id.toString());
+
+      // Simulate user changing their email address in Rankora
+      gUser.email = changedEmail;
+      await gUser.save();
+
+      // Login with Google via googleSub (even though token may have different or changed email)
+      const { user: resolvedUser } = await authService.googleLogin({
+        idToken: `mock_google_${gSub}:${originalEmail}`
+      });
+
+      assert.strictEqual(resolvedUser._id.toString(), gUser._id.toString(), 'Resolved by immutable googleSub');
+      assert.strictEqual(resolvedUser.email, changedEmail, 'Preserved updated account email');
+    });
+
+    // ── Test 17: googleLogin rejects suspended or soft-deleted users on email fallback ───
+    await test('17. googleLogin rejects suspended or soft-deleted users on email fallback', async () => {
+      // 17a. Suspended user
+      const suspendedEmail = `suspended-fallback-${testSuffix}@testsuite.local`;
+      const suspendedUser = await User.create({
+        name: 'Suspended User',
+        email: suspendedEmail,
+        status: 'SUSPENDED'
+      });
+      testUsersToCleanup.push(suspendedUser._id.toString());
+
+      let suspendedRejected = false;
+      try {
+        await authService.googleLogin({
+          idToken: `mock_google_sub_susp_${testSuffix}:${suspendedEmail}`
+        });
+      } catch (err: any) {
+        suspendedRejected = true;
+        assert.strictEqual(err.message, 'ACCOUNT_SUSPENDED');
+        assert.strictEqual(err.statusCode, 403);
+      }
+      assert.strictEqual(suspendedRejected, true, 'Must reject suspended user on googleLogin fallback');
+
+      // 17b. Deleted / Pending deletion user
+      const deletedEmail = `deleted-fallback-${testSuffix}@testsuite.local`;
+      const deletedUser = await User.create({
+        name: 'Deleted User',
+        email: deletedEmail,
+        status: 'PENDING_DELETION'
+      });
+      testUsersToCleanup.push(deletedUser._id.toString());
+
+      let deletedRejected = false;
+      try {
+        await authService.googleLogin({
+          idToken: `mock_google_sub_del_${testSuffix}:${deletedEmail}`
+        });
+      } catch (err: any) {
+        deletedRejected = true;
+        assert.strictEqual(err.message, 'ACCOUNT_DELETED');
+        assert.strictEqual(err.statusCode, 403);
+      }
+      assert.strictEqual(deletedRejected, true, 'Must reject soft-deleted user on googleLogin fallback');
+    });
+
+    // ── Test 18: If existing account email was never verified, clear passwordHash and tokens before linking ───
+    await test('18. If existing account email was never verified, clear passwordHash and tokens before linking', async () => {
+      const unverifiedEmail = `unverified-${testSuffix}@testsuite.local`;
+      const unverifiedUser = await User.create({
+        name: 'Unverified Pre-Registered User',
+        email: unverifiedEmail,
+        passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$unverifiedpass',
+        status: 'PENDING_VERIFICATION',
+        emailVerificationTokenHash: 'dummy_verify_token',
+        emailVerificationExpiresAt: new Date(Date.now() + 3600000),
+        passwordResetTokenHash: 'dummy_reset_token',
+        passwordResetExpiresAt: new Date(Date.now() + 3600000),
+        sessionVersion: 1
+      });
+      testUsersToCleanup.push(unverifiedUser._id.toString());
+      assert.strictEqual(unverifiedUser.isEmailVerified, false);
+      assert.ok(unverifiedUser.passwordHash);
+
+      const gSub = `sub_unverified_${testSuffix}`;
+      const { user: linkedUser } = await authService.googleLogin({
+        idToken: `mock_google_${gSub}:${unverifiedEmail}`
+      });
+
+      assert.strictEqual(linkedUser._id.toString(), unverifiedUser._id.toString(), 'Links to the existing account');
+      assert.strictEqual(linkedUser.googleSub, gSub, 'Sets googleSub on account');
+
+      // Refresh from DB to verify passwordHash and pending tokens were cleared and email is now verified
+      const refreshed = await User.findById(unverifiedUser._id);
+      assert.strictEqual(refreshed?.passwordHash, undefined, 'passwordHash must be cleared for unverified pre-existing account');
+      assert.strictEqual(refreshed?.isEmailVerified, true, 'isEmailVerified marked true by verified Google identity');
+      assert.strictEqual(refreshed?.status, 'ACTIVE', 'Status transitions from PENDING_VERIFICATION to ACTIVE');
+      assert.strictEqual(refreshed?.emailVerificationTokenHash, undefined, 'emailVerificationTokenHash must be cleared');
+      assert.strictEqual(refreshed?.emailVerificationExpiresAt, undefined, 'emailVerificationExpiresAt must be cleared');
+      assert.strictEqual(refreshed?.passwordResetTokenHash, undefined, 'passwordResetTokenHash must be cleared');
+      assert.strictEqual(refreshed?.passwordResetExpiresAt, undefined, 'passwordResetExpiresAt must be cleared');
+      assert.strictEqual(refreshed?.sessionVersion, 2, 'sessionVersion incremented to invalidate prior sessions');
+    });
+
+    // ── Test 19: googleLogin rejects with 403 on email fallback if matched user already has different googleSub ───
+    await test('19. googleLogin rejects with 403 on email fallback if matched user already has different googleSub', async () => {
+      const email = `conflict-sub-${testSuffix}@testsuite.local`;
+      const originalSub = `sub_orig_${testSuffix}`;
+      const attackerSub = `sub_different_${testSuffix}`;
+
+      const existingUser = await User.create({
+        name: 'Existing Linked User',
+        email,
+        googleSub: originalSub,
+        status: 'ACTIVE',
+        isEmailVerified: true
+      });
+      testUsersToCleanup.push(existingUser._id.toString());
+
+      let conflictRejected = false;
+      try {
+        await authService.googleLogin({
+          idToken: `mock_google_${attackerSub}:${email}`
+        });
+      } catch (err: any) {
+        conflictRejected = true;
+        assert.strictEqual(err.message, 'GOOGLE_ACCOUNT_CONFLICT');
+        assert.strictEqual(err.statusCode, 403);
+      }
+      assert.strictEqual(conflictRejected, true, 'Must reject with 403 on googleSub mismatch');
+
+      // Ensure original googleSub is untampered
+      const unchanged = await User.findById(existingUser._id);
+      assert.strictEqual(unchanged?.googleSub, originalSub, 'Existing googleSub must remain intact');
+    });
+
+    // ── Test 20: googleLogin primary path (found directly by googleSub) rejects suspended/deleted users with 403 ───
+    await test('20. googleLogin primary path (by googleSub) rejects suspended and deleted users with 403', async () => {
+      const suspSub = `sub_prim_susp_${testSuffix}`;
+      const suspEmail = `prim-susp-${testSuffix}@testsuite.local`;
+      const suspUser = await User.create({
+        name: 'Primary Suspended User',
+        email: suspEmail,
+        googleSub: suspSub,
+        status: 'SUSPENDED'
+      });
+      testUsersToCleanup.push(suspUser._id.toString());
+
+      let suspRejected = false;
+      try {
+        await authService.googleLogin({
+          idToken: `mock_google_${suspSub}:${suspEmail}`
+        });
+      } catch (err: any) {
+        suspRejected = true;
+        assert.strictEqual(err.message, 'ACCOUNT_SUSPENDED');
+        assert.strictEqual(err.statusCode, 403);
+      }
+      assert.strictEqual(suspRejected, true, 'Primary path must reject suspended user with 403');
+
+      const delSub = `sub_prim_del_${testSuffix}`;
+      const delEmail = `prim-del-${testSuffix}@testsuite.local`;
+      const delUser = await User.create({
+        name: 'Primary Deleted User',
+        email: delEmail,
+        googleSub: delSub,
+        status: 'DELETED'
+      });
+      testUsersToCleanup.push(delUser._id.toString());
+
+      let delRejected = false;
+      try {
+        await authService.googleLogin({
+          idToken: `mock_google_${delSub}:${delEmail}`
+        });
+      } catch (err: any) {
+        delRejected = true;
+        assert.strictEqual(err.message, 'ACCOUNT_DELETED');
+        assert.strictEqual(err.statusCode, 403);
+      }
+      assert.strictEqual(delRejected, true, 'Primary path must reject deleted user with 403');
     });
 
   } finally {

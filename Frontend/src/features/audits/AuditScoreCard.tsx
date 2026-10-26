@@ -50,29 +50,36 @@ export const AuditScoreCard: React.FC<AuditScoreCardProps> = ({ signal }) => {
   const confidence = legacyPlacesEvidence ? 'medium' : signal.confidence?.toLowerCase();
 
   return (
-    <div className="p-4 rounded-xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs transition">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start space-x-3">
-          <div className="mt-0.5">{badge.icon}</div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+    <div className="p-4 rounded-lg bg-white border border-slate-200 hover:border-slate-300 transition-colors">
+      <div className="flex items-start justify-between gap-3 sm:gap-4">
+        <div className="flex items-start space-x-3 min-w-0 flex-1">
+          <div className="mt-0.5 shrink-0">{badge.icon}</div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0">
                 {signal.code}
               </span>
-              <h4 className="text-sm font-bold text-slate-900 leading-tight">{signal.name}</h4>
+              <h4 className="text-sm font-bold text-slate-900 leading-tight break-words">
+                {signal.name}
+              </h4>
             </div>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">{signal.explanation || signal.remediationTip}</p>
+            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed break-words">
+              {signal.explanation || signal.remediationTip}
+            </p>
             {evidenceSource && (
-              <p className="text-[10px] text-slate-400 mt-1">Evidence: {evidenceSource}{confidence ? ` · ${confidence} confidence` : ''}</p>
+              <p className="text-[10px] text-slate-400 mt-1.5 break-words">
+                Evidence: {evidenceSource}
+                {confidence ? ` · ${confidence} confidence` : ''}
+              </p>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col items-end space-y-1.5 flex-shrink-0">
-          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badge.bg}`}>
+        <div className="flex flex-col items-end space-y-1.5 shrink-0 text-right">
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${badge.bg}`}>
             {badge.label}
           </span>
-          <span className="text-[11px] font-bold text-slate-700">
+          <span className="text-[11px] font-bold text-slate-700 whitespace-nowrap">
             {signal.severity === 'UNKNOWN' ? '—' : `${signal.score} / ${signal.weight} pts`}
           </span>
         </div>

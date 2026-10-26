@@ -1,6 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQueryWithReauth';
 import { IAuditRun, IAuditTask } from '@localo/types';
+import { locationApi } from './locationApi';
 
 export const auditApi = createApi({
   reducerPath: 'auditApi',
@@ -16,6 +17,12 @@ export const auditApi = createApi({
         method: 'POST',
       }),
       invalidatesTags: ['Audit', 'AuditTask'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     getLocationAudits: builder.query<
@@ -47,6 +54,12 @@ export const auditApi = createApi({
         method: 'POST',
       }),
       invalidatesTags: (result, error, { auditId }) => [{ type: 'Audit', id: auditId }, 'Audit', 'AuditTask'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     getLocationAuditTasks: builder.query<

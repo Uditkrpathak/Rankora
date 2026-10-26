@@ -23,4 +23,5 @@ adminRouter.patch('/users/:id/permissions', asyncHandler((req: any, res: any) =>
 adminRouter.patch('/users/:id/plan', asyncHandler((req: any, res: any) => adminController.updatePlan(req, res)));
 adminRouter.patch('/users/:id/status', asyncHandler((req: any, res: any) => adminController.updateStatus(req, res)));
 adminRouter.post('/users/:id/reset-usage', asyncHandler((req: any, res: any) => adminController.resetUsage(req, res)));
+adminRouter.post('/users/:id/verify-email', asyncHandler((req: any, res: any) => adminController.manuallyVerifyEmail(req, res)));
 adminRouter.get('/stats', asyncHandler((req: any, res: any) => adminController.getStats(req, res)));

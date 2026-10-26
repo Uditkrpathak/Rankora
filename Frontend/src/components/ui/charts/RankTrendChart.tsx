@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { CHART_THEME, tooltipStyle } from '../../../lib/chart-theme';
+import { CHART_THEME } from '../../../lib/chart-theme';
 
 export interface RankTrendDataPoint {
   date: string;
@@ -23,30 +23,28 @@ export interface RankTrendChartProps {
   height?: number;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const d = payload[0].payload as RankTrendDataPoint;
     return (
-      <div style={tooltipStyle}>
-        <p className="font-semibold text-slate-200 mb-1">{d.date}</p>
-        <div className="space-y-0.5">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-slate-400">Visibility Score:</span>
-            <span className="font-bold text-brand-400">{d.visibilityScore}%</span>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-slate-400">Avg Local Rank:</span>
-            <span className="font-bold text-white">
-              {d.averageRank <= 0 ? 'Not in top 20' : d.averageRank > 20 ? '20+' : `#${d.averageRank.toFixed(1)}`}
+      <div className="bg-white/95 backdrop-blur-md border border-slate-200/95 rounded-lg shadow-lg px-3 py-2 text-xs min-w-[140px] pointer-events-none">
+        <p className="text-slate-500 text-[11px] font-semibold pb-1 border-b border-slate-100">
+          {d.date}
+        </p>
+        <div className="flex items-center gap-2 mt-1.5">
+          <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
+          <span className="text-slate-700 font-medium">Visibility</span>
+          <span className="font-black text-slate-900 ml-auto">{d.visibilityScore}%</span>
+        </div>
+        {d.averageRank > 0 && (
+          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
+            <span>Avg Rank</span>
+            <span className="font-semibold text-slate-700 ml-auto">
+              {d.averageRank > 20 ? '20+' : `#${d.averageRank.toFixed(1)}`}
             </span>
           </div>
-          {d.top3Count !== undefined && (
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-slate-400">Top 3 Keywords:</span>
-              <span className="font-bold text-emerald-400">{d.top3Count}</span>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     );
   }
@@ -60,41 +58,43 @@ export const RankTrendChart: React.FC<RankTrendChartProps> = memo(
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            margin={{ top: 12, right: 12, left: -16, bottom: 0 }}
             accessibilityLayer
           >
             <defs>
-              <linearGradient id="rankoraBrandGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={CHART_THEME.colors.primary} stopOpacity={0.35} />
-                <stop offset="95%" stopColor={CHART_THEME.colors.primary} stopOpacity={0.0} />
+              <linearGradient id="rankoraSplineGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0284c7" stopOpacity={0.22} />
+                <stop offset="95%" stopColor="#0284c7" stopOpacity={0.0} />
               </linearGradient>
             </defs>
 
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke={CHART_THEME.colors.grid}
+              stroke="#f1f5f9"
             />
 
             <XAxis
               dataKey="date"
               tickLine={false}
-              axisLine={false}
+              axisLine={{ stroke: '#f1f5f9' }}
               tick={{
-                fill: CHART_THEME.colors.axis,
-                fontSize: CHART_THEME.typography.fontSizeSmall,
+                fill: '#64748b',
+                fontSize: 11,
                 fontFamily: CHART_THEME.typography.fontFamily,
               }}
+              dy={6}
             />
 
             <YAxis
               domain={metric === 'visibility' ? [0, 100] : ['dataMin - 1', 'dataMax + 1']}
+              ticks={metric === 'visibility' ? [0, 25, 50, 75, 100] : undefined}
               reversed={metric === 'rank'}
               tickLine={false}
               axisLine={false}
               tick={{
-                fill: CHART_THEME.colors.axis,
-                fontSize: CHART_THEME.typography.fontSizeSmall,
+                fill: '#64748b',
+                fontSize: 11,
                 fontFamily: CHART_THEME.typography.fontFamily,
               }}
               tickFormatter={(val) => (metric === 'visibility' ? `${val}%` : `#${val}`)}
@@ -105,19 +105,19 @@ export const RankTrendChart: React.FC<RankTrendChartProps> = memo(
             <Area
               type="monotone"
               dataKey={metric === 'visibility' ? 'visibilityScore' : 'averageRank'}
-              stroke={CHART_THEME.colors.primary}
-              strokeWidth={2.5}
+              stroke="#0284c7"
+              strokeWidth={2.2}
               fillOpacity={1}
-              fill="url(#rankoraBrandGrad)"
+              fill="url(#rankoraSplineGrad)"
               dot={{
-                r: 4.5,
+                r: 3.5,
                 fill: '#ffffff',
-                stroke: CHART_THEME.colors.primary,
+                stroke: '#0284c7',
                 strokeWidth: 2,
               }}
               activeDot={{
-                r: 6,
-                fill: CHART_THEME.colors.primary,
+                r: 5.5,
+                fill: '#0284c7',
                 stroke: '#ffffff',
                 strokeWidth: 2,
               }}

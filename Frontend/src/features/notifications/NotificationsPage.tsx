@@ -150,21 +150,22 @@ export const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full page-canvas flex flex-col text-slate-900 antialiased selection:bg-brand-500 selection:text-white">
+    <div className="min-h-screen w-full bg-white flex flex-col text-slate-900 antialiased selection:bg-brand-500 selection:text-white">
       <AppNavbar fullWidth={true} />
 
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Notifications & Alerts</h1>
-              {unreadCount > 0 && (
-                <span className="px-2.5 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full border border-red-200">
-                  {unreadCount} new
-                </span>
-              )}
-            </div>
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0">
+        <div className="w-full space-y-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900">Notifications & Alerts</h1>
+                {unreadCount > 0 && (
+                  <span className="px-2.5 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full border border-red-200">
+                    {unreadCount} new
+                  </span>
+                )}
+              </div>
             <p className="text-sm text-slate-500 mt-1">
               Surveillance alerts for negative reviews, Google listing tampering, and keyword rank volatility.
             </p>
@@ -398,6 +399,7 @@ export const NotificationsPage: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
         </div>
       </main>
     </div>

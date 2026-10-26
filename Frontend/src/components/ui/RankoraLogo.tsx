@@ -1,45 +1,43 @@
-import React from 'react';
+import React, { useId } from 'react';
 
-interface RankoraLogoProps {
+export interface RankoraLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showText?: boolean;
   showSubtitle?: boolean;
+  onDark?: boolean;
   className?: string;
 }
 
 export const RankoraLogo: React.FC<RankoraLogoProps> = ({
   size = 'md',
   showText = true,
-  showSubtitle = true,
+  onDark = false,
   className = '',
 }) => {
+  const rawId = useId();
+  const gradId = `rankoraGrad-${rawId.replace(/[^a-zA-Z0-9-_]/g, '')}`;
+  const pinId = `pinGlow-${rawId.replace(/[^a-zA-Z0-9-_]/g, '')}`;
+
   const iconDimensions = {
-    sm: { width: 32, height: 32, container: 'w-8 h-8' },
-    md: { width: 40, height: 40, container: 'w-10 h-10' },
-    lg: { width: 48, height: 48, container: 'w-12 h-12' },
-    xl: { width: 56, height: 56, container: 'w-14 h-14' },
+    sm: { width: 30, height: 30, container: 'w-7.5 h-7.5' },
+    md: { width: 38, height: 38, container: 'w-9.5 h-9.5' },
+    lg: { width: 44, height: 44, container: 'w-11 h-11' },
+    xl: { width: 52, height: 52, container: 'w-13 h-13' },
   };
 
   const textStyles = {
-    sm: 'text-base font-bold',
-    md: 'text-[22px] font-extrabold',
-    lg: 'text-2xl font-extrabold',
-    xl: 'text-3xl font-black',
+    sm: 'text-base font-bold tracking-tight',
+    md: 'text-[20px] font-extrabold tracking-tight',
+    lg: 'text-2xl font-extrabold tracking-tight',
+    xl: 'text-3xl font-black tracking-tight',
   };
 
-  const subtitleStyles = {
-    sm: 'text-[8.5px]',
-    md: 'text-[9.5px]',
-    lg: 'text-[11px]',
-    xl: 'text-[12px]',
-  };
-
-  const currentDim = iconDimensions[size];
+  const currentDim = iconDimensions[size] || iconDimensions.md;
 
   return (
-    <div className={`inline-flex items-center gap-3 select-none ${className}`}>
+    <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
       {/* Dynamic Rankora Monogram & Local SEO Radar Emblem */}
-      <div className={`relative ${currentDim.container} shrink-0 group-hover:scale-105 transition-transform duration-200`}>
+      <div className={`relative ${currentDim.container} shrink-0 transition-transform duration-200`}>
         <svg
           width={currentDim.width}
           height={currentDim.height}
@@ -49,21 +47,21 @@ export const RankoraLogo: React.FC<RankoraLogoProps> = ({
           className="w-full h-full drop-shadow-sm"
         >
           <defs>
-            <linearGradient id={`rankoraGrad-${size}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#2E3192" />
               <stop offset="100%" stopColor="#1CB5D6" />
             </linearGradient>
-            <linearGradient id={`pinGlow-${size}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id={pinId} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#1CB5D6" />
               <stop offset="100%" stopColor="#1FA971" />
             </linearGradient>
           </defs>
 
           {/* Base Rounded Squircle with Brand Gradient */}
-          <rect x="2" y="2" width="44" height="44" rx="12" fill={`url(#rankoraGrad-${size})`} />
+          <rect x="2" y="2" width="44" height="44" rx="12" fill={`url(#${gradId})`} />
 
           {/* Subtle Inner Highlight */}
-          <rect x="2" y="2" width="44" height="22" rx="12" fill="white" fillOpacity="0.08" />
+          <rect x="2" y="2" width="44" height="22" rx="12" fill="white" fillOpacity="0.1" />
 
           {/* Radar Wave Pulse (Local Map Signals) */}
           <path
@@ -94,7 +92,7 @@ export const RankoraLogo: React.FC<RankoraLogoProps> = ({
           />
 
           {/* Center Pin Aperture / Eye */}
-          <circle cx="26.5" cy="21.5" r="3.2" fill={`url(#pinGlow-${size})`} />
+          <circle cx="26.5" cy="21.5" r="3.2" fill={`url(#${pinId})`} />
 
           {/* Ascending Ranking Kick (Upward Momentum Vector) */}
           <path
@@ -105,14 +103,15 @@ export const RankoraLogo: React.FC<RankoraLogoProps> = ({
       </div>
 
       {showText && (
-        <div className="flex flex-col text-left justify-center">
-          <span className={`font-heading tracking-tight text-[#141833] leading-none ${textStyles[size]}`}>
+        <div className="flex items-center leading-none">
+          <span className={`font-heading font-extrabold tracking-tight ${onDark ? 'text-white' : 'text-[#0E1230]'} ${textStyles[size]}`}>
             Rankora
           </span>
-
+          <span className="text-[#1CB5D6] font-black text-xl ml-0.5 leading-none">.</span>
         </div>
       )}
     </div>
   );
 };
+
 export default RankoraLogo;

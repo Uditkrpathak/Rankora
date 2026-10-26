@@ -13,7 +13,7 @@ import {
   BusinessSortBy,
   BusinessStatusFilter,
 } from './components/BusinessFilterBar';
-import { useDebounce } from '../../lib/hooks/useDebounce';
+import { useDebounce } from '../../hooks/useDebounce';
 import { Plus } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
@@ -56,31 +56,33 @@ export const DashboardPage: React.FC = () => {
       <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0">
         <div className="space-y-5">
         {/* ── Page Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 pb-4 border-b border-slate-200/80">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-slate-200">
           <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-bold text-text-primary tracking-tight">
-                Your businesses
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                Businesses
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-purple border border-brand-200 shadow-2xs">
-                {totalCount}
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                {totalCount} {totalCount === 1 ? 'location' : 'locations'}
               </span>
             </div>
-            <p className="text-xs text-text-secondary font-medium mt-1">
-              Workspace: {workspaceName}
-            </p>
+            <div className="text-xs text-slate-500 mt-1.5 flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-slate-100/90 px-2.5 py-0.5 rounded-full text-xs border border-slate-200/80">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                {workspaceName}
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-500">Google Business Profiles & local rank tracking</span>
+            </div>
           </div>
 
           {/* Add business button */}
-          <Link to="/locations/add" className="hidden sm:inline-block shrink-0">
-            <Button
-              variant="primary"
-              size="sm"
-              leftIcon={<Plus className="w-3.5 h-3.5" />}
-              className="font-semibold"
-            >
-              Add business
-            </Button>
+          <Link
+            to="/locations/add"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#006EEE] hover:bg-[#005bc4] active:bg-[#004fa8] text-white text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add business</span>
           </Link>
         </div>
 
@@ -100,14 +102,14 @@ export const DashboardPage: React.FC = () => {
 
         {/* ── Loading ── */}
         {isLoading && (
-          <Card className="p-6 bg-white border border-slate-200/80">
+          <Card className="p-6 bg-white border border-slate-200">
             <TableSkeleton rows={4} />
           </Card>
         )}
 
         {/* ── Error ── */}
         {!isLoading && isError && (
-          <Card className="p-8 text-center space-y-3 bg-white border border-slate-200/80 max-w-lg mx-auto">
+          <Card className="p-8 text-center space-y-3 bg-white border border-slate-200 max-w-lg mx-auto">
             <p className="text-xs text-rose-600 font-medium">
               Failed to load business profiles from this workspace.
             </p>
@@ -136,8 +138,8 @@ export const DashboardPage: React.FC = () => {
         {/* ── Empty state (no businesses at all) ── */}
         {!isLoading && !isError && locations.length === 0 && !hasFilters && (
           <div className="py-8 sm:py-12">
-            <Card className="max-w-xl mx-auto p-8 glass-panel text-center">
-              <div className="w-14 h-14 rounded-2xl bg-brand-50 border border-brand-200/80 flex items-center justify-center mx-auto mb-4 shadow-2xs">
+            <Card className="max-w-xl mx-auto p-6 sm:p-8 bg-white border border-slate-200 rounded-lg text-center">
+              <div className="w-12 h-12 rounded-lg bg-brand-50 border border-brand-200 flex items-center justify-center mx-auto mb-4">
                 <svg viewBox="0 0 40 40" fill="none" className="w-8 h-8" aria-hidden="true">
                   <rect x="6" y="6" width="28" height="28" rx="4" className="stroke-brand-300" strokeWidth="1.5" />
                   <line x1="6" y1="15" x2="34" y2="15" className="stroke-brand-200" strokeWidth="1" strokeDasharray="2 2" />
@@ -167,7 +169,7 @@ export const DashboardPage: React.FC = () => {
                     variant="primary"
                     size="md"
                     leftIcon={<Plus className="w-3.5 h-3.5" />}
-                    className="px-4 font-semibold shadow-xs"
+                    className="px-4 font-semibold"
                   >
                     Add your first business
                   </Button>
@@ -180,7 +182,7 @@ export const DashboardPage: React.FC = () => {
                   { n: '2', title: 'Verify pin', desc: 'Confirm map coordinates and target radius.' },
                   { n: '3', title: 'Scan & rank', desc: 'Run coordinate GeoGrid heatmap checks.' },
                 ].map(({ n, title, desc }) => (
-                  <div key={n} className="p-3 rounded-xl border border-slate-200/70 bg-white/70 space-y-1">
+                  <div key={n} className="p-3 rounded-lg border border-slate-200 bg-white space-y-1">
                     <div className="flex items-center gap-1.5">
                       <span className="w-4 h-4 rounded-full text-[10px] font-bold bg-brand-100 text-brand-700 flex items-center justify-center shrink-0">
                         {n}

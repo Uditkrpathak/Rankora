@@ -214,8 +214,13 @@ export class KeywordsService {
     }
 
     if (query.search && query.search.trim()) {
-      const searchRegex = new RegExp(query.search.trim(), 'i');
-      filter.keyword = searchRegex;
+      const terms = query.search.trim().split(/\s+/).filter(Boolean);
+      if (terms.length === 1) {
+        filter.keyword = new RegExp(terms[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      } else if (terms.length > 1) {
+        const pattern = terms.map((t) => `(?=.*${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`).join('');
+        filter.keyword = new RegExp(pattern, 'i');
+      }
     }
 
     const sortOrder = query.order === 'asc' ? 1 : -1;
@@ -230,6 +235,8 @@ export class KeywordsService {
       sortObj = { lastScannedAt: sortOrder };
     } else if (query.sortBy === 'createdAt') {
       sortObj = { createdAt: sortOrder };
+    } else if (query.sortBy === 'keyword') {
+      sortObj = { keyword: sortOrder };
     } else {
       sortObj = { visibilityScore: sortOrder };
     }

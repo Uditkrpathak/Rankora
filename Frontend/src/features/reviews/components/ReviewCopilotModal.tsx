@@ -121,7 +121,7 @@ export const ReviewCopilotModal: React.FC<ReviewCopilotModalProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-6 bg-slate-50/70 border-b border-slate-200/80 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-100/80 flex items-center justify-center text-brand-600 shadow-2xs">
+            <div className="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600">
               <Sparkles className="w-5 h-5 text-brand-600" />
             </div>
             <div>
@@ -144,7 +144,7 @@ export const ReviewCopilotModal: React.FC<ReviewCopilotModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-200/60 transition cursor-pointer"
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-200/60 transition cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -154,7 +154,7 @@ export const ReviewCopilotModal: React.FC<ReviewCopilotModalProps> = ({
         {/* Modal Body */}
         <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 bg-white">
           {/* Review Context Box */}
-          <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-2.5">
+          <div className="p-4 rounded-lg bg-slate-50/90 border border-slate-200/80 space-y-2.5">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-bold text-xs text-slate-900">
@@ -166,7 +166,7 @@ export const ReviewCopilotModal: React.FC<ReviewCopilotModalProps> = ({
                   ))}
                 </div>
                 {copilotData.languageLabel && (
-                  <span className="px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold flex items-center gap-1 shadow-2xs">
+                  <span className="px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold flex items-center gap-1">
                     🌐 {copilotData.languageLabel}
                   </span>
                 )}
@@ -175,7 +175,7 @@ export const ReviewCopilotModal: React.FC<ReviewCopilotModalProps> = ({
                 Customer Feedback
               </span>
             </div>
-            <p className="text-xs text-slate-700 italic bg-white p-3.5 rounded-xl border border-slate-200/70 leading-relaxed font-medium shadow-2xs">
+            <p className="text-xs text-slate-700 italic bg-white p-3.5 rounded-lg border border-slate-200 leading-relaxed font-medium">
               "{copilotData.reviewText || '5-star rating without written comment'}"
             </p>
           </div>
@@ -195,14 +195,14 @@ export const ReviewCopilotModal: React.FC<ReviewCopilotModalProps> = ({
                     key={tone.key}
                     type="button"
                     onClick={() => setActiveTone(tone.key)}
-                    className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
+                    className={`p-3.5 rounded-lg border text-left transition flex flex-col justify-between cursor-pointer ${
                       isSelected
-                        ? 'bg-brand-50/50 border-brand-500 ring-2 ring-brand-500/20 shadow-xs'
-                        : 'bg-white border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 shadow-2xs'
+                        ? 'bg-brand-50/50 border-brand-500 ring-2 ring-brand-500/20'
+                        : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full mb-1.5">
-                      <span className="p-1.5 rounded-xl bg-slate-100/90">{tone.icon}</span>
+                      <span className="p-1.5 rounded-md bg-slate-100">{tone.icon}</span>
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${tone.badgeColor}`}>
                         {tone.tag}
                       </span>
@@ -222,7 +222,7 @@ export const ReviewCopilotModal: React.FC<ReviewCopilotModalProps> = ({
           </div>
 
           {/* Selected Tone Output Box (Editable) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3.5">
+          <div className="p-4 sm:p-5 rounded-lg bg-white border border-slate-200 space-y-3.5">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h4 className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">

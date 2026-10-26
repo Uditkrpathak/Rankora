@@ -8,6 +8,7 @@ import {
   useUploadAvatarMutation,
   useRequestEmailChangeMutation,
   useChangePasswordMutation,
+  useCreatePasswordMutation,
   useRequestAccountDeletionMutation
 } from '../../store/api/authApi';
 import { useListLocationsQuery } from '../../store/api/locationApi';
@@ -54,7 +55,11 @@ export const AccountPage: React.FC = () => {
   const [uploadAvatar, { isLoading: isUploadingAvatar }] = useUploadAvatarMutation();
   const [requestEmailChange, { isLoading: isRequestingEmail }] = useRequestEmailChangeMutation();
   const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation();
+  const [createPassword, { isLoading: isRequestingCreatePassword }] = useCreatePasswordMutation();
   const [requestAccountDeletion, { isLoading: isDeletingAccount }] = useRequestAccountDeletionMutation();
+
+  const [createPasswordSuccess, setCreatePasswordSuccess] = useState<string | null>(null);
+  const [createPasswordError, setCreatePasswordError] = useState<string | null>(null);
 
   // Name editing state
   const [isEditingName, setIsEditingName] = useState(false);
@@ -229,6 +234,17 @@ export const AccountPage: React.FC = () => {
       }, 2500);
     } catch (err: any) {
       setPassModalError(err?.data?.error?.message || 'Failed to update password.');
+    }
+  };
+
+  const handleRequestCreatePassword = async () => {
+    setCreatePasswordError(null);
+    setCreatePasswordSuccess(null);
+    try {
+      const res = await createPassword().unwrap();
+      setCreatePasswordSuccess(res.data?.message || 'A confirmation link has been sent to your email.');
+    } catch (err: any) {
+      setCreatePasswordError(err?.data?.error?.message || 'Failed to send password creation link.');
     }
   };
 
@@ -603,22 +619,53 @@ export const AccountPage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-slate-400" />
                   <span className="text-sm font-semibold text-slate-800">Password</span>
+                  {user?.hasPassword === false && (
+                    <span className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                      OAuth Only (No Password)
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  Secured with Argon2id encryption. In-session changes require your current password.
+                  {user?.hasPassword === false
+                    ? 'Your account was created via Google OAuth. Set a password to enable password sign-in and account updates.'
+                    : 'Secured with Argon2id encryption. In-session changes require your current password.'}
                 </p>
+                {createPasswordSuccess && (
+                  <p className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {createPasswordSuccess}
+                  </p>
+                )}
+                {createPasswordError && (
+                  <p className="text-xs text-red-600 font-medium mt-1 flex items-center gap-1">
+                    <XCircle className="w-3.5 h-3.5" />
+                    {createPasswordError}
+                  </p>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowPasswordModal(true);
-                  setPassModalError(null);
-                  setPassModalSuccess(null);
-                }}
-                className="self-start sm:self-auto px-3.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-lg text-xs font-semibold shadow-xs hover:bg-slate-50 transition"
-              >
-                Change Password
-              </button>
+              {user?.hasPassword === false ? (
+                <button
+                  type="button"
+                  onClick={handleRequestCreatePassword}
+                  disabled={isRequestingCreatePassword}
+                  className="self-start sm:self-auto px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isRequestingCreatePassword && <Loader2 className="w-3 h-3 animate-spin" />}
+                  Set Password
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordModal(true);
+                    setPassModalError(null);
+                    setPassModalSuccess(null);
+                  }}
+                  className="self-start sm:self-auto px-3.5 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-lg text-xs font-semibold shadow-xs hover:bg-slate-50 transition"
+                >
+                  Change Password
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -751,6 +798,50 @@ export const AccountPage: React.FC = () => {
                 >
                   Done
                 </button>
+              </div>
+            ) : user?.hasPassword === false ? (
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                  <p className="font-semibold mb-1 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    Password Required to Change Email
+                  </p>
+                  <p className="text-slate-600">
+                    Because your account was created with Google OAuth, it does not currently have a password. Please set a password first to verify your identity before updating your email.
+                  </p>
+                </div>
+
+                {createPasswordSuccess && (
+                  <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    <span>{createPasswordSuccess}</span>
+                  </div>
+                )}
+                {createPasswordError && (
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                    <XCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{createPasswordError}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowEmailModal(false)}
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRequestCreatePassword}
+                    disabled={isRequestingCreatePassword}
+                    className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {isRequestingCreatePassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    Send Password Creation Link
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleRequestEmailChange} className="space-y-4">

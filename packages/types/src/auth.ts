@@ -73,6 +73,9 @@ export interface IUser {
   emailSuppressed: boolean;
   sessionVersion: number;
   hasClaimedTrial?: boolean;
+  createPasswordTokenHash?: string;
+  createPasswordExpiresAt?: Date;
+  hasPassword?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -225,6 +228,7 @@ export interface AuthResponse {
     isEmailVerified: boolean;
     mfaEnabled: boolean;
     avatarUrl?: string;
+    hasPassword?: boolean;
   };
   activeWorkspace?: {
     id: string;

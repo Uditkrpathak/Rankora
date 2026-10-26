@@ -167,12 +167,12 @@ export const NotificationSettingsPage: React.FC = () => {
 
   return (
     <SettingsLayout>
-      <div className="flex-1 max-w-4xl">
+      <div className="w-full space-y-6">
         {/* Title */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Alerts & Notification Preferences</h1>
-            <p className="text-xs text-slate-500 mt-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Alerts & Notification Preferences</h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Configure real-time in-app alerts and Resend email dispatches for reviews, Google Maps sabotage, and rank drops.
             </p>
           </div>
@@ -180,7 +180,7 @@ export const NotificationSettingsPage: React.FC = () => {
             type="button"
             onClick={handleSave}
             disabled={isSaving || isLoading}
-            className="px-4 py-2 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white transition shadow-sm flex items-center gap-1.5 self-start sm:self-auto disabled:opacity-50"
+            className="px-4 py-2.5 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white transition shadow-sm flex items-center gap-1.5 self-start sm:self-auto disabled:opacity-50 cursor-pointer"
           >
             {isSaving ? (
               <span>Saving changes...</span>
@@ -196,7 +196,7 @@ export const NotificationSettingsPage: React.FC = () => {
         </div>
 
         {/* Global Delivery Channels */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 mb-6 shadow-2xs">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs">
           <h2 className="text-sm font-bold text-slate-900 mb-1">Master Notification Channels</h2>
           <p className="text-xs text-slate-500 mb-4">
             Master switches to enable or disable notification dispatch channels across this workspace.
@@ -204,7 +204,7 @@ export const NotificationSettingsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Email Alerts Toggle */}
-            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 hover:border-slate-300 transition cursor-pointer bg-slate-50/50">
+            <label className="flex items-start gap-3 p-4 rounded-xl border border-slate-200 hover:border-brand-300 hover:bg-brand-50/20 transition cursor-pointer bg-white">
               <input
                 type="checkbox"
                 checked={emailAlertsEnabled}
@@ -223,7 +223,7 @@ export const NotificationSettingsPage: React.FC = () => {
             </label>
 
             {/* In-App Notifications Toggle */}
-            <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 hover:border-slate-300 transition cursor-pointer bg-slate-50/50">
+            <label className="flex items-start gap-3 p-4 rounded-xl border border-slate-200 hover:border-brand-300 hover:bg-brand-50/20 transition cursor-pointer bg-white">
               <input
                 type="checkbox"
                 checked={inAppAlertsEnabled}
@@ -244,24 +244,24 @@ export const NotificationSettingsPage: React.FC = () => {
         </div>
 
         {/* Email Recipients */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 mb-6 shadow-2xs">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs">
           <h2 className="text-sm font-bold text-slate-900 mb-1">Email Alert Recipients</h2>
           <p className="text-xs text-slate-500 mb-4">
             Specify which team members or clients should receive email alerts. Defaults to the workspace owner if empty.
           </p>
 
           {/* Form to add email */}
-          <form onSubmit={handleAddEmail} className="flex gap-2 max-w-md mb-4">
+          <form onSubmit={handleAddEmail} className="flex flex-col sm:flex-row gap-2.5 w-full max-w-xl mb-4">
             <input
               type="email"
               placeholder="e.g. alerts@company.com"
               value={newEmailInput}
               onChange={(e) => setNewEmailInput(e.target.value)}
-              className="flex-1 px-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
             />
             <button
               type="submit"
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition shadow-2xs flex items-center gap-1"
+              className="px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer shrink-0"
             >
               <Plus size={14} />
               <span>Add</span>
@@ -270,7 +270,7 @@ export const NotificationSettingsPage: React.FC = () => {
           {emailError && <p className="text-xs text-red-600 mb-3">{emailError}</p>}
 
           {/* List of active recipients */}
-          <div className="space-y-2 max-w-lg">
+          <div className="space-y-2 w-full max-w-xl">
             {notifyEmails.length === 0 ? (
               <p className="text-xs text-slate-400 italic">
                 No custom recipients added yet — workspace owners/admins receive alerts by default.
@@ -279,13 +279,13 @@ export const NotificationSettingsPage: React.FC = () => {
               notifyEmails.map((email) => (
                 <div
                   key={email}
-                  className="flex items-center justify-between p-2.5 px-3 rounded-lg border border-slate-200 bg-slate-50/50 text-xs"
+                  className="flex items-center justify-between p-2.5 px-3.5 rounded-xl border border-slate-200 bg-white text-xs hover:border-slate-300 transition"
                 >
                   <span className="font-medium text-slate-700">{email}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveEmail(email)}
-                    className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-white transition"
+                    className="p-1 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
                     title="Remove recipient"
                   >
                     <Trash2 size={13} />
@@ -301,7 +301,7 @@ export const NotificationSettingsPage: React.FC = () => {
           <h2 className="text-sm font-bold text-slate-900 px-1">Alert Trigger Rules & Thresholds</h2>
 
           {/* Negative Reviews Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center border border-red-100">
@@ -371,7 +371,7 @@ export const NotificationSettingsPage: React.FC = () => {
           </div>
 
           {/* 24/7 Listing Protection Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
@@ -420,7 +420,7 @@ export const NotificationSettingsPage: React.FC = () => {
           </div>
 
           {/* Keyword Rank Drop Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
@@ -490,7 +490,7 @@ export const NotificationSettingsPage: React.FC = () => {
           </div>
 
           {/* Workspace Activity Card */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
@@ -537,13 +537,13 @@ export const NotificationSettingsPage: React.FC = () => {
         </div>
 
         {/* Live Test Tool */}
-        <div className="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-2xl p-5 sm:p-6 text-white shadow-md">
-          <div className="flex items-center gap-2 text-brand-300 font-semibold text-xs uppercase tracking-wider mb-1">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs">
+          <div className="flex items-center gap-2 text-brand-600 font-semibold text-xs uppercase tracking-wider mb-1">
             <Sparkles size={14} />
             <span>Real-Time Alert Verification</span>
           </div>
-          <h3 className="text-base font-bold text-white mb-1">Send a Live Test Alert</h3>
-          <p className="text-xs text-slate-300 mb-4 max-w-xl">
+          <h3 className="text-base font-bold text-slate-900 mb-1">Send a Live Test Alert</h3>
+          <p className="text-xs text-slate-500 mb-4 max-w-2xl">
             Simulate an alert to immediately verify that the notification bell popover and Resend email templates are working correctly.
           </p>
 
@@ -552,34 +552,34 @@ export const NotificationSettingsPage: React.FC = () => {
               type="button"
               disabled={isTesting}
               onClick={() => handleSendTest('NEGATIVE_REVIEW')}
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
-              <Send size={12} />
+              <Send size={12} className="text-brand-600" />
               <span>Test Negative Review Alert</span>
             </button>
             <button
               type="button"
               disabled={isTesting}
               onClick={() => handleSendTest('LISTING_PROTECTION')}
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
-              <Send size={12} />
+              <Send size={12} className="text-brand-600" />
               <span>Test Protection Hijack Alert</span>
             </button>
             <button
               type="button"
               disabled={isTesting}
               onClick={() => handleSendTest('RANK_DROP')}
-              className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition flex items-center gap-1.5 disabled:opacity-50"
+              className="px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-2xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
             >
-              <Send size={12} />
+              <Send size={12} className="text-brand-600" />
               <span>Test Rank Drop Alert</span>
             </button>
           </div>
 
           {testResult && (
-            <div className="mt-4 p-3 rounded-lg bg-white/10 border border-white/20 text-xs text-brand-200 flex items-center gap-2 animate-in fade-in">
-              <CheckCircle2 size={15} className="text-emerald-400" />
+            <div className="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2 animate-in fade-in">
+              <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
               <span>{testResult}</span>
             </div>
           )}

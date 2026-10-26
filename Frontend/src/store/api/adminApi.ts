@@ -69,6 +69,14 @@ export const adminApi = createApi({
       invalidatesTags: (_result, _error, id) => [{ type: 'AdminUsers', id }, 'AdminStats']
     }),
 
+    manuallyVerifyUserEmail: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/v1/admin/users/${id}/verify-email`,
+        method: 'POST'
+      }),
+      invalidatesTags: (_result, _error, id) => [{ type: 'AdminUsers', id }, 'AdminStats']
+    }),
+
     // ── Super Admin Endpoints (SUPER_ADMIN only) ────────────────
     listAdmins: builder.query<any, void>({
       query: () => '/v1/superadmin/admins',
@@ -129,6 +137,7 @@ export const {
   useUpdateUserPlanMutation,
   useUpdateUserStatusMutation,
   useResetUserUsageMutation,
+  useManuallyVerifyUserEmailMutation,
   useListAdminsQuery,
   useCreateAdminMutation,
   useUpdateAdminMutation,

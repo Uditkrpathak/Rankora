@@ -53,6 +53,8 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronRight,
+  Users,
+  Trophy,
 } from 'lucide-react';
 
 const GeoGridHeatmap = lazy(() =>
@@ -430,6 +432,7 @@ export const RankTrackingPage: React.FC = () => {
     setSearchParams({ locationId: selectedLocationId, keyword: kw });
   };
 
+  const [sidebarTab, setSidebarTab] = useState<'overview' | 'competitors' | 'actions'>('overview');
   const [leaderboardPage, setLeaderboardPage] = useState<number>(1);
   const LEADERBOARD_PAGE_SIZE = 10;
 
@@ -642,6 +645,15 @@ export const RankTrackingPage: React.FC = () => {
   const targetAtrp = targetEntity?.atrp ?? (currentScan?.metrics?.atrp ?? 21.0);
   const targetArp = targetEntity?.arp ?? (currentScan?.metrics?.arp ?? null);
   const targetVisibility = targetEntity?.solv ?? (currentScan?.metrics?.solv ?? 0.0);
+  const atrpDelta = useMemo(() => {
+    if (historyScans.length >= 2) {
+      const prevAtrp = historyScans[historyScans.length - 2]?.metrics?.atrp;
+      if (typeof prevAtrp === 'number' && typeof targetAtrp === 'number') {
+        return Number((prevAtrp - targetAtrp).toFixed(1));
+      }
+    }
+    return null;
+  }, [historyScans, targetAtrp]);
   const focusedCompetitor = focusedPlaceId !== TARGET_PLACE_ID ? allEntities.find((c) => c.placeId === focusedPlaceId) : null;
 
   const scanTimestamp = currentScan?.completedAt || currentScan?.createdAt;
@@ -702,7 +714,7 @@ export const RankTrackingPage: React.FC = () => {
   }, [selectedLocation?.recommendedTasks, dismissedTaskIds]);
 
   const renderSidebarContent = () => (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-3.5">
       {/* 1. Keywords Section */}
       <KeywordSelectorBar
         trackedKeywords={trackedKeywords}
@@ -723,7 +735,7 @@ export const RankTrackingPage: React.FC = () => {
       />
 
       {currentScan?.status === 'PARTIAL' && (
-        <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 space-y-2 shadow-2xs">
+        <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 font-bold">
               <AlertCircle size={15} className="text-amber-600 shrink-0" />
@@ -732,7 +744,7 @@ export const RankTrackingPage: React.FC = () => {
             <button
               onClick={() => executeScan(activeKeyword, true)}
               disabled={isTriggering || scanRunning}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-extrabold shadow-2xs transition cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-extrabold transition cursor-pointer disabled:opacity-50"
             >
               <RefreshCw size={11} className={isTriggering ? 'animate-spin' : ''} />
               <span>Retry Missing Pins</span>
@@ -781,74 +793,257 @@ export const RankTrackingPage: React.FC = () => {
         </div>
       )}
 
-      {/* 2. Selected-Business Summary Card */}
-      <BusinessPerformanceCard
-        selectedLocation={selectedLocation}
-        focusedPlaceId={focusedPlaceId}
-        onFocusTarget={() => setFocusedPlaceId(TARGET_PLACE_ID)}
-        targetStanding={targetStanding}
-        totalMarketCount={totalMarketCount}
-        targetEntity={targetEntity}
-        targetAtrp={targetAtrp}
-        targetVisibility={targetVisibility}
-        currentAreaDifficulty={currentAreaDifficulty}
-        measuredPointsCount={measuredPoints.length}
-        totalGridPointsCount={currentScan?.gridPoints?.length || 31}
-        formattedScanDate={formattedScanDate}
-        currentScan={currentScan}
-      />
-
-      {/* 3. Evidence-Backed AI Recommendations CTA Button */}
-      {activeTasks.length > 0 && (
+      {/* 2. Dedicated Navigation Tabs */}
+      <div className="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-semibold gap-1">
         <button
-          onClick={() => {
-            setIsMobileDrawerOpen(false);
-            navigate(`/recommendations?locationId=${selectedLocationId}`);
-          }}
-          className="w-full p-3.5 bg-gradient-to-br from-indigo-50/90 via-white to-blue-50/80 hover:from-indigo-100/90 hover:to-blue-100/90 border border-indigo-200/90 hover:border-indigo-300 rounded-2xl shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer flex items-center justify-between text-left group"
+          type="button"
+          onClick={() => setSidebarTab('overview')}
+          className={`flex-1 py-1.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
+            sidebarTab === 'overview'
+              ? 'bg-white text-slate-900 shadow-2xs font-bold'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-[#623CD0] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <Sparkles size={15} />
-            </div>
-            <div className="min-w-0 space-y-0.5">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
-                  Recommended Actions
-                </span>
-                <span className="px-1.5 py-0.2 bg-indigo-100 text-indigo-700 rounded-full text-[10px] font-extrabold shrink-0">
-                  {activeTasks.length}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium truncate">
-                {activeTasks.filter((t) => t.impact === 'HIGH').length > 0
-                  ? `${activeTasks.filter((t) => t.impact === 'HIGH').length} high-impact steps to beat rivals`
-                  : 'Actionable steps to close pack gaps'}
-              </p>
-            </div>
-          </div>
-          <ChevronRight size={16} className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <span>Overview</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setSidebarTab('competitors')}
+          className={`flex-1 py-1.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
+            sidebarTab === 'competitors'
+              ? 'bg-white text-slate-900 shadow-2xs font-bold'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Users size={13} className={sidebarTab === 'competitors' ? 'text-[#006EEE]' : 'text-slate-400'} />
+          <span>Competitors</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+              sidebarTab === 'competitors'
+                ? 'bg-[#006EEE] text-white'
+                : 'bg-slate-200 text-slate-700'
+            }`}
+          >
+            {qualifiedCompetitors.length}
+          </span>
+        </button>
+
+        {activeTasks.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setSidebarTab('actions')}
+            className={`flex-1 py-1.5 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
+              sidebarTab === 'actions'
+                ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Sparkles size={13} className={sidebarTab === 'actions' ? 'text-indigo-600' : 'text-slate-400'} />
+            <span>Actions</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                sidebarTab === 'actions'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-200 text-slate-700'
+              }`}
+            >
+              {activeTasks.length}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* 3. Tab: OVERVIEW */}
+      {sidebarTab === 'overview' && (
+        <div className="space-y-3 animate-in fade-in duration-150">
+          {/* Target Business Performance Card */}
+          <BusinessPerformanceCard
+            selectedLocation={selectedLocation}
+            focusedPlaceId={focusedPlaceId}
+            onFocusTarget={() => setFocusedPlaceId(TARGET_PLACE_ID)}
+            targetStanding={targetStanding}
+            totalMarketCount={totalMarketCount}
+            targetEntity={targetEntity}
+            targetAtrp={targetAtrp}
+            targetVisibility={targetVisibility}
+            currentAreaDifficulty={currentAreaDifficulty}
+            measuredPointsCount={measuredPoints.length}
+            totalGridPointsCount={currentScan?.gridPoints?.length || 31}
+            formattedScanDate={formattedScanDate}
+            currentScan={currentScan}
+            atrpDelta={atrpDelta}
+          />
+
+          {/* Quick Competitors Preview Card */}
+          {qualifiedCompetitors.length > 0 && (
+            <div className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Trophy size={14} className="text-amber-500" />
+                  <span className="text-xs font-bold text-slate-900">Top Competitors</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSidebarTab('competitors')}
+                  className="text-[11px] font-semibold text-[#006EEE] hover:underline flex items-center gap-0.5 cursor-pointer"
+                >
+                  <span>View all {qualifiedCompetitors.length}</span>
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+
+              <div className="space-y-1.5">
+                {qualifiedCompetitors.slice(0, 3).map((comp) => {
+                  const isFocused = focusedPlaceId === comp.placeId;
+                  return (
+                    <div
+                      key={comp.placeId}
+                      onClick={() => {
+                        setFocusedPlaceId(isFocused ? TARGET_PLACE_ID : comp.placeId);
+                        setIsMobileDrawerOpen(false);
+                      }}
+                      className={`p-2.5 rounded-lg border transition-all cursor-pointer flex items-center justify-between gap-2 bg-white ${
+                        isFocused
+                          ? 'border-[#006EEE] ring-1 ring-[#006EEE]/20'
+                          : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-black shrink-0 ${
+                          comp.standing === 1
+                            ? 'bg-amber-100 text-amber-800'
+                            : comp.standing === 2
+                            ? 'bg-slate-200 text-slate-800'
+                            : 'bg-orange-100 text-orange-800'
+                        }`}>
+                          #{comp.standing}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900 truncate">{comp.name}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{comp.address || 'Local competitor'}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[11px] font-bold text-slate-700">
+                          ATRP {comp.atrp.toFixed(1)}
+                        </span>
+                        <span className="text-[10px] font-bold text-[#006EEE] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
+                          SoLV {comp.solv.toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Actions CTA Button */}
+          {activeTasks.length > 0 && (
+            <button
+              onClick={() => {
+                setIsMobileDrawerOpen(false);
+                navigate(`/recommendations?locationId=${selectedLocationId}`);
+              }}
+              className="w-full p-3.5 bg-gradient-to-br from-indigo-50/90 via-white to-blue-50/80 hover:from-indigo-100/90 hover:to-blue-100/90 border border-indigo-200 hover:border-indigo-300 rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-between text-left group shadow-2xs"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#623CD0] text-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Sparkles size={15} />
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                      Recommended Actions
+                    </span>
+                    <span className="px-1.5 py-0.2 bg-indigo-100 text-indigo-700 rounded-full text-[10px] font-extrabold shrink-0">
+                      {activeTasks.length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 font-medium truncate">
+                    {activeTasks.filter((t) => t.impact === 'HIGH').length > 0
+                      ? `${activeTasks.filter((t) => t.impact === 'HIGH').length} high-impact steps to beat rivals`
+                      : 'Actionable steps to close pack gaps'}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all shrink-0" />
+            </button>
+          )}
+        </div>
       )}
 
-      {/* 4. Competitor Leaderboard */}
-      <CompetitorsLeaderboard
-        competitors={qualifiedCompetitors}
-        paginatedCompetitors={paginatedCompetitors}
-        focusedPlaceId={focusedPlaceId}
-        onFocusCompetitor={(id) => {
-          setFocusedPlaceId(id);
-          setIsMobileDrawerOpen(false);
-        }}
-        competitorsHidden={competitorsHidden}
-        onToggleHidden={() => setCompetitorsHidden(!competitorsHidden)}
-        measuredPointsCount={measuredPoints.length}
-        leaderboardPage={leaderboardPage}
-        totalLeaderboardPages={totalLeaderboardPages}
-        onPageChange={(p) => setLeaderboardPage(p)}
-        hasScan={Boolean(currentScan)}
-        isTriggering={isTriggering}
-      />
+      {/* 4. Tab: COMPETITORS */}
+      {sidebarTab === 'competitors' && (
+        <div className="space-y-3 animate-in fade-in duration-150">
+          <CompetitorsLeaderboard
+            competitors={qualifiedCompetitors}
+            paginatedCompetitors={paginatedCompetitors}
+            focusedPlaceId={focusedPlaceId}
+            onFocusCompetitor={(id) => {
+              setFocusedPlaceId(id);
+              setIsMobileDrawerOpen(false);
+            }}
+            competitorsHidden={competitorsHidden}
+            onToggleHidden={() => setCompetitorsHidden(!competitorsHidden)}
+            measuredPointsCount={measuredPoints.length}
+            leaderboardPage={leaderboardPage}
+            totalLeaderboardPages={totalLeaderboardPages}
+            onPageChange={(p) => setLeaderboardPage(p)}
+            hasScan={Boolean(currentScan)}
+            isTriggering={isTriggering}
+          />
+        </div>
+      )}
+
+      {/* 5. Tab: ACTIONS */}
+      {sidebarTab === 'actions' && activeTasks.length > 0 && (
+        <div className="space-y-3 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between pb-1">
+            <span className="text-xs font-bold text-slate-800">Priority Steps ({activeTasks.length})</span>
+            <button
+              onClick={() => {
+                setIsMobileDrawerOpen(false);
+                navigate(`/recommendations?locationId=${selectedLocationId}`);
+              }}
+              className="text-xs font-bold text-[#006EEE] hover:underline cursor-pointer"
+            >
+              Full Recommendations →
+            </button>
+          </div>
+          <div className="space-y-2">
+            {activeTasks.slice(0, 5).map((task) => (
+              <div
+                key={task.id}
+                className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-1.5"
+              >
+                <div className="flex items-center justify-between gap-1">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                    task.impact === 'HIGH'
+                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                      : 'bg-amber-50 text-amber-700 border border-amber-200'
+                  }`}>
+                    {task.impact} IMPACT
+                  </span>
+                  {task.category && (
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {task.category}
+                    </span>
+                  )}
+                </div>
+                <h4 className="text-xs font-bold text-slate-900 leading-snug">{task.title}</h4>
+                {task.description && (
+                  <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                    {task.description}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -879,13 +1074,14 @@ export const RankTrackingPage: React.FC = () => {
         scanCostLabel={scanCostLabel}
         canRefresh={!isTriggering && !scanRunning && Boolean(activeKeyword) && Boolean(scanConfig)}
         keywordsCount={trackedKeywords.length}
+        formattedScanDate={formattedScanDate}
       />
 
         {/* Main Body Split: Left Sidebar & Right Map Area */}
         <div className="flex flex-1 overflow-hidden relative">
           {/* Desktop Left Sidebar */}
           {isSidebarOpen && (
-            <aside className="w-[420px] xl:w-[460px] 2xl:w-[490px] bg-white border-r border-slate-200 hidden lg:flex flex-col shrink-0 overflow-y-auto z-20 shadow-xs">
+            <aside className="w-[480px] lg:w-[480px] xl:w-[540px] 2xl:w-[600px] bg-white border-r border-slate-200 hidden lg:flex flex-col shrink-0 overflow-y-auto z-20 shadow-xs">
               {renderSidebarContent()}
             </aside>
           )}
@@ -897,7 +1093,7 @@ export const RankTrackingPage: React.FC = () => {
                 className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs animate-in fade-in"
                 onClick={() => setIsMobileDrawerOpen(false)}
               />
-              <div className="relative w-[340px] max-w-[85vw] h-full bg-white shadow-2xl z-10 flex flex-col overflow-hidden animate-in slide-in-from-left">
+              <div className="relative w-[380px] sm:w-[460px] max-w-[90vw] h-full bg-white shadow-2xl z-10 flex flex-col overflow-hidden animate-in slide-in-from-left">
                 <div className="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
                   <span className="font-bold text-xs text-slate-800">Keywords & Competitors</span>
                   <button
@@ -926,7 +1122,7 @@ export const RankTrackingPage: React.FC = () => {
                   {previousMeasuredScan ? ' Showing an earlier saved map.' : ''}
                 </p>
                 {activeKeyword && scanConfig && !isTriggering && (
-                  <button onClick={() => executeScan(activeKeyword, true)} className="mt-2 inline-flex font-bold text-blue-700 underline cursor-pointer">
+                  <button onClick={() => executeScan(activeKeyword, true)} className="mt-2 inline-flex font-bold text-[#006EEE] hover:underline cursor-pointer">
                     Retry · {scanCostLabel}
                   </button>
                 )}
@@ -935,7 +1131,7 @@ export const RankTrackingPage: React.FC = () => {
 
             {scanRunning && (
               <div className="absolute top-16 left-3 sm:left-4 z-[440] rounded-xl border border-blue-200 bg-white/95 backdrop-blur-md px-3.5 py-2 text-xs text-blue-800 shadow-lg flex items-center gap-2">
-                <RefreshCw size={12} className="animate-spin text-blue-600" />
+                <RefreshCw size={12} className="animate-spin text-[#006EEE]" />
                 <span>
                   {currentScan?.status === 'QUEUED' ? 'Waiting for the scan worker…' : 'Collecting real Google Maps results'}
                   {' · '}{measuredPoints.length}/{currentScan?.pointCount || scanPointCount || '—'} points
@@ -963,14 +1159,14 @@ export const RankTrackingPage: React.FC = () => {
                   <div className="h-6 w-[1px] bg-slate-200" />
                   <div>
                     <div className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Visibility</div>
-                    <div className="text-base sm:text-lg font-black text-blue-600">
+                    <div className="text-base sm:text-lg font-black text-[#006EEE]">
                       {activeMetrics?.visibilityIndex !== undefined ? `${activeMetrics.visibilityIndex.toFixed(1)}%` : '—'}
                     </div>
                   </div>
                 </div>
 
                 {focusedCompetitor && (
-                  <div className="pointer-events-auto bg-blue-600 text-white rounded-xl px-3 py-1.5 shadow-md flex items-center gap-2 max-w-fit">
+                  <div className="pointer-events-auto bg-[#006EEE] text-white rounded-xl px-3 py-1.5 shadow-md flex items-center gap-2 max-w-fit">
                     <span className="text-[11px] sm:text-xs font-bold truncate max-w-[200px] sm:max-w-xs">Viewing: {focusedCompetitor.name}</span>
                     <button
                       onClick={() => setFocusedPlaceId(TARGET_PLACE_ID)}
@@ -1037,7 +1233,7 @@ export const RankTrackingPage: React.FC = () => {
                         </h3>
                         <p className="mt-1 text-xs text-slate-600">
                           {scanRunning || isTriggering
-                            ? 'Results appear as the scan worker saves each search point.'
+                            ? 'Results appear as rank measurements are recorded.'
                             : activeKeyword
                               ? 'This keyword has no completed provider results. A new map uses the search quota shown beside the keywords.'
                               : 'Choose a tracked keyword to see its saved rank map.'}
@@ -1048,7 +1244,7 @@ export const RankTrackingPage: React.FC = () => {
                 </>
               ) : (
                 <div className="flex flex-col h-full items-center justify-center p-8 text-center bg-slate-50">
-                  <RefreshCw size={36} className={`text-blue-500 mb-3 ${isTriggering ? 'animate-spin' : ''}`} />
+                  <RefreshCw size={36} className={`text-[#006EEE] mb-3 ${isTriggering ? 'animate-spin' : ''}`} />
                   <h3 className="text-base font-bold text-slate-800">
                     {isTriggering
                       ? `Fetching real Google Maps rankings for "${activeKeyword}"…`
@@ -1062,7 +1258,7 @@ export const RankTrackingPage: React.FC = () => {
                   {!isTriggering && activeKeyword && scanConfig && (
                     <button
                       onClick={() => executeScan(activeKeyword)}
-                      className="mt-4 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs"
+                      className="mt-4 px-4 py-2 rounded-xl bg-[#006EEE] hover:bg-[#005bc4] active:bg-[#004fa8] text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                     >
                       Scan &quot;{activeKeyword}&quot; · {scanCostLabel}
                     </button>
@@ -1220,7 +1416,7 @@ export const RankTrackingPage: React.FC = () => {
               </div>
 
               {/* Geometry Specs Summary Card */}
-              <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 space-y-2 text-xs">
+              <div className="bg-slate-50 rounded-lg p-3.5 border border-slate-200 space-y-2 text-xs">
                 <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                   Geometry Specifications
                 </div>

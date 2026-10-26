@@ -107,7 +107,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
     <div
       role="region"
       aria-label={ariaLabel}
-      className={`bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-card transition-all ${className}`}
+      className={`bg-white rounded-lg border border-slate-200 p-4 sm:p-5 ${className}`}
     >
       {(title || subtitle || action) && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">

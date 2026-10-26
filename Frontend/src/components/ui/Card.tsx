@@ -19,7 +19,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white rounded-lg border border-slate-200 shadow-xs ${
+      className={`bg-white rounded-lg border border-slate-200 ${
         noPadding ? '' : 'p-3.5 sm:p-4'
       } ${className}`}
       {...props}

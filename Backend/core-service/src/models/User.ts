@@ -19,6 +19,8 @@ export interface UserDocument extends Omit<IUser, '_id'>, Document {
   riskScore?: number;
   lastLoginAt?: Date;
   forcePasswordChange?: boolean;
+  createPasswordTokenHash?: string;
+  createPasswordExpiresAt?: Date;
 }
 
 const TwoFactorSchema = new Schema(
@@ -171,6 +173,17 @@ const UserSchema = new Schema<UserDocument>(
       type: Date,
       required: false
     },
+    createPasswordTokenHash: {
+      type: String,
+      required: false,
+      select: false,
+      index: true
+    },
+    createPasswordExpiresAt: {
+      type: Date,
+      required: false,
+      select: false
+    },
     deletionScheduledAt: {
       type: Date,
       required: false,
@@ -262,6 +275,8 @@ const UserSchema = new Schema<UserDocument>(
         delete ret.emailVerificationTokenHash;
         delete ret.passwordResetTokenHash;
         delete ret.emailChangeTokenHash;
+        delete ret.createPasswordTokenHash;
+        delete ret.createPasswordExpiresAt;
         if (ret.twoFactor) {
           delete ret.twoFactor.secretEncrypted;
           delete ret.twoFactor.tempSecretEncrypted;

@@ -2,18 +2,35 @@ import { fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@re
 import { setAccessToken, logOut } from '../slices/authSlice';
 
 function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
   const matches = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
   return matches ? decodeURIComponent(matches[1]) : null;
 }
 
-const rawBaseUrl = (
-  (import.meta as any).env?.VITE_API_BASE_URL ||
-  (import.meta as any).env?.VITE_API_URL ||
-  ''
-).replace(/\/+$/, '');
+export function resolveApiBaseUrl(
+  envOverrides?: { VITE_API_BASE_URL?: string; VITE_API_URL?: string },
+  isBrowser: boolean = typeof window !== 'undefined'
+): string {
+  const metaEnv = (typeof import.meta !== 'undefined' && (import.meta as any).env) || {};
+  const procEnv = (typeof process !== 'undefined' && process.env) || {};
+  const raw = (
+    envOverrides?.VITE_API_BASE_URL ??
+    envOverrides?.VITE_API_URL ??
+    metaEnv.VITE_API_BASE_URL ??
+    metaEnv.VITE_API_URL ??
+    procEnv.VITE_API_BASE_URL ??
+    procEnv.VITE_API_URL ??
+    ''
+  ).replace(/\/+$/, '');
+
+  if (raw) {
+    return `${raw}/`;
+  }
+  return isBrowser ? '/' : 'http://localhost:5001/';
+}
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: rawBaseUrl ? `${rawBaseUrl}/` : '/',
+  baseUrl: resolveApiBaseUrl(),
   credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as any;
@@ -41,11 +58,16 @@ const baseQuery = fetchBaseQuery({
 
 // Single-Flight Mutex to prevent refresh storms when concurrent queries receive 401
 let isRefreshing = false;
-let refreshSubscribers: Array<(token: string) => void> = [];
+let refreshSubscribers: Array<(success: boolean) => void> = [];
 
-function onTokenRefreshed(token: string) {
-  refreshSubscribers.forEach((cb) => cb(token));
+function notifySubscribers(success: boolean) {
+  const subscribers = refreshSubscribers;
   refreshSubscribers = [];
+  subscribers.forEach((cb) => {
+    try {
+      cb(success);
+    } catch {}
+  });
 }
 
 export const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
@@ -65,40 +87,58 @@ export const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, Fetch
 
     if (!isRefreshing) {
       isRefreshing = true;
+      let refreshSucceeded = false;
 
-      // Attempt token refresh via HttpOnly cookie
-      const refreshResult = await baseQuery(
-        {
-          url: '/v1/auth/refresh',
-          method: 'POST'
-        },
-        api,
-        extraOptions
-      );
+      try {
+        // Attempt token refresh via HttpOnly cookie
+        const refreshResult = await baseQuery(
+          {
+            url: '/v1/auth/refresh',
+            method: 'POST'
+          },
+          api,
+          extraOptions
+        );
 
-      isRefreshing = false;
+        if (refreshResult.data) {
+          const data = refreshResult.data as any;
+          const newAccessToken = data.data?.tokens?.accessToken || data.data?.accessToken;
+          const newCsrfToken = data.data?.tokens?.csrfToken || data.data?.csrfToken;
 
-      if (refreshResult.data) {
-        const data = refreshResult.data as any;
-        const newAccessToken = data.data?.accessToken;
-        const newCsrfToken = data.data?.csrfToken;
-        api.dispatch(setAccessToken({ accessToken: newAccessToken, csrfToken: newCsrfToken }));
-        onTokenRefreshed(newAccessToken);
+          if (newAccessToken) {
+            api.dispatch(setAccessToken({ accessToken: newAccessToken, csrfToken: newCsrfToken }));
+            refreshSucceeded = true;
+          } else {
+            api.dispatch(logOut());
+          }
+        } else {
+          api.dispatch(logOut());
+        }
+      } catch {
+        api.dispatch(logOut());
+      } finally {
+        isRefreshing = false;
+        notifySubscribers(refreshSucceeded);
+      }
 
+      if (refreshSucceeded) {
         // Retry initial query with new token
         result = await baseQuery(args, api, extraOptions);
-      } else {
-        api.dispatch(logOut());
       }
     } else {
       // Queue concurrent request until refresh completes
-      const retryPromise = new Promise<void>((resolve) => {
-        refreshSubscribers.push(() => {
-          resolve();
+      const retryPromise = new Promise<boolean>((resolve) => {
+        refreshSubscribers.push((success) => {
+          resolve(success);
         });
       });
-      await retryPromise;
-      result = await baseQuery(args, api, extraOptions);
+
+      const refreshSucceeded = await retryPromise;
+      if (refreshSucceeded) {
+        // Retry query with newly refreshed credentials
+        result = await baseQuery(args, api, extraOptions);
+      }
+      // If refresh failed, do NOT retry with expired credentials. Return original 401 result.
     }
   }
 

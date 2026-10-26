@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ITrackedKeyword } from '@localo/types';
 import { useListKeywordsQuery, useRefreshKeywordMutation } from '../../../store/api/keywordApi';
 import { useGetGscKeywordMetricsQuery } from '../../../store/api/gscApi';
 import { useToast } from '../../../components/ui/Toast';
-import { Settings, RotateCw, Plus, Search, ArrowUpDown, Sparkles, Globe, Info } from 'lucide-react';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { Settings, RotateCw, Plus, Search, ArrowUpDown, Sparkles, Globe, Info, X } from 'lucide-react';
 import {
   TrendLine,
   VisGauge,
@@ -52,6 +53,7 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
   const toast = useToast();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 250);
   const [sortBy, setSortBy] = useState<'visibility' | 'rank' | 'keyword'>('visibility');
   const [order, setOrder] = useState<'desc' | 'asc'>('desc');
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
@@ -62,7 +64,7 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
   const hasPreloaded = Array.isArray(preloadedKeywords);
 
   const { data: kwResp, refetch } = useListKeywordsQuery(
-    { workspaceId, locationId, limit: 20, search, sortBy, order },
+    { workspaceId, locationId, limit: 20, search: debouncedSearch, sortBy, order },
     { skip: !workspaceId || !locationId || hasPreloaded }
   );
 
@@ -94,15 +96,46 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
     ? (preloadedKeywords as unknown as ITrackedKeyword[])
     : (kwResp?.keywords || []);
 
-  const filtered =
-    hasPreloaded && search.trim()
-      ? allKeywords.filter((k) =>
-          k.keyword.toLowerCase().includes(search.toLowerCase())
-        )
-      : allKeywords;
+  const initialTotalRef = useRef<number | null>(null);
+  if (!search.trim() && kwResp?.total !== undefined) {
+    initialTotalRef.current = kwResp.total;
+  }
+  const baseTotalCount = hasPreloaded
+    ? allKeywords.length
+    : (initialTotalRef.current ?? kwResp?.total ?? allKeywords.length);
 
-  const displayKeywords = filtered.slice(0, showAll ? filtered.length : 3);
-  const totalCount = kwResp?.total ?? allKeywords.length;
+  const filtered = useMemo(() => {
+    let list = [...allKeywords];
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const terms = q.split(/\s+/).filter(Boolean);
+      list = list.filter((k) =>
+        terms.every((t) => k.keyword?.toLowerCase().includes(t))
+      );
+    }
+    if (hasPreloaded) {
+      list.sort((a, b) => {
+        let cmp = 0;
+        if (sortBy === 'rank') {
+          const rankA = a.currentRank ?? 999;
+          const rankB = b.currentRank ?? 999;
+          cmp = rankA - rankB;
+        } else if (sortBy === 'keyword') {
+          cmp = (a.keyword || '').localeCompare(b.keyword || '');
+        } else {
+          const visA = a.visibilityScore ?? 0;
+          const visB = b.visibilityScore ?? 0;
+          cmp = visA - visB;
+        }
+        return order === 'asc' ? cmp : -cmp;
+      });
+    }
+    return list;
+  }, [allKeywords, search, hasPreloaded, sortBy, order]);
+
+  const isSearching = Boolean(search.trim());
+  const displayKeywords = isSearching || showAll ? filtered : filtered.slice(0, 3);
+  const totalCount = baseTotalCount;
 
   const handleRefresh = async (e: React.MouseEvent, kwId: string, kwName: string) => {
     e.stopPropagation();
@@ -158,7 +191,10 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-bold text-slate-900">
-            Tracked Keywords <span className="text-xs font-semibold text-slate-400">({totalCount})</span>
+            Tracked Keywords{' '}
+            <span className="text-xs font-semibold text-slate-400">
+              ({isSearching ? `${filtered.length} of ${baseTotalCount}` : totalCount})
+            </span>
           </h3>
         </div>
       </div>
@@ -175,16 +211,30 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setSearch('');
+            }}
             placeholder="Filter keywords..."
-            className="w-full pl-8 pr-3 h-7 text-xs rounded-lg border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-400 focus:border-brand-400 transition"
+            className="w-full pl-8 pr-7 h-7 text-xs rounded-lg border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-400 focus:border-brand-400 transition"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition p-0.5 rounded cursor-pointer"
+              title="Clear filter"
+              aria-label="Clear filter"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
         </div>
         {(['rank', 'visibility', 'keyword'] as const).map((field) => (
           <button
             key={field}
             type="button"
             onClick={() => toggleSort(field)}
-            className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-lg border text-xs font-semibold transition ${
+            className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-lg border text-xs font-semibold transition cursor-pointer ${
               sortBy === field
                 ? 'bg-brand-50 text-brand-700 border-brand-200'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -203,13 +253,22 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
       {displayKeywords.length === 0 && (
         <div className="py-6 text-center rounded-xl bg-slate-50 border border-slate-100 space-y-2">
           <p className="text-xs text-slate-400 font-medium">
-            {search ? 'No keywords match your filter.' : 'No tracked keywords yet.'}
+            {search ? `No keywords match "${search}".` : 'No tracked keywords yet.'}
           </p>
-          {!search && (
+          {search ? (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand-600 hover:text-brand-700 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+              Clear search filter
+            </button>
+          ) : (
             <button
               type="button"
               onClick={() => setIsSuggestionsOpen(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
               Get smart keyword suggestions
@@ -271,7 +330,7 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
                 onClick={() =>
                   navigate(`/rank-tracking?locationId=${locationId}&keyword=${encodeURIComponent(kw.keyword)}`)
                 }
-                className="group flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50/60 hover:bg-white border border-slate-100 hover:border-brand-200/90 hover:shadow-xs transition-all duration-150 cursor-pointer text-xs"
+                className="group flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-3 px-3 py-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200/80 transition-colors cursor-pointer text-xs"
               >
                 {/* Keyword + Badges */}
                 <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -374,11 +433,11 @@ export const BusinessCardKeywords: React.FC<BusinessCardKeywordsProps> = ({
           })}
 
           {/* Show more / fewer */}
-          {filtered.length > 3 && (
+          {!isSearching && filtered.length > 3 && (
             <button
               type="button"
               onClick={() => setShowAll((v) => !v)}
-              className="w-full text-center text-xs font-semibold text-brand-600 hover:text-brand-700 py-1.5 rounded-xl hover:bg-brand-50/40 transition"
+              className="w-full text-center text-xs font-semibold text-brand-600 hover:text-brand-700 py-1.5 rounded-xl hover:bg-brand-50/40 transition cursor-pointer"
             >
               {showAll
                 ? 'Show fewer keywords'

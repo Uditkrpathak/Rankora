@@ -95,7 +95,7 @@ export const TeamManagement: React.FC = () => {
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-xs self-start sm:self-auto cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition self-start sm:self-auto cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>Invite Team Member</span>
@@ -103,14 +103,14 @@ export const TeamManagement: React.FC = () => {
         </div>
 
         {message && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center space-x-2 shadow-2xs">
+          <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{message}</span>
           </div>
         )}
 
         {/* Members Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Member Name & Email</span>
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Access Role & Status</span>
@@ -129,7 +129,7 @@ export const TeamManagement: React.FC = () => {
                 return (
                   <div key={m.id || m._id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/50 transition">
                     <div className="flex items-center space-x-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-extrabold flex items-center justify-center text-sm shadow-2xs shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-extrabold flex items-center justify-center text-sm shrink-0">
                         {m.user?.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                       <div>
@@ -147,14 +147,14 @@ export const TeamManagement: React.FC = () => {
 
                     <div className="flex items-center space-x-3 self-end sm:self-auto">
                       {isOwner ? (
-                        <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                        <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
                           {roleMeta.label}
                         </span>
                       ) : (
                         <select
                           value={m.role}
                           onChange={(e) => handleRoleChange(m.user?._id || m.userId, e.target.value)}
-                          className="text-xs font-semibold border border-slate-200 rounded-xl px-3 py-1.5 bg-white text-slate-800 outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition shadow-2xs cursor-pointer"
+                          className="text-xs font-semibold border border-slate-200 rounded-lg px-3 py-1.5 bg-white text-slate-800 outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition cursor-pointer"
                         >
                           <option value="admin">Admin (Full Access)</option>
                           <option value="member">Member (Scan & Edit)</option>

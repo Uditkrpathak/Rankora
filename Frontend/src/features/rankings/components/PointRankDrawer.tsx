@@ -27,59 +27,39 @@ export const PointRankDrawer: React.FC<PointRankDrawerProps> = ({
       {/* Slide-out Drawer */}
       <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white border-l border-slate-200 shadow-2xl z-[1000] flex flex-col transition-transform duration-300">
         {/* Header */}
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-        <div>
-          <div className="flex items-center space-x-2">
-            <MapPin className="w-4 h-4 text-brand-600" />
-            <h3 className="text-base font-bold text-slate-900">
-              Search point
-            </h3>
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+              <MapPin className="w-4 h-4 text-[#006EEE]" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Pin Rankings
+              </h3>
+              <p className="text-xs text-slate-500">
+                Local search results at this pin location
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5 font-mono">
-            {point.lat.toFixed(5)}, {point.lng.toFixed(5)}
-          </p>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <p className="text-xs text-slate-500">
-              {measured
-                ? `Source: ${point.provider} · ${new Date(point.scannedAt).toLocaleTimeString()}`
-                : 'Provider result unavailable'}
-            </p>
-            {((point as any).cached || point.provider === 'CACHE' || (point as any).costUsd === 0) && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                ⚡ CACHED (48h)
-              </span>
-            )}
-            {(point as any).refunded && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                🛡️ Failed - retry available
-              </span>
-            )}
-            {(point as any).cooling && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                ⏳ Proxy cooling 30min
-              </span>
-            )}
-          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+            aria-label="Close pin drawer"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 rounded-xl bg-white hover:bg-slate-200 border border-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
 
-      {/* Target Status Banner */}
-      <div className="p-4 bg-white border-b border-slate-100">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-600 font-medium">Target Location Rank:</span>
+        {/* Target Status Banner */}
+        <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
+          <span className="text-xs text-slate-700 font-semibold">Your Business Rank:</span>
           {!measured ? (
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-              Unknown
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+              Unavailable
             </span>
           ) : point.targetRank ? (
             <span
-              className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+              className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
                 point.targetRank <= 3
                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                   : point.targetRank <= 10
@@ -90,12 +70,11 @@ export const PointRankDrawer: React.FC<PointRankDrawerProps> = ({
               Rank #{point.targetRank}
             </span>
           ) : (
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-              Not found in first 20
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+              Not in top 20
             </span>
           )}
         </div>
-      </div>
 
       {/* SERP Competitor List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
@@ -113,8 +92,8 @@ export const PointRankDrawer: React.FC<PointRankDrawerProps> = ({
                   key={idx}
                   className={`p-3.5 rounded-xl border transition ${
                     isTarget
-                      ? 'bg-brand-50/80 border-brand-300 shadow-xs'
-                      : 'bg-white border-slate-200 hover:border-slate-300'
+                      ? 'bg-white border-[#006EEE] ring-2 ring-[#006EEE]/15 shadow-xs'
+                      : 'bg-white border-slate-200 hover:border-slate-300 shadow-2xs'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -134,7 +113,7 @@ export const PointRankDrawer: React.FC<PointRankDrawerProps> = ({
                             {item.name}
                           </h5>
                           {isTarget && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-brand-600 text-white">
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#006EEE] text-white">
                               YOU
                             </span>
                           )}
@@ -162,7 +141,7 @@ export const PointRankDrawer: React.FC<PointRankDrawerProps> = ({
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.name} ${item.address || ''}`)}${item.placeId && !/^(dfs_|serpapi_|google_place_)/.test(item.placeId) ? `&query_place_id=${encodeURIComponent(item.placeId)}` : ''}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-brand-600 hover:text-brand-800"
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#006EEE] hover:underline"
                   >
                     Open in Google Maps <ExternalLink className="h-3 w-3" />
                   </a>

@@ -198,13 +198,10 @@ export const GeoGridHeatmap: React.FC<GeoGridHeatmapProps> = ({
 
       const locDetail = point.distanceKm !== undefined
         ? point.distanceKm === 0
-          ? ' · Center (0 km)'
-          : ` · ${point.distanceKm.toFixed(1)} km${point.bearingDeg !== null && point.bearingDeg !== undefined ? ` @ ${Math.round(point.bearingDeg)}°` : ''}${point.ring ? ` (Ring ${point.ring})` : ''}`
+          ? ' · Center'
+          : ` · ${point.distanceKm.toFixed(1)} km from center`
         : '';
-      const snapDetail = point.snapOffsetM && point.snapOffsetM > 0
-        ? ` · snapped ${Math.round(point.snapOffsetM)}m`
-        : '';
-      const tooltipText = `${appearance.tooltip}${locDetail}${snapDetail}`;
+      const tooltipText = `${appearance.tooltip}${locDetail}`;
 
       // Find corresponding comparison point
       let deltaBadgeHtml = '';

@@ -12,7 +12,7 @@ export const FEATURE_FLAGS = {
   /** GBP Reviews Inbox & AI Copilot */
   ENABLE_REVIEWS_INBOX: true,
   /** 17-Point SEO Audits Engine UI */
-  ENABLE_AUDITS: false,
+  ENABLE_AUDITS: true,
   /** Team & Client Management */
   ENABLE_TEAM_CLIENTS: false,
   /** Auto-Pilot Listing Protection */

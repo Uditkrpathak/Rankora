@@ -1,6 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQueryWithReauth';
 import { ITrackedKeyword, ITrackedKeywordSettings, IKeywordsListResponse } from '@localo/types';
+import { locationApi } from './locationApi';
 
 export const keywordApi = createApi({
   reducerPath: 'keywordApi',
@@ -46,6 +47,12 @@ export const keywordApi = createApi({
       }),
       transformResponse: (res: any) => res.data,
       invalidatesTags: ['Keywords'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     updateTrackedKeyword: builder.mutation<
@@ -59,6 +66,12 @@ export const keywordApi = createApi({
       }),
       transformResponse: (res: any) => res.data,
       invalidatesTags: ['Keywords'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     deleteKeyword: builder.mutation<
@@ -70,6 +83,12 @@ export const keywordApi = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ['Keywords'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     refreshKeyword: builder.mutation<
@@ -82,6 +101,12 @@ export const keywordApi = createApi({
       }),
       transformResponse: (res: any) => res.data,
       invalidatesTags: ['Keywords'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     checkKeywordRelevance: builder.query<

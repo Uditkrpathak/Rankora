@@ -14,7 +14,7 @@ import { useGetScanConfigQuery } from '../../store/api/scanApi';
 import { AppNavbar } from '../../components/layout/AppNavbar';
 import { BusinessAvatar } from '../../components/ui/BusinessAvatar';
 import { LocationDetailDrawer } from './components/LocationDetailDrawer';
-import { useDebounce } from '../../lib/hooks/useDebounce';
+import { useDebounce } from '../../hooks/useDebounce';
 import { useToast } from '../../components/ui/Toast';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
@@ -290,7 +290,7 @@ export const LocationsPage: React.FC = () => {
 
           <Link
             to="/locations/add"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-sm hover:shadow-md transition active:scale-95 shrink-0"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs transition shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add Business Profile</span>
@@ -300,14 +300,14 @@ export const LocationsPage: React.FC = () => {
         {/* 1. Plan Counters Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* All active */}
-          <div className="bg-white rounded-2xl border border-brand-200/80 p-5 shadow-xs relative overflow-hidden group hover:shadow-md transition">
+          <div className="bg-white rounded-lg border border-slate-200 p-4 relative overflow-hidden group hover:border-slate-300 transition-colors">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">All Active Profiles</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">All Active Profiles</span>
               <span className="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold border border-brand-200">
                 Unlimited
               </span>
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+            <div className="text-2xl font-bold text-slate-900 mt-2">
               {counters.activeProfiles}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-medium">
@@ -316,14 +316,14 @@ export const LocationsPage: React.FC = () => {
           </div>
 
           {/* Connected Profiles */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs group hover:shadow-md transition">
+          <div className="bg-white rounded-lg border border-slate-200 p-4 group hover:border-slate-300 transition-colors">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Connected Accounts</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Connected Accounts</span>
               <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
                 Ready
               </span>
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+            <div className="text-2xl font-bold text-slate-900 mt-2">
               {counters.activeProfiles}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-medium">
@@ -332,11 +332,11 @@ export const LocationsPage: React.FC = () => {
           </div>
 
           {/* Pinned */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs group hover:shadow-md transition">
+          <div className="bg-white rounded-lg border border-slate-200 p-4 group hover:border-slate-300 transition-colors">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pinned Profiles</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pinned Profiles</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+            <div className="text-2xl font-bold text-slate-900 mt-2">
               {counters.pinnedCount}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-medium">
@@ -345,11 +345,11 @@ export const LocationsPage: React.FC = () => {
           </div>
 
           {/* Inactive */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs group hover:shadow-md transition">
+          <div className="bg-white rounded-lg border border-slate-200 p-4 group hover:border-slate-300 transition-colors">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Inactive / Paused</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Inactive / Paused</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+            <div className="text-2xl font-bold text-slate-900 mt-2">
               {counters.inactiveCount}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-medium">
@@ -359,7 +359,7 @@ export const LocationsPage: React.FC = () => {
         </div>
 
         {/* 2. Toolbar & Bulk Selector Row */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 mb-6 shadow-xs flex flex-wrap items-center justify-between gap-3.5">
+        <div className="bg-white border border-slate-200 rounded-lg p-3 mb-6 flex flex-wrap items-center justify-between gap-3">
           {/* Left: Bulk Checkbox + Search + Filters */}
           <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[260px]">
             {/* Search Box */}
@@ -370,7 +370,7 @@ export const LocationsPage: React.FC = () => {
                 placeholder="Search profiles..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-8.5 pr-3 py-1.5 rounded-xl border border-slate-200/90 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition shadow-2xs"
+                className="w-full pl-8.5 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition"
               />
             </div>
 

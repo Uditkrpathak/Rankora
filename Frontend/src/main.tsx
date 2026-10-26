@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import { ToastProvider } from './components/ui/Toast';
 import App from './App';
-import './index.css';
+import './styles/globals.css';
 import L from 'leaflet';
 
 // Global Leaflet default marker icon fix to prevent 404 image errors

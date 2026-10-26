@@ -467,6 +467,67 @@ export class AdminController {
   }
 
   /**
+   * POST /api/admin/users/:id/verify-email
+   * Manually verifies a user's email address, activates account, and starts workspace trial clock.
+   */
+  public async manuallyVerifyEmail(req: AuthenticatedRequest, res: Response): Promise<void> {
+    if (!req.user) return;
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(404).json({ success: false, error: { code: 'USER_NOT_FOUND', message: 'User not found' } });
+      return;
+    }
+
+    await this.checkManagePermission(req.user, user);
+
+    const before = {
+      isEmailVerified: user.isEmailVerified,
+      status: user.status
+    };
+
+    user.isEmailVerified = true;
+    user.status = 'ACTIVE';
+    user.emailVerificationTokenHash = undefined;
+    user.emailVerificationExpiresAt = undefined;
+    await user.save();
+
+    // Start 14-day trial clock for user's owned workspaces if not already set
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    const { WorkspaceMember } = await import('../../models/WorkspaceMember');
+    const { Workspace } = await import('../../models/Workspace');
+    const ownedMemberships = await WorkspaceMember.find({ userId: user._id, role: 'owner' }).select('workspaceId');
+    const workspaceIds = ownedMemberships.map((m: any) => m.workspaceId);
+
+    if (workspaceIds.length > 0) {
+      await Workspace.updateMany(
+        { _id: { $in: workspaceIds }, trialEndsAt: { $exists: false } },
+        { $set: { trialEndsAt, 'plan.periodEnd': trialEndsAt } }
+      );
+    }
+
+    await AuditLog.create({
+      actorUserId: req.user._id.toString(),
+      actorRole: req.user.platformRole || 'ADMIN',
+      targetUserId: user._id.toString(),
+      action: 'ADMIN_MANUALLY_VERIFY_EMAIL',
+      before,
+      after: { isEmailVerified: true, status: 'ACTIVE' },
+      ip: req.ip || req.socket.remoteAddress,
+      userAgent: req.headers['user-agent']
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        message: `Email for ${user.email} has been manually verified and account activated.`,
+        isEmailVerified: true,
+        status: user.status
+      }
+    });
+  }
+
+  /**
    * GET /api/admin/stats
    */
   public async getStats(_req: AuthenticatedRequest, res: Response): Promise<void> {

@@ -20,6 +20,9 @@ import {
   Settings,
   Link2,
   Shield,
+  Home,
+  ClipboardCheck,
+  MessageSquare,
 } from 'lucide-react';
 
 interface AppNavbarProps {
@@ -82,10 +85,11 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
   const isAdmin = user?.platformRole === 'ADMIN' || user?.platformRole === 'SUPER_ADMIN';
 
   const navLinks = [
-    { label: 'Home', to: '/dashboard' },
-    ...(isAdmin ? [{ label: 'Admin', to: '/admin' }] : []),
-    { label: 'Reviews', to: '/reviews' },
-    { label: 'Help', to: '/help' },
+    { label: 'Home', to: '/dashboard', icon: Home },
+    ...(isAdmin ? [{ label: 'Admin', to: '/admin', icon: Shield }] : []),
+    { label: 'Audits', to: '/audits', icon: ClipboardCheck },
+    { label: 'Reviews', to: '/reviews', icon: MessageSquare },
+    { label: 'Help', to: '/help', icon: HelpCircle },
   ];
 
   const handleAddClick = () => {
@@ -116,19 +120,31 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
             <BrandLogo to="/dashboard" />
             <div className="h-4 w-px bg-slate-200/90 hidden sm:block" />
 
-            <nav className="hidden md:flex items-center gap-2" aria-label="Main Navigation">
+            <nav className="hidden md:flex items-center gap-1.5" aria-label="Main Navigation">
               {navLinks.map((link) => {
-                const isActive = location.pathname === link.to;
+                const isActive =
+                  location.pathname === link.to ||
+                  (link.to === '/dashboard' &&
+                    (location.pathname === '/' ||
+                      location.pathname.startsWith('/dashboard') ||
+                      location.pathname.startsWith('/locations/')));
+                const IconComponent = link.icon;
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${isActive
-                      ? 'bg-slate-100 text-slate-900 font-semibold shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                      }`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      isActive
+                        ? 'bg-sky-50 text-brand-600 border border-sky-100 shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
                   >
-                    {link.label}
+                    <IconComponent
+                      className={`w-3.5 h-3.5 ${
+                        isActive ? 'text-brand-600' : 'text-slate-400'
+                      }`}
+                    />
+                    <span>{link.label}</span>
                   </Link>
                 );
               })}
@@ -147,7 +163,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
                 size="md"
                 onClick={handleAddClick}
                 leftIcon={<Plus className="w-3.5 h-3.5" aria-hidden="true" />}
-                className="font-semibold shadow-xs"
+                className="font-semibold"
                 aria-label="Add business"
               >
                 Add business
@@ -158,7 +174,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
             <button
               onClick={handleAddClick}
               aria-label="Add business"
-              className="sm:hidden p-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 shadow-xs"
+              className="sm:hidden p-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -188,7 +204,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onAddBusiness, fullWidth =
                 <div
                   role="menu"
                   aria-orientation="vertical"
-                  className="absolute right-0 mt-2 w-56 rounded-xl bg-white border border-slate-200 shadow-elevated py-1.5 z-50 text-xs"
+                  className="absolute right-0 mt-2 w-56 rounded-lg bg-white border border-slate-200 shadow-elevated py-1.5 z-50 text-xs"
                 >
                   <div className="px-3.5 py-2.5 border-b border-slate-100">
                     <p className="font-semibold text-slate-900 truncate">

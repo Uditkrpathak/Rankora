@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { AppNavbar } from '../../components/layout/AppNavbar';
 import { useToast } from '../../components/ui/Toast';
-import { useDebounce } from '../../lib/hooks/useDebounce';
+import { useDebounce } from '../../hooks/useDebounce';
 import {
   useLazySearchPlacesQuery,
   useAddFromPlacesSearchMutation,
@@ -12,23 +12,49 @@ import {
 import {
   useLazyGetGoogleAuthUrlQuery,
   useGetGoogleStatusQuery,
-  useGetDiscoveredLocationsQuery,
+  useLazyGetDiscoveredLocationsQuery,
   useImportLocationMutation,
 } from '../../store/api/gbpApi';
 import {
   ArrowLeft,
+  ArrowRight,
   Search,
   MapPin,
   X,
   RefreshCw,
-  Sparkles,
   Building2,
   CheckCircle2,
   AlertCircle,
   Download,
-  Globe,
+  Clock,
+  BarChart2,
+  Settings,
+  FileText,
+  Plus,
+  Star,
+  Check,
 } from 'lucide-react';
-import { BusinessAvatar } from '../../components/ui/BusinessAvatar';
+
+const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
+  <svg className={className} viewBox="0 0 24 24">
+    <path
+      fill="#4285F4"
+      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+    />
+  </svg>
+);
 
 export const AddBusinessProfilesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,13 +71,20 @@ export const AddBusinessProfilesPage: React.FC = () => {
   const isGoogleConnected = Boolean(googleStatus?.isConnected);
   const googleEmail = googleStatus?.googleEmail || '';
 
-  const {
-    data: discoveredLocations = [],
-    isLoading: isDiscovering,
-    refetch: refetchDiscovered,
-  } = useGetDiscoveredLocationsQuery(workspaceId, {
-    skip: !workspaceId || !isGoogleConnected,
-  });
+  const [
+    triggerDiscover,
+    {
+      data: discoveredLocations = [],
+      isFetching: isDiscovering,
+      isUninitialized,
+    },
+  ] = useLazyGetDiscoveredLocationsQuery();
+
+  const handleScanListings = () => {
+    if (workspaceId) {
+      triggerDiscover(workspaceId);
+    }
+  };
 
   const [importLocation] = useImportLocationMutation();
   const [importingGbpId, setImportingGbpId] = useState<string | null>(null);
@@ -64,6 +97,13 @@ export const AddBusinessProfilesPage: React.FC = () => {
       triggerSearch({ workspaceId, q: debouncedQuery.trim() });
     }
   }, [debouncedQuery, workspaceId, triggerSearch]);
+
+  const handleManualSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (query.trim().length >= 2 && workspaceId) {
+      triggerSearch({ workspaceId, q: query.trim() });
+    }
+  };
 
   const handleImportGbp = async (loc: any) => {
     if (importingGbpId) return;
@@ -103,7 +143,6 @@ export const AddBusinessProfilesPage: React.FC = () => {
 
       toast.success(`"${place.name}" has been successfully added to your workspace!`);
 
-      // Navigate to /locations with success toast state
       navigate('/locations', {
         state: {
           activatedProfileName: place.name,
@@ -111,7 +150,11 @@ export const AddBusinessProfilesPage: React.FC = () => {
         },
       });
     } catch (err: any) {
-      if (err?.data?.error?.code === 'LOCATION_ALREADY_ADDED' || err?.data?.error?.code === 'PLACE_ALREADY_ADDED' || err?.status === 409) {
+      if (
+        err?.data?.error?.code === 'LOCATION_ALREADY_ADDED' ||
+        err?.data?.error?.code === 'PLACE_ALREADY_ADDED' ||
+        err?.status === 409
+      ) {
         const msg = `"${place.name}" has already been added to this workspace.`;
         setErrorMessage(msg);
         toast.error(msg);
@@ -145,272 +188,443 @@ export const AddBusinessProfilesPage: React.FC = () => {
   const places = searchResults?.results || [];
 
   return (
-    <div className="min-h-screen w-full page-canvas flex flex-col text-slate-900 antialiased selection:bg-brand-500 selection:text-white">
+    <div className="min-h-screen w-full bg-white flex flex-col text-slate-900 antialiased selection:bg-[#006EEE] selection:text-white">
       <AppNavbar fullWidth={true} />
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0">
-        <div style={{ maxWidth: '820px', margin: '0 auto', padding: '10px 0 60px' }}>
-        {/* Back Link */}
-        <Link
-          to="/locations"
-          className="inline-flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight hover:text-brand-600 transition mb-6"
-        >
-          <ArrowLeft size={20} />
-          <span>Add Business Profiles</span>
-        </Link>
 
-        {/* ── Discovered Google Business Profiles Section ── */}
-        {isGoogleConnected && (
-          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs mb-6">
-            <div className="flex items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100 flex-wrap">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-600 shadow-2xs">
-                  <CheckCircle2 size={20} />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                    Google Business Profile Connected
-                  </h2>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Linked to <span className="font-bold text-slate-700">{googleEmail}</span>
-                  </p>
-                </div>
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0">
+        <div className="w-full space-y-6 pb-20">
+          {/* Header Bar */}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Add a business
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+              Connect your Google Business Profile or add any business to track local search performance.
+            </p>
+          </div>
+
+          {/* 3-Step Progress Stepper */}
+          <div className="flex items-center justify-between gap-4 py-2 flex-wrap sm:flex-nowrap border-b border-slate-100 pb-4">
+            {/* Step 1 */}
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-[#006EEE] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                1
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-900 leading-tight">Connect account</div>
+                <div className="text-[11px] text-slate-500">Link your Google account</div>
+              </div>
+            </div>
+
+            <div className="hidden sm:block flex-1 h-[1px] bg-slate-200 mx-3" />
+
+            {/* Step 2 */}
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">
+                2
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-700 leading-tight">Find business</div>
+                <div className="text-[11px] text-slate-500">Search or choose a business</div>
+              </div>
+            </div>
+
+            <div className="hidden sm:block flex-1 h-[1px] bg-slate-200 mx-3" />
+
+            {/* Step 3 */}
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">
+                3
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-700 leading-tight">Confirm details</div>
+                <div className="text-[11px] text-slate-500">Verify and add to Rankora</div>
+              </div>
+            </div>
+          </div>
+
+          {/* 1. Primary Search Card - Positioned at the top for immediate visibility */}
+          <div className="bg-white border border-slate-200 rounded-xl p-5 sm:p-6 space-y-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                Find your business on Google Maps
+              </h2>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                Search by business name, city, or full address.
+              </p>
+            </div>
+
+            {/* Search Input Bar with Button */}
+            <form onSubmit={handleManualSearch} className="flex items-center gap-2.5">
+              <div className="relative flex-1">
+                <Search
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Search business here..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="w-full pl-10 pr-9 py-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#006EEE] focus:ring-1 focus:ring-[#006EEE] transition"
+                  autoFocus
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition cursor-pointer"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
               </div>
 
               <button
-                type="button"
-                onClick={() => refetchDiscovered()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-2xs"
+                type="submit"
+                disabled={isSearching || query.trim().length < 2}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#006EEE] hover:bg-[#005bc4] active:bg-[#004fa8] text-white text-xs font-semibold transition cursor-pointer disabled:opacity-50 shrink-0"
               >
-                <RefreshCw size={12} className={isDiscovering ? 'animate-spin' : ''} />
-                Refresh listings
+                {isSearching ? <RefreshCw size={13} className="animate-spin" /> : <Search size={13} />}
+                <span>Search</span>
               </button>
-            </div>
+            </form>
 
-            {isDiscovering ? (
-              <div className="p-8 text-center text-slate-500 text-xs font-medium flex items-center justify-center gap-2.5">
-                <RefreshCw size={16} className="animate-spin text-brand-600" />
-                <span>Scanning Google accounts for your business listings...</span>
+            {/* Error Message */}
+            {errorMessage && (
+              <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{errorMessage}</span>
               </div>
-            ) : discoveredLocations.length > 0 ? (
-              <div className="space-y-3">
-                <p className="text-xs text-slate-500 font-medium mb-2">
-                  Select a business below to import it into your workspace with verified Google ownership:
-                </p>
-                {discoveredLocations.map((loc: any, idx: number) => {
-                  const isThisImporting = importingGbpId === (loc.gbpLocationId || loc.placeId);
+            )}
+
+            {/* Places Results List */}
+            {isSearching ? (
+              <div className="p-8 text-center text-slate-500 text-xs font-medium flex items-center justify-center gap-2.5">
+                <RefreshCw size={16} className="animate-spin text-[#006EEE]" />
+                <span>Searching Google Maps places...</span>
+              </div>
+            ) : places.length > 0 ? (
+              <div className="divide-y divide-slate-100 border border-slate-100 rounded-lg overflow-hidden">
+                {places.map((place: any, idx: number) => {
+                  const isThisAdding = addingPlaceId === place.placeId;
+                  const categoryName = (place.category || place.resolvedCategory || place.primaryCategory)?.replace(/_/g, ' ');
                   return (
                     <div
-                      key={loc.gbpLocationId || loc.placeId || idx}
-                      className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200/80 hover:border-brand-500/50 hover:bg-brand-50/20 transition bg-slate-50/50"
+                      key={place.placeId || idx}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 hover:bg-slate-50/70 transition bg-white"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-brand-600 shrink-0 shadow-2xs">
-                          <Building2 size={20} />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                            <span className="text-sm font-bold text-slate-900 truncate">
-                              {loc.name}
-                            </span>
-                            {loc.primaryCategory && (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                                {loc.primaryCategory}
-                              </span>
-                            )}
+                        {place.thumbnailUrl ? (
+                          <img
+                            src={place.thumbnailUrl}
+                            alt={place.name}
+                            className="w-14 h-11 rounded-lg object-cover border border-slate-200 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-14 h-11 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-[#006EEE] shrink-0">
+                            <Building2 size={20} />
                           </div>
-                          <p className="text-xs text-slate-500 truncate font-medium">
-                            {loc.address || `${loc.city || ''}, ${loc.state || ''}`}
+                        )}
+
+                        <div className="min-w-0">
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                            {place.name}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                            <MapPin size={11} className="shrink-0 text-slate-400" />
+                            <span className="truncate">{place.address}</span>
                           </p>
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleImportGbp(loc)}
-                        disabled={Boolean(importingGbpId) || loc.isImported}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs shrink-0 inline-flex items-center gap-1.5 cursor-pointer ${
-                          loc.isImported
-                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                            : 'bg-brand-600 hover:bg-brand-700 text-white active:scale-95'
-                        }`}
-                      >
-                        {isThisImporting ? (
-                          <>
-                            <RefreshCw size={12} className="animate-spin" />
-                            Importing...
-                          </>
-                        ) : loc.isImported ? (
-                          <>
-                            <CheckCircle2 size={12} className="text-emerald-500" />
-                            Imported
-                          </>
-                        ) : (
-                          <>
-                            <Download size={12} />
-                            Import & Track
-                          </>
+                      <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-center shrink-0">
+                        {categoryName && (
+                          <span className="text-[11px] font-medium px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                            {categoryName}
+                          </span>
                         )}
-                      </button>
+
+                        {typeof place.rating === 'number' && place.rating > 0 && (
+                          <div className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                            <span>{place.rating.toFixed(1)}</span>
+                            <Star size={12} className="fill-amber-400 text-amber-400" />
+                            {place.userRatingCount && (
+                              <span className="text-[11px] text-slate-400 font-normal">
+                                ({place.userRatingCount.toLocaleString()} reviews)
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleSelectPlace(place)}
+                          disabled={Boolean(addingPlaceId)}
+                          className="px-4 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 transition cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          {isThisAdding && <RefreshCw size={11} className="animate-spin text-[#006EEE]" />}
+                          <span>{isThisAdding ? 'Adding...' : 'Select'}</span>
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
               </div>
-            ) : (
-              <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-900 leading-relaxed">
-                <span className="font-bold">Notice:</span> Google reported <strong>0 verified business listings</strong> directly owned by <strong>{googleEmail}</strong> on <a href="https://business.google.com" target="_blank" rel="noreferrer" className="underline font-bold">business.google.com</a>.
-                <br />
-                You can search and add any storefront or clinic on Google Maps using the search bar below!
+            ) : query.trim().length >= 2 ? (
+              <div className="p-6 text-center text-slate-500 text-xs border border-slate-100 rounded-lg">
+                No places found matching "<strong>{query}</strong>". Try searching for another name or address.
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Find your business Card */}
-        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs mb-5">
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1.5">
-            {isGoogleConnected ? 'Search & add any business' : 'Find your business'}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mb-5 leading-relaxed">
-            Search for your business exactly as customers would find its name on Google Maps.
-          </p>
-
-          {/* Blue Info Callout Box (Only if Google NOT connected yet) */}
-          {!isGoogleConnected && (
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-100/90 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed mb-5 shadow-2xs">
-              Want customers to always find you? Connect your Google account to{' '}
-              <a
-                href="#connect-google"
-                onClick={handleConnectGoogle}
-                className="text-brand-600 font-bold hover:underline cursor-pointer"
-              >
-                sync your Business Profiles
-              </a>
-              . You'll get tools to assist you with higher rankings in Google.
-            </div>
-          )}
-
-          {/* Search Autocomplete Input */}
-          <div className="relative">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-            />
-
-            <input
-              type="text"
-              placeholder="Enter your business name or city..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-11 pr-11 py-3.5 rounded-2xl border-2 border-brand-500/80 bg-white text-sm font-medium text-slate-900 placeholder-slate-400 outline-none shadow-sm focus:ring-4 focus:ring-brand-500/15 focus:border-brand-600 transition"
-              autoFocus
-            />
-
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
-              >
-                <X size={12} />
-              </button>
-            )}
+            ) : null}
           </div>
 
-          {/* Manual Entry Fallback Link */}
-          <div className="mt-4 pt-1 flex items-center justify-between text-xs text-slate-500">
-            <span>Can't find your business on Google?</span>
-            <Link
-              to="/locations/manual-add"
-              className="text-brand-600 font-bold hover:underline inline-flex items-center gap-1"
-            >
-              Enter details manually →
-            </Link>
-          </div>
-
-          {/* Error Message */}
-          {errorMessage && (
-            <div className="mt-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
-              <AlertCircle size={16} className="shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Autocomplete Dropdown List */}
-        {query.trim().length >= 2 && (
-          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-lg overflow-hidden">
-            {isSearching ? (
-              <div className="p-8 text-center text-slate-500 text-xs font-medium flex items-center justify-center gap-2.5">
-                <RefreshCw size={16} className="animate-spin text-brand-600" />
-                <span>Searching Google Maps places...</span>
+          {/* 2. Secondary Section: 2 Columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Card: Connect Google Business Profile */}
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 sm:p-6 space-y-5">
+              <div className="flex items-start gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                  <GoogleIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                    Connect Google Business Profile
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    Import locations you manage on Google and start tracking their local search performance.
+                  </p>
+                </div>
               </div>
-            ) : places.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 text-xs">
-                No places found matching "<strong>{query}</strong>". Try a different name, or{' '}
-                <Link to="/locations/manual-add" className="text-brand-600 font-bold hover:underline">
-                  add it manually
-                </Link>.
-              </div>
-            ) : (
-              <div>
-                {places.map((place: any, index: number) => (
-                  <div
-                    key={place.placeId || index}
-                    onClick={() => handleSelectPlace(place)}
-                    className="flex items-center gap-3.5 p-4 sm:p-4.5 border-b border-slate-100 last:border-none hover:bg-slate-50/80 transition cursor-pointer group"
-                  >
-                    {/* Place Thumbnail / Avatar */}
-                    <BusinessAvatar
-                      name={place.name}
-                      photoUrl={place.photoUrl || place.thumbnailUrl}
-                      coverPhotoUrl={place.coverPhotoUrl}
-                      logoUrl={place.logoUrl}
-                      website={place.website}
-                      category={place.category}
-                      size="md"
-                      className="w-11 h-11 rounded-xl shrink-0 shadow-2xs group-hover:scale-105 transition"
-                    />
 
-                    {/* Place Name & Full Address */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <span className="text-sm font-extrabold text-slate-900 group-hover:text-brand-600 transition">
-                          {place.name}
-                        </span>
-                        {(place.resolvedCategory || place.suggestedCategory || place.category) && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 inline-flex items-center gap-1">
-                            <Sparkles size={10} />
-                            {(place.resolvedCategory || place.suggestedCategory || place.category).replace(/_/g, ' ').toUpperCase()}
-                          </span>
-                        )}
+              {/* Connected State Banner */}
+              {isGoogleConnected ? (
+                <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">
+                        Google Business Profile connected
                       </div>
-                      <div className="text-xs text-slate-500 truncate font-medium">
-                        {place.address}
+                      <div className="text-xs text-slate-600">
+                        Linked to <span className="font-semibold text-slate-800">{googleEmail}</span>
                       </div>
                     </div>
-
-                    {(() => {
-                      const isThisAdding = addingPlaceId === place.placeId;
-                      return (
-                        <button
-                          type="button"
-                          disabled={Boolean(addingPlaceId)}
-                          className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-xs hover:shadow active:scale-95 shrink-0 inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                        >
-                          {isThisAdding && (
-                            <RefreshCw size={12} className="animate-spin" />
-                          )}
-                          {isThisAdding ? 'Adding...' : 'Add'}
-                        </button>
-                      );
-                    })()}
                   </div>
-                ))}
+
+                  <button
+                    type="button"
+                    onClick={handleScanListings}
+                    disabled={isDiscovering}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer hover:border-slate-300 disabled:opacity-50"
+                  >
+                    <RefreshCw size={12} className={isDiscovering ? 'animate-spin text-[#006EEE]' : ''} />
+                    <span>{isDiscovering ? 'Scanning...' : 'Scan listings'}</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-blue-50/60 border border-blue-200 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <div className="text-xs font-bold text-slate-900">
+                      Link your Google Account
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      Sync verified business profiles directly from Google.
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleConnectGoogle}
+                    disabled={isAuthUrlLoading}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#006EEE] hover:bg-[#005bc4] active:bg-[#004fa8] text-white text-xs font-semibold transition cursor-pointer disabled:opacity-50"
+                  >
+                    <GoogleIcon className="w-4 h-4 bg-white rounded-full p-0.5" />
+                    <span>{isAuthUrlLoading ? 'Connecting...' : 'Connect Google Profile'}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* 3 Value Propositions */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#006EEE] flex items-center justify-center shrink-0">
+                    <MapPin size={16} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900">Import your locations</div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Bring in all businesses you manage on Google Business Profile.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#006EEE] flex items-center justify-center shrink-0">
+                    <BarChart2 size={16} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900">Track local performance</div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Monitor rankings, reviews and visibility for each location.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#006EEE] flex items-center justify-center shrink-0">
+                    <Settings size={16} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900">Keep in sync</div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      We'll sync your business info and new locations automatically.
+                    </p>
+                  </div>
+                </div>
               </div>
-            )}
+
+              {/* Action Footer */}
+              <div className="flex items-center gap-4 pt-2 border-t border-slate-100 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleScanListings}
+                  disabled={isDiscovering}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#006EEE] hover:bg-[#005bc4] active:bg-[#004fa8] text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                >
+                  <Building2 size={15} />
+                  <span>{isDiscovering ? 'Scanning...' : 'Find my locations'}</span>
+                </button>
+
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                  <Clock size={14} className="text-slate-400" />
+                  <span>Last synced: Oct 23, 2026 at 9:56 AM</span>
+                </div>
+              </div>
+
+              {/* Discovered Listings list (if any found) */}
+              {discoveredLocations.length > 0 && (
+                <div className="space-y-2.5 pt-3 border-t border-slate-100">
+                  <p className="text-xs text-slate-500 font-medium">
+                    Discovered Google Business Profiles ({discoveredLocations.length}):
+                  </p>
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {discoveredLocations.map((loc: any, idx: number) => {
+                      const isThisImporting = importingGbpId === (loc.gbpLocationId || loc.placeId);
+                      return (
+                        <div
+                          key={loc.gbpLocationId || loc.placeId || idx}
+                          className="flex items-center justify-between gap-4 p-3 rounded-lg border border-slate-200 hover:bg-slate-50/60 transition bg-white"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-[#006EEE] shrink-0">
+                              <Building2 size={16} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                <span className="text-xs font-bold text-slate-900 truncate">
+                                  {loc.name}
+                                </span>
+                                {loc.primaryCategory && (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                                    {loc.primaryCategory}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-slate-500 truncate font-medium">
+                                {loc.address || `${loc.city || ''}, ${loc.state || ''}`}
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleImportGbp(loc)}
+                            disabled={Boolean(importingGbpId) || loc.isImported}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition shrink-0 inline-flex items-center gap-1.5 cursor-pointer ${
+                              loc.isImported
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                                : 'bg-[#006EEE] hover:bg-[#005bc4] text-white'
+                            }`}
+                          >
+                            {isThisImporting ? (
+                              <>
+                                <RefreshCw size={12} className="animate-spin" />
+                                <span>Importing...</span>
+                              </>
+                            ) : loc.isImported ? (
+                              <>
+                                <CheckCircle2 size={12} className="text-emerald-500" />
+                                <span>Imported</span>
+                              </>
+                            ) : (
+                              <>
+                                <Download size={12} />
+                                <span>Import & Track</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Card: How it works */}
+            <div className="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5 sm:p-6 space-y-4">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">How it works</h2>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Add your business in just a few steps.
+                </p>
+              </div>
+
+              <div className="space-y-5 pt-2">
+                {/* Step 1 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 text-[#006EEE] flex items-center justify-center shrink-0">
+                    <Search size={15} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900">Search for your business</div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Find your business on Google Maps or import it from your connected account.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 text-[#006EEE] flex items-center justify-center shrink-0">
+                    <FileText size={15} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900">Confirm the correct location</div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Make sure you select the right business and address.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 text-[#006EEE] flex items-center justify-center shrink-0">
+                    <BarChart2 size={15} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-slate-900">Start tracking rankings</div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      We'll add it to your workspace so you can track local search performance.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
       </main>
     </div>
   );

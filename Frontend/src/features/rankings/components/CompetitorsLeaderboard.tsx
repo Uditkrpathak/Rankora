@@ -73,49 +73,57 @@ export const CompetitorsLeaderboard: React.FC<CompetitorsLeaderboardProps> = ({
       </div>
 
       {!competitorsHidden && (
-        <div className="space-y-2">
-          <div className="space-y-1.5 max-h-[380px] overflow-y-auto pr-1">
+        <div className="space-y-2.5">
+          <div className="space-y-2">
             {paginatedCompetitors.map((comp) => {
               const isFocused = focusedPlaceId === comp.placeId;
               return (
                 <div
                   key={comp.placeId}
                   onClick={() => onFocusCompetitor(isFocused ? TARGET_PLACE_ID : comp.placeId)}
-                  className={`p-2.5 rounded-xl border transition cursor-pointer flex items-start gap-2.5 ${
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 bg-white ${
                     isFocused
-                      ? 'bg-blue-50/80 border-blue-300 shadow-xs ring-1 ring-blue-300'
-                      : 'bg-white border-slate-200 hover:border-slate-300 shadow-2xs'
+                      ? 'border-[#006EEE] ring-2 ring-[#006EEE]/15 shadow-xs'
+                      : 'border-slate-200 hover:border-slate-300 shadow-2xs'
                   }`}
                 >
                   {/* Rank Standing Badge */}
-                  <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
-                    <span className="text-xs font-black text-slate-800">#{comp.standing}</span>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border text-xs font-black ${
+                    comp.standing === 1
+                      ? 'bg-amber-50 border-amber-200 text-amber-800'
+                      : comp.standing === 2
+                      ? 'bg-slate-100 border-slate-200 text-slate-800'
+                      : comp.standing === 3
+                      ? 'bg-orange-50 border-orange-200 text-orange-800'
+                      : 'bg-white border-slate-200 text-slate-700'
+                  }`}>
+                    #{comp.standing}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
-                      <div className="flex items-center gap-1 flex-wrap">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold ${
                             comp.atrp <= 3
-                              ? 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                               : comp.atrp <= 10
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-slate-100 text-slate-700'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-slate-100 text-slate-700 border border-slate-200'
                           }`}
                         >
                           ATRP {comp.atrp.toFixed(1)}
                         </span>
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-[#006EEE] border border-blue-100">
                           SoLV {comp.solv.toFixed(0)}%
                         </span>
-                        <span className="px-1 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-600">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
                           Best #{comp.bestRank}
                         </span>
                       </div>
 
                       {comp.rating && (
-                        <div className="flex items-center gap-0.5 text-[11px] font-bold text-amber-600 shrink-0">
+                        <div className="flex items-center gap-0.5 text-xs font-bold text-amber-600 shrink-0">
                           <Star size={11} className="fill-amber-400 text-amber-400" />
                           <span>{comp.rating.toFixed(1)}</span>
                         </div>
@@ -123,8 +131,8 @@ export const CompetitorsLeaderboard: React.FC<CompetitorsLeaderboardProps> = ({
                     </div>
 
                     <h4 className="text-xs font-bold text-slate-900 truncate mt-1">{comp.name}</h4>
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 mt-0.5">
-                      <p className="truncate max-w-[140px]">{comp.address || comp.primaryCategory || 'Local competitor'}</p>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 mt-0.5 gap-2">
+                      <p className="truncate max-w-[200px] sm:max-w-[260px]">{comp.address || comp.primaryCategory || 'Local competitor'}</p>
                       <span className="text-[10px] font-medium text-slate-400 shrink-0">
                         {comp.occurrences}/{totalMeasured} ({comp.coveragePercent}%)
                       </span>
@@ -135,7 +143,7 @@ export const CompetitorsLeaderboard: React.FC<CompetitorsLeaderboardProps> = ({
             })}
 
             {competitors.length === 0 && !isTriggering && (
-              <div className="p-4 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200 text-xs text-slate-400">
+              <div className="p-6 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200 text-xs text-slate-400">
                 {hasScan ? 'No competitors with ≥10% pin coverage found.' : 'Select a keyword above to load rankings.'}
               </div>
             )}
@@ -143,22 +151,22 @@ export const CompetitorsLeaderboard: React.FC<CompetitorsLeaderboardProps> = ({
 
           {/* Pagination Controls */}
           {totalLeaderboardPages > 1 && (
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-              <span className="text-[11px] text-slate-500">
+            <div className="flex items-center justify-between pt-2.5 border-t border-slate-200 text-xs">
+              <span className="text-[11px] font-medium text-slate-500">
                 Page {leaderboardPage} of {totalLeaderboardPages}
               </span>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => onPageChange(Math.max(1, leaderboardPage - 1))}
                   disabled={leaderboardPage === 1}
-                  className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-[11px]"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#006EEE] hover:text-white text-slate-700 font-bold disabled:opacity-40 disabled:hover:bg-slate-100 disabled:hover:text-slate-700 disabled:cursor-not-allowed cursor-pointer text-xs transition-colors"
                 >
                   Prev
                 </button>
                 <button
                   onClick={() => onPageChange(Math.min(totalLeaderboardPages, leaderboardPage + 1))}
                   disabled={leaderboardPage === totalLeaderboardPages}
-                  className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-[11px]"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#006EEE] hover:text-white text-slate-700 font-bold disabled:opacity-40 disabled:hover:bg-slate-100 disabled:hover:text-slate-700 disabled:cursor-not-allowed cursor-pointer text-xs transition-colors"
                 >
                   Next
                 </button>

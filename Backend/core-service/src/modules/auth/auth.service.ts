@@ -402,12 +402,14 @@ export class AuthService {
     
     try {
       if (ENV.NODE_ENV !== 'production' && input.idToken.startsWith('mock_google_')) {
-        const sub = input.idToken.replace('mock_google_', '');
+        const tokenContent = input.idToken.replace('mock_google_', '');
+        const [sub, customEmail] = tokenContent.includes(':') ? tokenContent.split(':') : [tokenContent, undefined];
         payload = {
           sub,
-          email: `${input.idToken}@example.com`.toLowerCase(),
+          email: (customEmail || `${tokenContent}@example.com`).toLowerCase(),
           name: 'Google User',
-          picture: 'https://example.com/avatar.jpg'
+          picture: 'https://example.com/avatar.jpg',
+          email_verified: true
         };
       } else {
         const validAudiences = Array.from(new Set([
@@ -432,9 +434,77 @@ export class AuthService {
     }
 
     const normalizedEmail = payload.email.toLowerCase().trim();
-    let user = await User.findOne({
-      $or: [{ googleSub: payload.sub }, { email: normalizedEmail }]
-    });
+    // 1. Look up by googleSub first (Google immutable ID)
+    let user = await User.findOne({ googleSub: payload.sub });
+
+    // Confirm suspended and deleted checks apply to users found directly by googleSub
+    if (user) {
+      if (user.status === 'DELETED' || user.status === 'PENDING_DELETION') {
+        const err: any = new Error('ACCOUNT_DELETED');
+        err.statusCode = 403;
+        throw err;
+      }
+
+      if (user.status === 'SUSPENDED') {
+        const err: any = new Error('ACCOUNT_SUSPENDED');
+        err.statusCode = 403;
+        throw err;
+      }
+    }
+
+    // 2. If not found, look up by email only when payload.email_verified is true
+    if (!user && payload.email_verified) {
+      user = await User.findOne({ email: normalizedEmail });
+      if (user) {
+        // Reject with 403 if the matched user already has a googleSub different from payload.sub
+        if (user.googleSub && user.googleSub !== payload.sub) {
+          const err: any = new Error('GOOGLE_ACCOUNT_CONFLICT');
+          err.statusCode = 403;
+          throw err;
+        }
+
+        // Reject suspended or soft-deleted users using the same checks as standard login
+        if (user.status === 'DELETED' || user.status === 'PENDING_DELETION') {
+          const err: any = new Error('ACCOUNT_DELETED');
+          err.statusCode = 403;
+          throw err;
+        }
+
+        if (user.status === 'SUSPENDED') {
+          const err: any = new Error('ACCOUNT_SUSPENDED');
+          err.statusCode = 403;
+          throw err;
+        }
+
+        const wasUnverified = !user.isEmailVerified;
+        // In unverified-account branch: clear password, only change status if PENDING_VERIFICATION, clear tokens, and increment session
+        if (wasUnverified) {
+          user.passwordHash = undefined;
+          user.isEmailVerified = true;
+          if (user.status === 'PENDING_VERIFICATION') {
+            user.status = 'ACTIVE';
+          }
+          user.emailVerificationTokenHash = undefined;
+          user.emailVerificationExpiresAt = undefined;
+          user.passwordResetTokenHash = undefined;
+          user.passwordResetExpiresAt = undefined;
+          user.createPasswordTokenHash = undefined;
+          user.createPasswordExpiresAt = undefined;
+        }
+
+        // Only link users with no googleSub
+        if (!user.googleSub) {
+          user.googleSub = payload.sub;
+        }
+
+        await user.save();
+
+        if (wasUnverified) {
+          const newSessionVersion = await tokenService.incrementSessionVersion(user._id.toString(), 'OAUTH_LINK_UNVERIFIED');
+          user.sessionVersion = newSessionVersion;
+        }
+      }
+    }
 
     if (!user) {
       // Create new user & workspace
@@ -509,14 +579,6 @@ export class AuthService {
 
         return newUser;
       });
-    } else if (!user.googleSub) {
-      // Link Google account to existing email user
-      user.googleSub = payload.sub;
-      if (!user.isEmailVerified) {
-        user.isEmailVerified = true;
-        user.status = 'ACTIVE';
-      }
-      await user.save();
     }
 
     const tokens = await tokenService.issueTokenBundle({

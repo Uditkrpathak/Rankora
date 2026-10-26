@@ -36,7 +36,7 @@ export const KeywordSelectorBar: React.FC<KeywordSelectorBarProps> = ({
 
         <button
           onClick={onOpenAddModal}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#006EEE] text-xs font-bold transition-colors cursor-pointer border border-blue-200 shadow-2xs"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#006EEE] hover:bg-[#005bc4] active:bg-[#004fa8] text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
         >
           <Plus size={13} />
           <span>Add Keyword</span>
@@ -62,7 +62,7 @@ export const KeywordSelectorBar: React.FC<KeywordSelectorBarProps> = ({
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                 isSelected
                   ? 'bg-[#006EEE] text-white shadow-xs'
-                  : 'bg-[#EFF6FF] text-[#006EEE] hover:bg-blue-100/70 border border-blue-200/60'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200/80'
               }`}
               title={rankLabel ? `Average Total Rank Position (ATRP): ${rankLabel}` : 'Tracked keyword'}
             >
@@ -71,8 +71,8 @@ export const KeywordSelectorBar: React.FC<KeywordSelectorBarProps> = ({
                 <span
                   className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
                     isSelected
-                      ? 'bg-white/20 text-white'
-                      : 'bg-white text-blue-800 border border-blue-200'
+                      ? 'bg-white/25 text-white'
+                      : 'bg-white text-slate-700 border border-slate-200'
                   }`}
                 >
                   {rankLabel}

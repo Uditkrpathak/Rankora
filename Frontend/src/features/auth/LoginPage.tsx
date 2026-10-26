@@ -88,14 +88,14 @@ export const LoginPage: React.FC = () => {
         title="Two-Factor Authentication"
         subtitle="Enter the 6-digit code from your authenticator app or an emergency backup code."
       >
-      {/* Two-Factor Authentication View */}
-      <AuthAlert error={error} onDismiss={() => setError(null)} />
+        {/* Two-Factor Authentication View */}
+        <AuthAlert error={error} onDismiss={() => setError(null)} />
 
-        <form onSubmit={handleMfaSubmit} className="space-y-5">
+        <form onSubmit={handleMfaSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">Verification Code</label>
             <div className="relative">
-              <KeyRound className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={mfaCode}
@@ -103,7 +103,7 @@ export const LoginPage: React.FC = () => {
                 placeholder="123456 or ABCD-EFGH"
                 required
                 autoFocus
-                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-brand-600 focus:border-transparent outline-none transition"
+                className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 bg-slate-50/40 hover:bg-white focus:bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none"
               />
             </div>
           </div>
@@ -111,7 +111,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={isMfaLoading}
-            className="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm transition shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
+            className="w-full h-11 rounded-xl bg-gradient-to-r from-[#2E3192] to-[#1d4ed8] hover:from-[#242775] hover:to-[#1a44be] text-white font-semibold text-sm transition-all shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer active:scale-[0.99]"
           >
             <ShieldCheck className="w-4 h-4" />
             <span>{isMfaLoading ? 'Verifying...' : 'Verify & Continue'}</span>
@@ -120,7 +120,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setMfaChallengeToken(null)}
-            className="w-full text-center text-xs text-slate-500 hover:text-slate-800 transition"
+            className="w-full pt-1 text-center text-xs text-slate-500 hover:text-slate-800 transition font-medium"
           >
             ← Back to regular login
           </button>
@@ -146,53 +146,53 @@ export const LoginPage: React.FC = () => {
       />
 
       {/* Divider */}
-      <div className="relative flex py-2 items-center mb-6">
-        <div className="flex-grow border-t border-slate-200"></div>
-        <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase font-medium">Or with email</span>
-        <div className="flex-grow border-t border-slate-200"></div>
+      <div className="relative flex py-2 items-center mb-5">
+        <div className="flex-grow border-t border-slate-200/80"></div>
+        <span className="flex-shrink mx-3 text-slate-400 text-[11px] uppercase tracking-wider font-semibold">Or with email</span>
+        <div className="flex-grow border-t border-slate-200/80"></div>
       </div>
 
       {/* Email + Password Form */}
       <form onSubmit={handlePasswordLogin} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+          <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email Address</label>
           <div className="relative">
-            <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               required
-              className="w-full pl-9 pr-3 h-9 rounded-lg border border-slate-300 text-slate-900 text-base md:text-xs focus-visible:outline-brand-500 outline-none transition"
+              className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 bg-slate-50/40 hover:bg-white focus:bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none"
             />
           </div>
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between mb-1.5">
             <label className="block text-xs font-semibold text-slate-700">Password</label>
-            <Link to="/forgot-password" className="text-xs text-brand-600 hover:text-brand-800 font-medium transition">
+            <Link to="/forgot-password" className="text-xs text-brand-600 hover:text-brand-700 font-semibold transition">
               Forgot password?
             </Link>
           </div>
           <div className="relative">
-            <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full pl-9 pr-9 h-9 rounded-lg border border-slate-300 text-slate-900 text-base md:text-xs focus-visible:outline-brand-500 outline-none transition"
+              className="w-full pl-10 pr-11 h-11 rounded-xl border border-slate-200 bg-slate-50/40 hover:bg-white focus:bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition p-1 rounded"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100/80 rounded-lg focus:outline-none transition cursor-pointer"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>
@@ -200,25 +200,18 @@ export const LoginPage: React.FC = () => {
         <button
           type="submit"
           disabled={isLoginLoading}
-          className="w-full mt-2 h-9 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs transition shadow-xs flex items-center justify-center space-x-1.5 disabled:opacity-50 cursor-pointer"
+          className="w-full mt-2 h-11 rounded-xl bg-gradient-to-r from-[#2E3192] to-[#1d4ed8] hover:from-[#242775] hover:to-[#1a44be] text-white font-semibold text-sm transition-all shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer active:scale-[0.99] group"
         >
           <span>{isLoginLoading ? 'Signing in...' : 'Sign In'}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
         </button>
       </form>
 
       {/* Footer link */}
-      <div className="mt-8 text-center text-xs text-slate-600">
+      <div className="mt-6 text-center text-xs text-slate-600">
         Don't have an account?{' '}
-        <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-800 transition">
+        <Link to="/register" className="font-bold text-brand-600 hover:text-brand-700 transition">
           Create an account
-        </Link>
-      </div>
-
-      <div className="mt-3 text-center text-[11px] text-slate-400">
-        Staff & System Administrators:{' '}
-        <Link to="/admin/login" className="text-slate-500 hover:text-brand-600 underline transition font-medium">
-          Admin portal sign in
         </Link>
       </div>
     </AuthLayout>

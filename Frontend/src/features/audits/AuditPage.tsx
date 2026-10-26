@@ -142,19 +142,19 @@ export const AuditPage: React.FC = () => {
     <div className="min-h-screen w-full page-canvas flex flex-col text-slate-900 antialiased selection:bg-brand-500 selection:text-white">
       <AppNavbar fullWidth={true} />
       <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0">
-        <div className="space-y-8 w-full pb-12">
+        <div className="space-y-6 w-full pb-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center shadow-xs">
+              <div className="w-9 h-9 rounded-lg bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+              <div className="min-w-0">
+                <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight truncate">
                   17-Point Automated Local SEO Audit
                 </h1>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5 leading-snug">
                   Algorithmic evaluation of profile completeness, trust, and Google Maps ranking readiness.
                 </p>
               </div>
@@ -162,11 +162,11 @@ export const AuditPage: React.FC = () => {
           </div>
 
           {/* Controls */}
-          <div className="flex items-center space-x-3 flex-wrap gap-2">
+          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
             <select
               value={selectedLocationId}
               onChange={(e) => setSelectedLocationId(e.target.value)}
-              className="bg-white border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl px-3 py-2 outline-none focus-visible:outline-brand-500 shadow-2xs cursor-pointer"
+              className="bg-white border border-slate-300 text-slate-800 text-xs font-semibold rounded-lg px-3 py-2 outline-none focus-visible:outline-brand-500 cursor-pointer flex-1 sm:flex-initial max-w-full sm:max-w-xs truncate"
             >
               {locations.map((loc) => (
                 <option key={loc._id} value={loc._id}>
@@ -181,6 +181,7 @@ export const AuditPage: React.FC = () => {
               isLoading={isRunning}
               leftIcon={<Play className="w-3.5 h-3.5 fill-white" />}
               onClick={handleRunAudit}
+              className="shrink-0"
             >
               Run Audit
             </Button>
@@ -190,6 +191,7 @@ export const AuditPage: React.FC = () => {
               size="sm"
               disabled={!selectedLocation || isSavingSchedule}
               onClick={handleScheduleToggle}
+              className="shrink-0"
             >
               Weekly Audit {selectedLocation?.auditScheduleEnabled === false ? 'Off' : 'On'}
             </Button>
@@ -201,7 +203,7 @@ export const AuditPage: React.FC = () => {
             {/* Top Score Overview & Category Chart */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Score Gauge Card */}
-              <div className="p-6 md:p-7 rounded-3xl bg-white border border-slate-200/80 shadow-card flex flex-col justify-between">
+              <div className="p-5 md:p-6 rounded-lg bg-white border border-slate-200 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -244,7 +246,7 @@ export const AuditPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h3 className="text-base font-bold text-slate-900 leading-snug">
                         {currentAudit.score >= 80
                           ? 'Excellent Standing'
@@ -280,26 +282,39 @@ export const AuditPage: React.FC = () => {
                 <ChartContainer
                   title="Audit Pillars Breakdown"
                   subtitle="Category scores across SEO dimensions"
-                  height={220}
+                  height={320}
                 >
-                  <DistributionBarChart data={auditCategoryData} height={220} unit="pts" />
+                  <DistributionBarChart
+                    data={auditCategoryData}
+                    layout="vertical"
+                    height={320}
+                    yAxisWidth={140}
+                    unit="pts"
+                  />
                 </ChartContainer>
               </div>
             </div>
 
             {(!hasRecentGbpSync || outdatedAudit) && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                {!hasRecentGbpSync && (
-                  <p>
-                    This profile has no recent verified Google Business Profile sync. Public listing or manually entered facts are not proof of profile ownership. Review, post, attribute and media checks without a current source are marked “Needs data” and excluded from the score.{' '}
-                    <Link to="/locations" className="font-semibold underline">Connect Google in Business Profiles</Link>.
-                  </p>
-                )}
-                {outdatedAudit && (
-                  <p className={!hasRecentGbpSync ? 'mt-2' : ''}>
-                    This saved audit uses ruleset {currentAudit.rulesVersion || 'unknown'}. Run the audit again to apply the current evidence and freshness checks.
-                  </p>
-                )}
+              <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4 text-xs sm:text-sm text-amber-900 flex items-start gap-3">
+                <div className="p-1.5 rounded-lg bg-amber-100 text-amber-700 shrink-0 mt-0.5">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div className="space-y-1 flex-1 min-w-0">
+                  {!hasRecentGbpSync && (
+                    <p className="leading-relaxed">
+                      This profile has no recent verified Google Business Profile sync. Public listing or manually entered facts are not proof of profile ownership. Review, post, attribute and media checks without a current source are marked “Needs data” and excluded from the score.{' '}
+                      <Link to="/locations" className="font-semibold underline text-amber-950 hover:text-black">
+                        Connect Google in Business Profiles
+                      </Link>.
+                    </p>
+                  )}
+                  {outdatedAudit && (
+                    <p className="leading-relaxed text-amber-800">
+                      This saved audit uses ruleset {currentAudit.rulesVersion || 'unknown'}. Run the audit again to apply the current evidence and freshness checks.
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -307,21 +322,21 @@ export const AuditPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Audit Checklist Signals</h3>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900">Audit Checklist Signals</h3>
                   <p className="text-xs text-slate-500">
                     {currentAudit.signals?.filter((signal) => signal.severity !== 'UNKNOWN').length || 0} of {currentAudit.signals?.length || 17} checks have evidence · {currentAudit.summary?.unknownCount || 0} need data
                   </p>
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="inline-flex rounded-xl bg-white p-1 border border-slate-200 text-xs font-semibold shadow-xs">
+                <div className="inline-flex rounded-lg bg-white p-0.5 border border-slate-200 text-xs font-medium overflow-x-auto max-w-full scrollbar-none">
                   {['ALL', 'CRITICAL', 'WARNING', 'OPTIMIZATION', 'PASS'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveFilter(tab)}
-                      className={`px-3 py-1 rounded-lg transition ${
+                      className={`px-3 py-1 rounded-md transition shrink-0 cursor-pointer ${
                         activeFilter === tab
-                          ? 'bg-brand-500 text-white shadow-xs'
+                          ? 'bg-brand-500 text-white'
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
@@ -339,9 +354,9 @@ export const AuditPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="p-12 text-center max-w-md mx-auto bg-white rounded-3xl border border-slate-200/80 shadow-card space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto">
-              <ShieldCheck className="w-6 h-6" />
+          <div className="p-8 text-center max-w-md mx-auto bg-white rounded-lg border border-slate-200 space-y-3">
+            <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-slate-900">No Audit Run for this Profile</h3>
             <p className="text-xs text-slate-500">

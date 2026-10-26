@@ -174,11 +174,17 @@ export const BusinessCardHeader: React.FC<BusinessCardHeaderProps> = ({
       >
         {/* Top: Audit Score & More Menu */}
         <div className="flex items-center gap-4">
-          <AuditScoreGauge
-            score={location.auditScore}
-            unknownCount={location.auditUnknownCount}
-            rulesVersion={location.auditRulesVersion}
-          />
+          <Link
+            to={`/audits?locationId=${location._id}`}
+            title="View 17-point SEO audit details and recommendations"
+            className="hover:opacity-80 transition cursor-pointer"
+          >
+            <AuditScoreGauge
+              score={location.auditScore}
+              unknownCount={location.auditUnknownCount}
+              rulesVersion={location.auditRulesVersion}
+            />
+          </Link>
 
           {/* Three dots menu */}
           <div className="relative">
@@ -196,6 +202,15 @@ export const BusinessCardHeader: React.FC<BusinessCardHeaderProps> = ({
                 className="absolute right-0 mt-1 w-44 rounded-xl bg-white border border-slate-200 shadow-elevated py-1.5 z-30 text-xs"
                 onMouseLeave={() => setMenuOpen(false)}
               >
+                <Link
+                  to={`/audits?locationId=${location._id}`}
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-slate-700 hover:bg-slate-50 transition font-medium"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>17-Point Audit</span>
+                </Link>
+
                 <Link
                   to={`/rank-tracking?locationId=${location._id}`}
                   onClick={() => setMenuOpen(false)}
@@ -220,7 +235,7 @@ export const BusinessCardHeader: React.FC<BusinessCardHeaderProps> = ({
                     setMenuOpen(false);
                     setBoosterOpen(true);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-amber-800 hover:bg-amber-50 transition font-medium text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-amber-800 hover:bg-amber-50 transition font-medium text-left cursor-pointer"
                 >
                   <QrCode className="w-3.5 h-3.5 text-amber-600" />
                   <span>QR Review Standee</span>
@@ -243,7 +258,7 @@ export const BusinessCardHeader: React.FC<BusinessCardHeaderProps> = ({
                     setMenuOpen(false);
                     onDelete();
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-rose-600 hover:bg-rose-50 transition font-semibold text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-rose-600 hover:bg-rose-50 transition font-semibold text-left cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Profile</span>
@@ -253,8 +268,16 @@ export const BusinessCardHeader: React.FC<BusinessCardHeaderProps> = ({
           </div>
         </div>
 
-        {/* Bottom: View Map Pill Button + QR Review Stand */}
+        {/* Bottom: View Audit + View Map + QR Review Stand */}
         <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            to={`/audits?locationId=${location._id}`}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50/90 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200/80 transition-all duration-150 shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>View Audit</span>
+          </Link>
+
           <Link
             to={`/rank-tracking?locationId=${location._id}`}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50/90 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200/80 transition-all duration-150 shadow-2xs hover:shadow-xs active:scale-95"

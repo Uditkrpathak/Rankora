@@ -28,11 +28,20 @@ export interface FormattedError {
 export function parseError(err: any): FormattedError {
   const code: string =
     err?.data?.error?.code ||
+    err?.status ||
     (typeof err === 'string' && /^[A-Z0-9_]+$/.test(err) ? err : '') ||
     '';
   const rawMessage: string =
     err?.data?.error?.message ||
-    (typeof err === 'string' ? err : err?.message || 'An unexpected error occurred.');
+    (typeof err === 'string' ? err : err?.message || err?.error || 'An unexpected error occurred.');
+
+  if (code === 'FETCH_ERROR' || rawMessage.toLowerCase().includes('failed to fetch')) {
+    return {
+      type: 'danger',
+      title: 'Server Connection Error',
+      message: 'Could not connect to the backend server. Please check that the server is running and try again.',
+    };
+  }
 
   switch (code) {
     case 'INVALID_CREDENTIALS':

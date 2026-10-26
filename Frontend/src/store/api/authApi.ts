@@ -2,6 +2,8 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQueryWithReauth';
 import { setCredentials, logOut, updateUserVerified } from '../slices/authSlice';
 
+import { workspaceApi } from './workspaceApi';
+
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: baseQueryWithReauth,
@@ -252,13 +254,36 @@ export const authApi = createApi({
       })
     }),
 
+    createPassword: builder.mutation<any, { email?: string } | void>({
+      query: (body) => ({
+        url: '/v1/auth/me/create-password',
+        method: 'POST',
+        body: body || {}
+      })
+    }),
+
+    confirmCreatePassword: builder.mutation<any, { token: string; newPassword: string }>({
+      query: (body) => ({
+        url: '/v1/auth/create-password/confirm',
+        method: 'POST',
+        body
+      }),
+      invalidatesTags: ['User']
+    }),
+
     requestAccountDeletion: builder.mutation<any, { currentPassword: string }>({
       query: (body) => ({
         url: '/v1/auth/me/delete-request',
         method: 'POST',
         body
       }),
-      invalidatesTags: ['User', 'Workspaces']
+      invalidatesTags: ['User', 'Workspaces'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(workspaceApi.util.invalidateTags(['Workspaces']));
+        } catch {}
+      },
     }),
 
     logout: builder.mutation<any, void>({
@@ -307,6 +332,8 @@ export const {
   useRequestEmailChangeMutation,
   useConfirmEmailChangeMutation,
   useChangePasswordMutation,
+  useCreatePasswordMutation,
+  useConfirmCreatePasswordMutation,
   useRequestAccountDeletionMutation,
   useLogoutMutation,
   useLogoutAllMutation

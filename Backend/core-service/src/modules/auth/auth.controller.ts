@@ -87,7 +87,8 @@ export class AuthController {
           status: user.status,
           isEmailVerified: user.isEmailVerified,
           mfaEnabled: user.mfaEnabled,
-          lastLoginAt: user.lastLoginAt
+          lastLoginAt: user.lastLoginAt,
+          hasPassword: Boolean(user.passwordHash)
         },
         activeWorkspace: workspace ? {
           id: workspace._id,
@@ -146,7 +147,8 @@ export class AuthController {
           isEmailVerified: user.isEmailVerified,
           mfaEnabled: user.mfaEnabled,
           avatarUrl: user.avatarUrl,
-          lastLoginAt: user.lastLoginAt
+          lastLoginAt: user.lastLoginAt,
+          hasPassword: Boolean(user.passwordHash)
         },
         activeWorkspace: workspace ? {
           id: workspace._id,
@@ -200,7 +202,8 @@ export class AuthController {
           isEmailVerified: user.isEmailVerified,
           mfaEnabled: user.mfaEnabled,
           avatarUrl: user.avatarUrl,
-          lastLoginAt: user.lastLoginAt
+          lastLoginAt: user.lastLoginAt,
+          hasPassword: Boolean(user.passwordHash)
         },
         tokens: {
           accessToken: tokens.accessToken,
@@ -233,7 +236,8 @@ export class AuthController {
           status: user.status,
           isEmailVerified: user.isEmailVerified,
           mfaEnabled: user.mfaEnabled,
-          avatarUrl: user.avatarUrl
+          avatarUrl: user.avatarUrl,
+          hasPassword: Boolean(user.passwordHash)
         },
         activeWorkspace: workspace ? {
           id: workspace._id,
@@ -353,7 +357,8 @@ export class AuthController {
           status: user.status,
           isEmailVerified: user.isEmailVerified,
           mfaEnabled: user.mfaEnabled,
-          avatarUrl: user.avatarUrl
+          avatarUrl: user.avatarUrl,
+          hasPassword: Boolean(user.passwordHash)
         }
       }
     });
@@ -447,7 +452,8 @@ export class AuthController {
             name: user.name,
             status: user.status,
             isEmailVerified: user.isEmailVerified,
-            mfaEnabled: user.mfaEnabled
+            mfaEnabled: user.mfaEnabled,
+            hasPassword: Boolean(user.passwordHash)
           },
           activeWorkspace: workspace ? {
             id: workspace._id,
@@ -534,7 +540,8 @@ export class AuthController {
           isEmailVerified: req.user.isEmailVerified,
           mfaEnabled: req.user.mfaEnabled,
           avatarUrl: req.user.avatarUrl,
-          lastLoginAt: req.user.lastLoginAt
+          lastLoginAt: req.user.lastLoginAt,
+          hasPassword: Boolean(req.user.passwordHash)
         },
         workspaces
       }
@@ -627,6 +634,66 @@ export class AuthController {
       userAgent
     );
     res.status(200).json({ success: true, data: result });
+  }
+
+  public async createPassword(req: Request, res: Response): Promise<void> {
+    const ip = req.ip || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const { token, newPassword, email } = req.body || {};
+
+    // If token and newPassword are provided, proceed with confirmation
+    if (token && newPassword) {
+      try {
+        const result = await accountService.confirmCreatePassword(token, newPassword, ip, userAgent);
+        res.status(200).json({ success: true, data: result });
+      } catch (err: any) {
+        const statusCode = err.statusCode || 400;
+        res.status(statusCode).json({
+          success: false,
+          error: { code: err.code || 'BAD_REQUEST', message: err.message }
+        });
+      }
+      return;
+    }
+
+    // Otherwise, this initiates sending confirmation to the current email
+    const userId = (req as AuthenticatedRequest).user?._id?.toString();
+    try {
+      if (userId) {
+        const result = await accountService.requestCreatePassword(userId, ip, userAgent);
+        res.status(200).json({ success: true, data: { message: result.message } });
+      } else if (email) {
+        const result = await accountService.requestCreatePasswordByEmail(email, ip, userAgent);
+        res.status(200).json({ success: true, data: { message: result.message } });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Authentication or email is required.' }
+        });
+      }
+    } catch (err: any) {
+      const statusCode = err.statusCode || 400;
+      res.status(statusCode).json({
+        success: false,
+        error: { code: err.code || 'BAD_REQUEST', message: err.message }
+      });
+    }
+  }
+
+  public async confirmCreatePassword(req: Request, res: Response): Promise<void> {
+    const ip = req.ip || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const { token, newPassword } = req.body || {};
+    try {
+      const result = await accountService.confirmCreatePassword(token, newPassword, ip, userAgent);
+      res.status(200).json({ success: true, data: result });
+    } catch (err: any) {
+      const statusCode = err.statusCode || 400;
+      res.status(statusCode).json({
+        success: false,
+        error: { code: err.code || 'BAD_REQUEST', message: err.message }
+      });
+    }
   }
 }
 

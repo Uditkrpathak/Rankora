@@ -528,14 +528,14 @@ export const HelpPage: React.FC = () => {
   }, [selectedCategory, searchQuery, lang]);
 
   return (
-    <div className="min-h-screen w-full page-canvas flex flex-col text-slate-900 antialiased selection:bg-brand-500 selection:text-white">
+    <div className="min-h-screen w-full bg-white flex flex-col text-slate-900 antialiased selection:bg-brand-500 selection:text-white">
       <AppNavbar fullWidth={true} />
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-7 flex flex-col min-w-0">
-        <div className="max-w-6xl mx-auto w-full space-y-6">
+      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0">
+        <div className="w-full space-y-6">
 
           {/* Top Hero Banner */}
           <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
-            <div className="relative z-10 space-y-4 max-w-2xl">
+            <div className="relative z-10 space-y-4 max-w-4xl">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>{lang === 'en' ? 'Universal Platform Guide & Help Center' : 'हेल्प और नॉलेज सेंटर'}</span>
@@ -590,9 +590,9 @@ export const HelpPage: React.FC = () => {
                   key={c.key}
                   type="button"
                   onClick={() => setSelectedCategory(c.key as Category)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                     selectedCategory === c.key
-                      ? 'bg-[#006EEE] text-white shadow-xs'
+                      ? 'bg-[#006EEE] text-white'
                       : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
@@ -609,7 +609,7 @@ export const HelpPage: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={lang === 'en' ? 'Search topics...' : 'विषय खोजें...'}
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006EEE] transition"
+                className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#006EEE] transition"
               />
             </div>
           </div>
@@ -621,11 +621,11 @@ export const HelpPage: React.FC = () => {
               return (
                 <Card
                   key={guide.id}
-                  className="p-5 sm:p-7 bg-white border-slate-200 shadow-xs rounded-2xl space-y-5 hover:border-slate-300 transition"
+                  className="p-5 sm:p-6 bg-white border-slate-200 rounded-lg space-y-5 hover:border-slate-300 transition"
                 >
                   {/* Card Header */}
                   <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shrink-0 mt-0.5">
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 shrink-0 mt-0.5">
                       {guide.icon}
                     </div>
                     <div className="space-y-1">
@@ -645,7 +645,7 @@ export const HelpPage: React.FC = () => {
 
                   {/* Generic Example Callout Card (When Available) */}
                   {content.exampleScenario && (
-                    <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200/70 space-y-1.5">
+                    <div className="p-4 rounded-lg bg-blue-50/60 border border-blue-200/70 space-y-1.5">
                       <div className="flex items-center gap-2 text-xs font-bold text-blue-900">
                         <Lightbulb className="w-4 h-4 text-blue-600 shrink-0" />
                         <span>
@@ -666,7 +666,7 @@ export const HelpPage: React.FC = () => {
                     {content.coreConcepts.map((c, i) => (
                       <div
                         key={i}
-                        className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-1.5 hover:bg-slate-50 transition"
+                        className="p-3.5 rounded-lg bg-slate-50/70 border border-slate-200/80 space-y-1.5 hover:bg-slate-50 transition"
                       >
                         <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${c.badgeCls}`}>
                           {c.badge}
@@ -690,7 +690,7 @@ export const HelpPage: React.FC = () => {
                           return (
                             <div
                               key={idx}
-                              className="rounded-xl border border-slate-200/80 bg-slate-50/40 overflow-hidden"
+                              className="rounded-lg border border-slate-200 bg-slate-50/40 overflow-hidden"
                             >
                               <button
                                 type="button"
@@ -720,7 +720,7 @@ export const HelpPage: React.FC = () => {
             })}
 
             {filteredGuides.length === 0 && (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 space-y-2">
+              <div className="p-8 text-center bg-white rounded-lg border border-slate-200 space-y-2">
                 <HelpCircle className="w-8 h-8 text-slate-400 mx-auto" />
                 <h3 className="text-sm font-bold text-slate-800">
                   {lang === 'en' ? 'No matching topics found' : 'कोई विषय नहीं मिला'}

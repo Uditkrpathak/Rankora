@@ -57,10 +57,10 @@ export const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({ isOp
     }}>
       <div style={{
         background: '#ffffff',
-        borderRadius: '16px',
+        borderRadius: '8px',
         width: '100%',
         maxWidth: '480px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
         overflow: 'hidden',
         border: '1px solid #e2e8f0',
       }}>
@@ -75,7 +75,7 @@ export const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProps> = ({ isOp
             <div style={{
               width: '36px',
               height: '36px',
-              borderRadius: '10px',
+              borderRadius: '8px',
               background: '#eff6ff',
               color: '#2563eb',
               display: 'flex',

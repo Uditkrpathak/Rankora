@@ -7,7 +7,8 @@ import {
   useUpdateUserPermissionsMutation,
   useUpdateUserPlanMutation,
   useUpdateUserStatusMutation,
-  useResetUserUsageMutation
+  useResetUserUsageMutation,
+  useManuallyVerifyUserEmailMutation
 } from '../../store/api/adminApi';
 import {
   ArrowLeft,
@@ -41,6 +42,7 @@ export const AdminUserDetailPage: React.FC = () => {
   const [updatePlan, { isLoading: isPlanSaving }] = useUpdateUserPlanMutation();
   const [updateStatus, { isLoading: isStatusSaving }] = useUpdateUserStatusMutation();
   const [resetUsage, { isLoading: isResettingUsage }] = useResetUserUsageMutation();
+  const [manuallyVerify, { isLoading: isVerifying }] = useManuallyVerifyUserEmailMutation();
 
   // Local state for Limits Tab
   const [useDefaultMap, setUseDefaultMap] = useState<Record<string, boolean>>({
@@ -260,6 +262,24 @@ export const AdminUserDetailPage: React.FC = () => {
     });
   };
 
+  // Manually Verify Email Handler
+  const handleManuallyVerify = () => {
+    setConfirmModal({
+      open: true,
+      title: 'Verify Email & Activate Account',
+      description: `Manually verify the email address for ${user.email} and activate their account? This bypasses the email delivery requirement and immediately unlocks full access for the user.`,
+      action: async () => {
+        try {
+          await manuallyVerify(user.id).unwrap();
+          showToast('User email verified and account activated successfully!');
+          refetch();
+        } catch (err: any) {
+          showToast(`Failed: ${err?.data?.error?.message || err?.message || 'Error verifying email'}`);
+        }
+      }
+    });
+  };
+
   return (
     <AdminLayout>
       {/* Toast Notification */}
@@ -307,14 +327,16 @@ export const AdminUserDetailPage: React.FC = () => {
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold font-mono text-white tracking-tight">{user.name}</h1>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border ${
                 user.status === 'SUSPENDED'
-                  ? 'bg-neutral-950 text-neutral-400 border-neutral-800'
+                  ? 'bg-red-950/60 text-red-300 border-red-800/60'
+                  : user.status === 'PENDING_VERIFICATION' || !user.isEmailVerified
+                  ? 'bg-amber-950/60 text-amber-300 border-amber-700/60'
                   : 'bg-neutral-900 text-white border-neutral-700'
               }`}>
-                {user.status}
+                {user.status === 'PENDING_VERIFICATION' || !user.isEmailVerified ? 'PENDING_VERIFICATION' : user.status}
               </span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-white text-black">
                 {user.planName}
@@ -325,7 +347,19 @@ export const AdminUserDetailPage: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {(user.status === 'PENDING_VERIFICATION' || !user.isEmailVerified) && (
+            <button
+              onClick={handleManuallyVerify}
+              disabled={isVerifying}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-600/80 text-xs text-emerald-200 font-mono font-semibold transition cursor-pointer disabled:opacity-50 shadow-sm"
+              title="Instantly verify user email and activate account"
+            >
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Verify Email Now</span>
+            </button>
+          )}
+
           <button
             onClick={handleResetUsage}
             disabled={isResettingUsage}

@@ -1,5 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQueryWithReauth';
+import { locationApi } from './locationApi';
+import { keywordApi } from './keywordApi';
 
 export interface GscSite {
   siteUrl: string;
@@ -97,6 +99,13 @@ export const gscApi = createApi({
       }),
       transformResponse: (response: any) => response.data,
       invalidatesTags: ['GscPerformance', 'GscOpportunities', 'GscKeywordMetrics', 'Location', 'Locations', 'Keywords'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+          dispatch(keywordApi.util.invalidateTags(['Keywords']));
+        } catch {}
+      },
     }),
 
     getGscPerformance: builder.query<
@@ -141,6 +150,13 @@ export const gscApi = createApi({
         'Locations',
         'Keywords',
       ],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+          dispatch(keywordApi.util.invalidateTags(['Keywords']));
+        } catch {}
+      },
     }),
   }),
 });

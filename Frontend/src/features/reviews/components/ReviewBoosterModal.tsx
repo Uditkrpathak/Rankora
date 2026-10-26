@@ -154,13 +154,13 @@ export const ReviewBoosterModal: React.FC<ReviewBoosterModalProps> = ({
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-5xl h-[92vh] sm:h-[88vh] max-h-[860px] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
+          className="bg-white rounded-lg border border-slate-200 w-full max-w-5xl h-[92vh] sm:h-[88vh] max-h-[860px] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center shadow-2xs shrink-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
                 <QrIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
               </div>
               <div className="min-w-0">
@@ -340,7 +340,7 @@ export const ReviewBoosterModal: React.FC<ReviewBoosterModalProps> = ({
               </div>
 
               {/* Direct Review Link Card */}
-              <div className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+              <div className="p-3.5 rounded-lg bg-white border border-slate-200 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
                     <Store size={13} className="text-brand-600" />

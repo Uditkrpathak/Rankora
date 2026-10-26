@@ -1,6 +1,8 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQueryWithReauth';
 import { IScanRun } from '@localo/types';
+import { keywordApi } from './keywordApi';
+import { locationApi } from './locationApi';
 
 export const scanApi = createApi({
   reducerPath: 'scanApi',
@@ -58,6 +60,13 @@ export const scanApi = createApi({
         body,
       }),
       invalidatesTags: ['Scan'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(keywordApi.util.invalidateTags(['Keywords']));
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     getLocationScans: builder.query<

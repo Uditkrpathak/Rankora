@@ -42,8 +42,8 @@ export const PublicReportPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-slate-900">
-        <div className="flex flex-col items-center gap-3 p-8 rounded-3xl bg-white border border-slate-200 shadow-xl">
-          <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center animate-pulse text-blue-600 font-bold">
+        <div className="flex flex-col items-center gap-3 p-8 rounded-lg bg-white border border-slate-200">
+          <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center animate-pulse text-blue-600 font-bold">
             R
           </div>
           <p className="text-sm font-bold text-slate-800">Loading Local SEO Report...</p>
@@ -55,8 +55,8 @@ export const PublicReportPage: React.FC = () => {
   if (error || !data?.data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white p-4">
-        <div className="max-w-md w-full p-8 rounded-3xl bg-white border border-slate-200 shadow-xl text-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto">
+        <div className="max-w-md w-full p-8 rounded-lg bg-white border border-slate-200 text-center space-y-4">
+          <div className="w-12 h-12 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto">
             <ShieldCheck size={24} />
           </div>
           <h2 className="text-lg font-black text-slate-900">Report Unavailable</h2>
@@ -65,7 +65,7 @@ export const PublicReportPage: React.FC = () => {
           </p>
           <Link
             to="/"
-            className="inline-block px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs"
+            className="inline-block px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition"
           >
             Go to Home
           </Link>
@@ -190,19 +190,19 @@ export const PublicReportPage: React.FC = () => {
 
           {/* 3 Metric Tiles */}
           <div className="lg:col-span-7 grid grid-cols-3 gap-3">
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-center">
               <span className="text-[10px] font-bold text-slate-500 uppercase">Average Rank</span>
               <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{agr}</div>
               <span className="text-[10px] text-slate-400">across coverage area</span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+            <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-center">
               <span className="text-[10px] font-bold text-emerald-800 uppercase">Top 3 Visibility</span>
               <div className="text-2xl sm:text-3xl font-black text-emerald-800 mt-1">{top3Pct}</div>
               <span className="text-[10px] text-emerald-700 font-medium">Local Pack presence</span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-center">
+            <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-center">
               <span className="text-[10px] font-bold text-blue-800 uppercase">Top 10 Reach</span>
               <div className="text-2xl sm:text-3xl font-black text-blue-800 mt-1">{top10Pct}</div>
               <span className="text-[10px] text-blue-700 font-medium">top rankings</span>
@@ -212,7 +212,7 @@ export const PublicReportPage: React.FC = () => {
 
         {/* Agency Executive Notes (if set) */}
         {branding?.notes && (
-          <div className="p-5 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs space-y-1">
+          <div className="p-5 rounded-lg bg-blue-50 border border-blue-200 text-xs space-y-1">
             <div className="font-extrabold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
               <Sparkles size={14} className="text-blue-600" />
               <span>Consultant Insights & Growth Strategy</span>
@@ -222,7 +222,7 @@ export const PublicReportPage: React.FC = () => {
         )}
 
         {/* Map Card */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50">
             <div className="flex items-center gap-2">
               <Layers size={16} className="text-blue-600" />
@@ -307,7 +307,7 @@ export const PublicReportPage: React.FC = () => {
             </div>
 
             <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 border border-slate-100">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <span className="font-semibold text-slate-800 flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
                   Primary Category Alignment
@@ -315,7 +315,7 @@ export const PublicReportPage: React.FC = () => {
                 <span className="text-[11px] font-bold text-slate-600">{(location as any).primaryCategory?.displayName || (location as any).categories?.[0] || 'Configured'}</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 border border-slate-100">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <span className="font-semibold text-slate-800 flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
                   LocalBusiness JSON-LD Schema
@@ -325,7 +325,7 @@ export const PublicReportPage: React.FC = () => {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 border border-slate-100">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <span className="font-semibold text-slate-800 flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
                   Weekly Operating Schedule
@@ -333,7 +333,7 @@ export const PublicReportPage: React.FC = () => {
                 <span className="text-[11px] font-bold text-slate-600">Verified Active</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 border border-slate-100">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <span className="font-semibold text-slate-800 flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
                   Name, Address, Phone (NAP) Consistency

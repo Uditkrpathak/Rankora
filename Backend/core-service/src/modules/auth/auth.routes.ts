@@ -37,6 +37,8 @@ authRouter.post('/forgot-password', passwordResetRateLimiter, asyncHandler((req:
 authRouter.post('/reset-password', passwordResetRateLimiter, asyncHandler((req: any, res: any) => authController.resetPassword(req, res)));
 authRouter.post('/mfa/challenge', authRateLimiter, asyncHandler((req: any, res: any) => authController.mfaChallenge(req, res)));
 authRouter.post('/me/email/confirm-change', asyncHandler((req: any, res: any) => authController.confirmEmailChange(req, res)));
+authRouter.post('/create-password', passwordResetRateLimiter, asyncHandler((req: any, res: any) => authController.createPassword(req, res)));
+authRouter.post('/create-password/confirm', passwordResetRateLimiter, asyncHandler((req: any, res: any) => authController.confirmCreatePassword(req, res)));
 
 // Dev-only instant verification bypass (Guarded by requireDevEnvironment returning 404 in prod/when disabled)
 authRouter.post('/dev/verify-now', authenticate, requireDevEnvironment, asyncHandler((req: any, res: any) => authController.devBypassVerify(req, res)));
@@ -47,6 +49,8 @@ authRouter.patch('/me', authenticate, asyncHandler((req: any, res: any) => authC
 authRouter.post('/me/avatar', authenticate, upload.single('avatar'), asyncHandler((req: any, res: any) => authController.uploadAvatar(req, res)));
 authRouter.post('/me/email/request-change', authenticate, asyncHandler((req: any, res: any) => authController.requestEmailChange(req, res)));
 authRouter.post('/me/password', authenticate, asyncHandler((req: any, res: any) => authController.changePassword(req, res)));
+authRouter.post('/me/create-password', authenticate, passwordResetRateLimiter, asyncHandler((req: any, res: any) => authController.createPassword(req, res)));
+authRouter.post('/me/create-password/confirm', asyncHandler((req: any, res: any) => authController.confirmCreatePassword(req, res)));
 authRouter.post('/me/delete-request', authenticate, asyncHandler((req: any, res: any) => authController.requestAccountDeletion(req, res)));
 authRouter.post('/logout-all', authenticate, asyncHandler((req: any, res: any) => authController.logoutAll(req, res)));
 authRouter.get('/sessions', authenticate, asyncHandler((req: any, res: any) => authController.listSessions(req, res)));

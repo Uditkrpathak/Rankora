@@ -34,7 +34,7 @@ export const SessionsPage: React.FC = () => {
         <button
           onClick={handleLogoutAll}
           disabled={isLoggingOutAll}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-semibold text-xs transition disabled:opacity-50 cursor-pointer"
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-semibold text-xs transition disabled:opacity-50 cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           <span>Log out from all devices</span>
@@ -44,7 +44,7 @@ export const SessionsPage: React.FC = () => {
       {isLoading ? (
         <div className="p-12 text-center text-slate-400 text-sm">Loading sessions...</div>
       ) : sessions.length === 0 ? (
-        <div className="p-12 text-center text-slate-500 text-sm bg-white rounded-2xl border border-slate-200">
+        <div className="p-12 text-center text-slate-500 text-sm bg-white rounded-lg border border-slate-200">
           No active sessions found.
         </div>
       ) : (
@@ -54,10 +54,10 @@ export const SessionsPage: React.FC = () => {
             return (
               <div
                 key={session.familyId}
-                className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs"
+                className="bg-white rounded-lg border border-slate-200 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               >
                 <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
                     {isMobile ? <Smartphone className="w-5 h-5" /> : <Laptop className="w-5 h-5" />}
                   </div>
                   <div>

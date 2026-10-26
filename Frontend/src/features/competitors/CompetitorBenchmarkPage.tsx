@@ -99,7 +99,7 @@ export const CompetitorBenchmarkPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full min-w-0">
           <div className="min-w-0">
             <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center shrink-0 shadow-xs">
+              <div className="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100 text-brand-600 flex items-center justify-center shrink-0">
                 <Users className="w-5 h-5" />
               </div>
               <div className="min-w-0">
@@ -118,7 +118,7 @@ export const CompetitorBenchmarkPage: React.FC = () => {
             <select
               value={selectedLocationId}
               onChange={(e) => setSelectedLocationId(e.target.value)}
-              className="bg-white border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl px-3 py-2 outline-none focus-visible:outline-brand-500 shadow-2xs cursor-pointer w-full sm:w-64"
+              className="bg-white border border-slate-300 text-slate-800 text-xs font-semibold rounded-lg px-3 py-2 outline-none focus-visible:outline-brand-500 cursor-pointer w-full sm:w-64"
             >
               {locations.map((loc) => (
                 <option key={loc._id} value={loc._id}>
@@ -205,10 +205,10 @@ export const CompetitorBenchmarkPage: React.FC = () => {
 
         {/* Competitive Gap Analysis: What Competitors Are Doing Extra */}
         {hasCompetitors && (
-          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 p-4 sm:p-6 lg:p-7 shadow-xs space-y-5 sm:space-y-6 w-full min-w-0">
+          <div className="bg-white rounded-lg border border-slate-200 p-4 sm:p-6 space-y-5 sm:space-y-6 w-full min-w-0">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-100 pb-5 w-full min-w-0">
               <div className="flex items-start sm:items-center space-x-3.5 min-w-0 flex-1">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0 shadow-2xs text-lg">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0 text-lg">
                   🔥
                 </div>
                 <div className="min-w-0 flex-1">
@@ -232,7 +232,7 @@ export const CompetitorBenchmarkPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate(`/locations/${selectedLocationId}/tasks`)}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black active:scale-[0.98] text-white font-bold text-xs shadow-xs transition cursor-pointer w-full md:w-auto shrink-0"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900 hover:bg-black text-white font-bold text-xs transition cursor-pointer w-full md:w-auto shrink-0"
               >
                 <span>🚀 Fix Gaps in Smart Tasks</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -241,7 +241,7 @@ export const CompetitorBenchmarkPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full min-w-0">
               {/* 1. Review Volume Advantage */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-white border border-slate-200/90 space-y-3.5 shadow-2xs hover:border-amber-300 transition group w-full min-w-0">
+              <div className="p-4 sm:p-5 rounded-lg bg-white border border-slate-200 space-y-3.5 hover:border-slate-300 transition group w-full min-w-0">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                     <span className="text-sm">💬</span>
@@ -283,13 +283,13 @@ export const CompetitorBenchmarkPage: React.FC = () => {
               </div>
 
               {/* 2. Category Footprint */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-white border border-slate-200/90 space-y-3.5 shadow-2xs hover:border-emerald-300 transition group w-full min-w-0">
+              <div className="p-4 sm:p-5 rounded-lg bg-white border border-slate-200 space-y-3.5 hover:border-slate-300 transition group w-full min-w-0">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                     <span className="text-sm">🏷️</span>
                     <span>Category Footprint</span>
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1 shadow-2xs shrink-0">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1 shrink-0">
                     <span>📂</span> {competitorCategories.length} Categories
                   </span>
                 </div>
@@ -300,7 +300,7 @@ export const CompetitorBenchmarkPage: React.FC = () => {
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {competitorCategories.slice(0, 4).map((cat) => (
-                      <span key={cat} className="px-2.5 py-1 rounded-lg bg-emerald-50/60 border border-emerald-200/70 text-[11px] text-emerald-900 font-bold shadow-2xs flex items-center gap-1 max-w-full truncate">
+                      <span key={cat} className="px-2.5 py-1 rounded-md bg-emerald-50/60 border border-emerald-200/70 text-[11px] text-emerald-900 font-bold flex items-center gap-1 max-w-full truncate">
                         <span>🏷️</span> <span className="truncate">{cat}</span>
                       </span>
                     ))}
@@ -312,13 +312,13 @@ export const CompetitorBenchmarkPage: React.FC = () => {
               </div>
 
               {/* 3. Proximity & Geo-Keywords */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-white border border-slate-200/90 space-y-3.5 shadow-2xs hover:border-purple-300 transition group w-full min-w-0 md:col-span-2 lg:col-span-1">
+              <div className="p-4 sm:p-5 rounded-lg bg-white border border-slate-200 space-y-3.5 hover:border-slate-300 transition group w-full min-w-0 md:col-span-2 lg:col-span-1">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                     <span className="text-sm">💡</span>
                     <span>Key Optimization Action</span>
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-800 border border-purple-200 flex items-center gap-1 shadow-2xs shrink-0">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-800 border border-purple-200 flex items-center gap-1 shrink-0">
                     <span>⚡</span> High ROI
                   </span>
                 </div>
@@ -327,7 +327,7 @@ export const CompetitorBenchmarkPage: React.FC = () => {
                   <p className="text-xs font-bold text-slate-900 flex items-center gap-1">
                     <span>🚀</span> Deploy Schema & Keyword Density
                   </p>
-                  <div className="bg-purple-50/40 p-2.5 rounded-xl border border-purple-100 text-[11px] text-purple-900 font-semibold space-y-1">
+                  <div className="bg-purple-50/40 p-2.5 rounded-lg border border-purple-100 text-[11px] text-purple-900 font-semibold space-y-1">
                     <div className="flex items-center gap-1.5">
                       <span>✅</span> Local Schema Markup Structured Data
                     </div>
@@ -346,7 +346,7 @@ export const CompetitorBenchmarkPage: React.FC = () => {
 
         {/* Competitor List Table */}
         {hasCompetitors && (
-          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden w-full min-w-0">
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden w-full min-w-0">
             <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full min-w-0">
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">

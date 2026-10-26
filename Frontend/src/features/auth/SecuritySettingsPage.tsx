@@ -102,18 +102,18 @@ export const SecuritySettingsPage: React.FC = () => {
       </div>
 
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center space-x-2">
+        <div className="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center space-x-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {/* 2FA Status Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+      <div className="bg-white rounded-lg border border-slate-200 p-5 sm:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start space-x-4">
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 isEnrolledLocal ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'
               }`}
             >
@@ -229,7 +229,7 @@ export const SecuritySettingsPage: React.FC = () => {
 
         {/* Step 3: Backup Codes Reveal (One-Time) */}
         {backupCodes && (
-          <div className="mt-6 p-6 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-4 animate-fade-in">
+          <div className="mt-6 p-6 rounded-lg bg-emerald-50 border border-emerald-200 space-y-4 animate-fade-in">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-base font-bold text-emerald-900 flex items-center space-x-2">
@@ -242,7 +242,7 @@ export const SecuritySettingsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 p-4 bg-white/90 border border-emerald-100 rounded-xl font-mono text-xs text-slate-800 text-center font-bold">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 p-4 bg-white/90 border border-emerald-100 rounded-lg font-mono text-xs text-slate-800 text-center font-bold">
               {backupCodes.map((code, idx) => (
                 <div key={idx} className="p-2 rounded bg-slate-50 border border-slate-200 select-all">
                   {code}
@@ -254,7 +254,7 @@ export const SecuritySettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyAllCodes}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100/50 transition cursor-pointer"
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100/50 transition cursor-pointer"
               >
                 {copiedCodes ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedCodes ? 'Copied to Clipboard' : 'Copy All Codes'}</span>
@@ -263,7 +263,7 @@ export const SecuritySettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleDownloadCodes}
-                className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100/50 transition cursor-pointer"
+                className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 text-xs font-semibold hover:bg-emerald-100/50 transition cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download as .txt</span>
@@ -272,7 +272,7 @@ export const SecuritySettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setBackupCodes(null)}
-                className="ml-auto px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition cursor-pointer"
+                className="ml-auto px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition cursor-pointer"
               >
                 I have safely stored my backup codes
               </button>
@@ -284,9 +284,9 @@ export const SecuritySettingsPage: React.FC = () => {
       {/* Additional Security Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Device & Session Management */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-5 flex flex-col justify-between space-y-4">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center mb-3">
               <Key className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-slate-900">Active Device Sessions</h3>
@@ -304,9 +304,9 @@ export const SecuritySettingsPage: React.FC = () => {
         </div>
 
         {/* Password Recovery & Reset */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-4">
+        <div className="bg-white rounded-lg border border-slate-200 p-5 flex flex-col justify-between space-y-4">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center mb-3">
               <Lock className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-slate-900">Password & Encryption</h3>

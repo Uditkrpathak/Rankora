@@ -12,7 +12,7 @@ export const ListKeywordsQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(20),
   search: z.string().optional(),
-  sortBy: z.enum(['rank', 'visibility', 'volume', 'lastScannedAt', 'createdAt']).default('visibility'),
+  sortBy: z.enum(['rank', 'visibility', 'volume', 'lastScannedAt', 'createdAt', 'keyword']).default('visibility'),
   order: z.enum(['asc', 'desc']).default('desc'),
   status: z.enum(['active', 'paused']).optional(),
 });

@@ -12,6 +12,7 @@ import { ARGON2_CONFIG, COMMON_PASSWORDS, generateSecureToken, hashToken } from 
 import { enqueueEmail } from '../../jobs/email.queue';
 import { redisClient } from '../../config/redis';
 import { ENV } from '../../config/env';
+import { tokenService } from './token.service';
 
 function createAuthError(message: string, statusCode = 401): Error {
   const err: any = new Error(message);
@@ -171,7 +172,8 @@ export class AccountService {
       status: user.status,
       avatarUrl: user.avatarUrl,
       isEmailVerified: user.isEmailVerified,
-      mfaEnabled: user.mfaEnabled
+      mfaEnabled: user.mfaEnabled,
+      hasPassword: Boolean(user.passwordHash)
     };
   }
 
@@ -568,6 +570,204 @@ export class AccountService {
       success: true,
       message: 'Account deletion scheduled. Your data will be permanently removed in 30 days.',
       deletionScheduledAt
+    };
+  }
+
+  /**
+   * Request password creation: Rejects if password exists, sends confirmation to current email first.
+   */
+  public async requestCreatePassword(
+    userId: string,
+    ip?: string,
+    userAgent?: string
+  ) {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('USER_NOT_FOUND');
+
+    // Reject if a password already exists
+    if (user.passwordHash) {
+      const err: any = new Error('A password already exists for this account.');
+      err.code = 'PASSWORD_ALREADY_EXISTS';
+      err.statusCode = 400;
+      throw err;
+    }
+
+    // Generate secure token (30-minute expiry)
+    const rawToken = generateSecureToken(32);
+    const tokenHashValue = hashToken(rawToken);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+    user.createPasswordTokenHash = tokenHashValue;
+    user.createPasswordExpiresAt = expiresAt;
+    await user.save();
+
+    // Send confirmation to CURRENT email first
+    const confirmationLink = `${ENV.FRONTEND_URL}/create-password?token=${rawToken}`;
+    await enqueueEmail({
+      to: user.email,
+      template: 'VERIFY_EMAIL',
+      userId: user._id.toString(),
+      data: {
+        userName: user.name,
+        verificationLink: confirmationLink
+      },
+      idempotencyKey: `email:create-pwd:${user._id}:${tokenHashValue.substring(0, 16)}`
+    });
+
+    await AuditLog.create({
+      actorUserId: userId,
+      action: 'CREATE_PASSWORD_REQUESTED',
+      resourceType: 'User',
+      resourceId: userId,
+      ip,
+      userAgent
+    });
+
+    return {
+      success: true,
+      message: 'A confirmation link has been sent to your current email address.',
+      rawToken: process.env.NODE_ENV !== 'production' ? rawToken : undefined
+    };
+  }
+
+  /**
+   * Request password creation by email: Returns generic response and anti-enumeration protections.
+   */
+  public async requestCreatePasswordByEmail(
+    email: string,
+    ip?: string,
+    userAgent?: string
+  ) {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user || user.passwordHash) {
+      // Anti-enumeration: return generic success without revealing existence or password status
+      return {
+        success: true,
+        message: 'If an account exists without a password, a confirmation link has been sent.'
+      };
+    }
+    await this.requestCreatePassword(user._id.toString(), ip, userAgent);
+    return {
+      success: true,
+      message: 'If an account exists without a password, a confirmation link has been sent.'
+    };
+  }
+
+  /**
+   * Confirm password creation: Validates token and creates new password with Argon2id.
+   */
+  public async confirmCreatePassword(
+    token: string,
+    newPassword: string,
+    ip?: string,
+    userAgent?: string
+  ) {
+    if (!token) {
+      const err: any = new Error('Token is required.');
+      err.code = 'VALIDATION_ERROR';
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      const err: any = new Error('Password must be at least 8 characters long.');
+      err.code = 'VALIDATION_ERROR';
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      const err: any = new Error('Password must contain at least one uppercase letter.');
+      err.code = 'VALIDATION_ERROR';
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      const err: any = new Error('Password must contain at least one lowercase letter.');
+      err.code = 'VALIDATION_ERROR';
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      const err: any = new Error('Password must contain at least one number.');
+      err.code = 'VALIDATION_ERROR';
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      const err: any = new Error('Password must contain at least one special character.');
+      err.code = 'VALIDATION_ERROR';
+      err.statusCode = 400;
+      throw err;
+    }
+    if (COMMON_PASSWORDS.has(newPassword.toLowerCase())) {
+      const err: any = new Error('This password is too common. Please choose a stronger password.');
+      err.code = 'VALIDATION_ERROR';
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const tokenHashValue = hashToken(token);
+    const user = await User.findOne({
+      createPasswordTokenHash: tokenHashValue,
+      createPasswordExpiresAt: { $gt: new Date() }
+    }).select('+createPasswordTokenHash +createPasswordExpiresAt +passwordHash');
+
+    if (!user) {
+      const err: any = new Error('Invalid or expired password creation link.');
+      err.code = 'INVALID_OR_EXPIRED_TOKEN';
+      err.statusCode = 400;
+      throw err;
+    }
+
+    // Re-check password doesn't already exist
+    if (user.passwordHash) {
+      const err: any = new Error('A password already exists for this account.');
+      err.code = 'PASSWORD_ALREADY_EXISTS';
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const passwordHash = await argon2.hash(newPassword, {
+      memoryCost: ARGON2_CONFIG.memoryCost,
+      timeCost: ARGON2_CONFIG.timeCost,
+      parallelism: ARGON2_CONFIG.parallelism,
+      type: argon2.argon2id
+    });
+
+    user.passwordHash = passwordHash;
+    user.argon2Version = ARGON2_CONFIG.version;
+    user.createPasswordTokenHash = undefined;
+    user.createPasswordExpiresAt = undefined;
+    await user.save();
+
+    // 🔒 Security: Invalidate all existing sessions and refresh tokens globally the same way password-reset does
+    await tokenService.incrementSessionVersion(user._id.toString(), 'PASSWORD_RESET');
+
+    await AuditLog.create({
+      actorUserId: user._id.toString(),
+      action: 'PASSWORD_CREATED',
+      resourceType: 'User',
+      resourceId: user._id.toString(),
+      ip,
+      userAgent
+    });
+
+    await enqueueEmail({
+      to: user.email,
+      template: 'SECURITY_ALERT',
+      userId: user._id.toString(),
+      data: {
+        userName: user.name,
+        action: 'Password Created',
+        details: 'A password has been successfully created for your account.'
+      },
+      idempotencyKey: `email:sec_alert:pwd_create_${user._id}_${Date.now()}`
+    });
+
+    return {
+      success: true,
+      message: 'Password created successfully. You can now use your password to manage your account.'
     };
   }
 }

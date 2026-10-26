@@ -12,6 +12,7 @@ export interface UserState {
   mfaEnabled: boolean;
   avatarUrl?: string;
   lastLoginAt?: string | Date;
+  hasPassword?: boolean;
 }
 
 export interface WorkspaceState {
@@ -26,6 +27,18 @@ export interface WorkspaceState {
   locationCount?: string;
   primaryGoal?: string;
   gbpConnectionStatus?: 'not_started' | 'connected' | 'skipped';
+  branding?: {
+    logoUrl?: string;
+    primaryColor?: string;
+    domain?: string;
+    agencyName?: string;
+    category?: string;
+    targetCity?: string;
+    websiteUrl?: string;
+    phoneNumber?: string;
+    locationCount?: string;
+    primaryGoal?: string;
+  };
 }
 
 interface AuthState {

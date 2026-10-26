@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --border-color: #E5E7EB;
+
+  --text-primary: #1F2937;
+  --text-secondary: #4B5563;
+  --text-muted: #6B7280;
+
+  --brand-indigo: #2E3192;
+  --brand-cyan: #1CB5D6;
+  --brand-navy: #0E1230;
+  --brand-soft-surface: #F4F7FC;
+  --brand-heading: #141833;
+  --brand-body: #5A6180;
+  --brand-green: #1FA971;
+
+  --brand-blue: #2E3192;
+  --brand-purple: #2E3192;
+  --brand-gradient: linear-gradient(
+    135deg,
+    #2E3192 0%,
+    #1CB5D6 100%
+  );
+
+  --brand-50: #eff6ff;
+  --brand-100: #dbeafe;
+  --brand-200: #bfdbfe;
+  --brand-300: #93c5fd;
+  --brand-400: #60a5fa;
+  --brand-500: #623CD0;
+  --brand-600: #006EEE;
+  --brand-700: #1d4ed8;
+  --brand-800: #1e40af;
+  --brand-900: #1e3a8a;
+  --brand-950: #172554;
+  --brand-accent: #006EEE;
+  --brand-primary-tint: rgba(98, 60, 208, 0.08);
+  --brand-accent-tint: rgba(0, 110, 238, 0.08);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: #FFFFFF;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #FFFFFF;
+  color: #141833;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.primary-button {
+  background: var(--brand-gradient);
+  color: white;
+  border: none;
+  font-weight: 600;
+  transition: opacity 150ms ease, transform 100ms ease;
+}
+
+.primary-button:hover {
+  opacity: 0.9;
+}
+
+.primary-button:active {
+  opacity: 0.95;
+  transform: translateY(0.5px);
+}
+
+/* Accessible focus ring */
+*:focus-visible {
+  outline: 2px solid #1CB5D6;
+  outline-offset: 1px;
+}
+
+/* Bento Card Style */
+.bento-card {
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  box-shadow: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-card:hover {
+  border-color: #D1D5DB;
+  box-shadow: none;
+}
+
+/* Hero Dotted Background */
+.hero-dotted-grid {
+  background-image: radial-gradient(rgba(28, 181, 214, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Compact flat loading skeletons */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.shimmer {
+  background-color: #f1f5f9;
+  animation: pulse-subtle 1.8s infinite ease-in-out;
+}
+
+.shimmer-dark {
+  background-color: #1e293b;
+  animation: pulse-subtle 1.8s infinite ease-in-out;
+}
+
+.shimmer-brand {
+  background-color: #eef2ff;
+  animation: pulse-subtle 1.6s infinite ease-in-out;
+}
+
+/* Compact flat scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Localo Clean Light Map Basemap Styling */
+.clean-light-map-tiles {
+  filter: grayscale(100%) brightness(104%) contrast(88%);
+}
+
+/* Clean White Surfaces and Top Nav */
+.glass-panel {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color, #E5E7EB);
+  box-shadow: none;
+}
+
+.glass-nav {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-color, #E5E7EB);
+  box-shadow: none;
+}
+
+/* Page canvas background: pure white application surface */
+.page-canvas {
+  background-color: #FFFFFF;
+  min-height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

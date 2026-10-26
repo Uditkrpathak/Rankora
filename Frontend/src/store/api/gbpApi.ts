@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseQueryWithReauth';
 import { IGbpDiscoveredLocation } from '@localo/types';
-import { Location } from './locationApi';
+import { locationApi, Location } from './locationApi';
 
 export interface GbpAccount {
   _id: string;
@@ -68,6 +68,12 @@ export const gbpApi = createApi({
         body: { code, state },
       }),
       invalidatesTags: ['GbpStatus', 'DiscoveredLocations', 'Location', 'Locations'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     disconnectGoogle: builder.mutation<{ isConnected: boolean }, { workspaceId: string; email?: string }>({
@@ -77,6 +83,12 @@ export const gbpApi = createApi({
         body: email ? { email } : undefined,
       }),
       invalidatesTags: ['GbpStatus', 'DiscoveredLocations', 'Location', 'Locations'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     getDiscoveredLocations: builder.query<IGbpDiscoveredLocation[], string>({
@@ -92,6 +104,12 @@ export const gbpApi = createApi({
         body,
       }),
       invalidatesTags: ['DiscoveredLocations', 'Location', 'Locations'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     batchImportLocations: builder.mutation<BatchImportResponse, { workspaceId: string; locations: IGbpDiscoveredLocation[] }>({
@@ -102,6 +120,12 @@ export const gbpApi = createApi({
       }),
       transformResponse: (response: { data: BatchImportResponse }) => response.data,
       invalidatesTags: ['DiscoveredLocations', 'Location', 'Locations'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
 
     syncLocation: builder.mutation<Location, { workspaceId: string; locId: string }>({
@@ -110,6 +134,12 @@ export const gbpApi = createApi({
         method: 'POST',
       }),
       invalidatesTags: ['Location', 'Locations'],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(locationApi.util.invalidateTags(['Locations']));
+        } catch {}
+      },
     }),
   }),
 });
@@ -122,6 +152,7 @@ export const {
   useConnectGoogleMutation,
   useDisconnectGoogleMutation,
   useGetDiscoveredLocationsQuery,
+  useLazyGetDiscoveredLocationsQuery,
   useImportLocationMutation,
   useBatchImportLocationsMutation,
   useSyncLocationMutation,

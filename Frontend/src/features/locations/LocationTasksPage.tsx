@@ -161,11 +161,11 @@ export const LocationTasksPage: React.FC = () => {
       <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0">
         <div className="space-y-6 w-full pb-12">
         {/* Top Localo Subheader */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-lg border border-slate-200">
           <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => navigate('/locations')}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer"
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer"
               title="Back to Locations"
             >
               <ArrowLeft size={18} />
@@ -175,7 +175,7 @@ export const LocationTasksPage: React.FC = () => {
             <select
               value={locationId}
               onChange={(e) => navigate(`/locations/${e.target.value}/tasks`)}
-              className="max-w-[240px] sm:max-w-xs rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 truncate shadow-2xs cursor-pointer"
+              className="max-w-[240px] sm:max-w-xs rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 truncate cursor-pointer"
             >
               {locations.map((loc) => (
                 <option value={loc._id} key={loc._id}>
@@ -194,7 +194,7 @@ export const LocationTasksPage: React.FC = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <Link
               to={`/rank-tracking?locationId=${locationId}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition border border-blue-200 shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition border border-blue-200"
             >
               <Compass size={14} />
               <span>Geo-Grid Map</span>
@@ -202,7 +202,7 @@ export const LocationTasksPage: React.FC = () => {
 
             <Link
               to={`/locations/${locationId}/profile`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition border border-slate-200 shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition border border-slate-200"
             >
               <Layers size={14} />
               <span>Profile Dashboard</span>
@@ -211,7 +211,7 @@ export const LocationTasksPage: React.FC = () => {
             <button
               onClick={handleRerunAudit}
               disabled={isRecalculating || !latestAudit}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw size={13} className={isRecalculating ? 'animate-spin' : ''} />
               <span>{isRecalculating ? 'Auditing…' : 'Re-run Audit'}</span>
@@ -221,7 +221,7 @@ export const LocationTasksPage: React.FC = () => {
 
         {/* Localo Green Hero Banner (Matching Localo Screenshot 1) */}
         {!bannerDismissed && (
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600 p-6 sm:p-8 text-white shadow-lg animate-in fade-in">
+          <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600 p-5 sm:p-6 text-white animate-in fade-in">
             <button
               onClick={() => setBannerDismissed(true)}
               className="absolute top-4 right-4 p-1.5 rounded-full bg-black/10 hover:bg-black/20 text-white transition cursor-pointer"
@@ -308,7 +308,7 @@ export const LocationTasksPage: React.FC = () => {
             <select
               value={selectedPillar}
               onChange={(e) => setSelectedPillar(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs cursor-pointer"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 cursor-pointer"
             >
               <option value="ALL">All Pillars ({activeTab === 'new' ? openTasks.length : completedTasks.length})</option>
               <option value="CATEGORIES">Categories</option>
@@ -324,12 +324,12 @@ export const LocationTasksPage: React.FC = () => {
         {isTasksLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-32 bg-white rounded-2xl border border-slate-200/80 shimmer" />
+              <div key={i} className="h-32 bg-white rounded-lg border border-slate-200 shimmer" />
             ))}
           </div>
         ) : currentDisplayTasks.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-white border-2 border-dashed border-slate-200 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+          <div className="p-12 text-center rounded-lg bg-white border border-slate-200 space-y-3">
+            <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle2 size={24} />
             </div>
             <h3 className="text-base font-bold text-slate-900">
@@ -350,8 +350,8 @@ export const LocationTasksPage: React.FC = () => {
               return (
                 <div
                   key={task._id || task.id || task.signalCode}
-                  className={`bg-white rounded-2xl border transition shadow-xs p-5 sm:p-6 flex flex-col md:flex-row md:items-start justify-between gap-5 ${
-                    isCompleted ? 'border-slate-200/60 bg-slate-50/50' : 'border-slate-200 hover:border-slate-300'
+                  className={`bg-white rounded-lg border transition p-4 sm:p-5 flex flex-col md:flex-row md:items-start justify-between gap-5 ${
+                    isCompleted ? 'border-slate-200 bg-slate-50/50' : 'border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -396,7 +396,7 @@ export const LocationTasksPage: React.FC = () => {
                         {task.whyItMatters}
                       </p>
 
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 space-y-1">
+                      <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-700 space-y-1">
                         <div className="font-bold text-slate-900 flex items-center gap-1.5">
                           <Target size={13} className="text-blue-600" />
                           <span>Recommended Action:</span>
